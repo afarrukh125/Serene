@@ -1,11 +1,15 @@
 package listeners;
 
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Objects;
 
 public class SereneListener implements Listener {
 
@@ -27,6 +31,15 @@ public class SereneListener implements Listener {
         if (level < 30) {
             playerExpChangeEvent.setAmount(finalAmount);
             logger.info("Actual experience gained is " + finalAmount + " from bonus.");
+        }
+    }
+
+    @EventHandler
+    public void onPlayerSleep(PlayerBedEnterEvent playerBedEnterEvent) {
+        if(playerBedEnterEvent.getBedEnterResult().equals(PlayerBedEnterEvent.BedEnterResult.OK)) {
+            Location bedLocation = playerBedEnterEvent.getBed().getLocation();
+            Objects.requireNonNull(bedLocation.getWorld()).getPlayers().forEach(p->p.sendMessage(playerBedEnterEvent.getPlayer().getName() + " is sleeping."));
+            Objects.requireNonNull(bedLocation.getWorld()).setTime(0);
         }
     }
 }

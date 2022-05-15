@@ -1,45 +1,65 @@
 package listeners;
 
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerBedEnterEvent;
+import org.bukkit.event.player.PlayerBedLeaveEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import utils.SleepTimerTask;
 
-import java.util.Objects;
+import java.time.Duration;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class SereneListener implements Listener {
 
-    private final Logger logger;
+    private static final Logger LOG = LoggerFactory.getLogger(SereneListener.class);
+    private final Timer dayChangeTimer;
+    private boolean shouldSkip;
 
     public SereneListener() {
-        this.logger = LoggerFactory.getLogger(SereneListener.class);
+        dayChangeTimer = new Timer("Sleep timer");
     }
 
     @EventHandler
     public void onPlayerExperienceGain(PlayerExpChangeEvent playerExpChangeEvent) {
-        logger.info("Original amount gained: " + playerExpChangeEvent.getAmount());
+        int originalAmount = playerExpChangeEvent.getAmount();
         Player player = playerExpChangeEvent.getPlayer();
-        int initialAmount = playerExpChangeEvent.getAmount();
         int level = player.getLevel();
         double bonus = Math.ceil((double) level / 4);
-        int finalAmount = initialAmount + (int) bonus;
+        int finalAmount = originalAmount + (int) bonus;
 
         if (level < 30) {
             playerExpChangeEvent.setAmount(finalAmount);
-            logger.info("Actual experience gained is " + finalAmount + " from bonus.");
+            LOG.info("Original amount: {} Bonus: {} Final experience amount: {} (Level {})",
+                    originalAmount,
+                    bonus,
+                    finalAmount,
+                    level);
         }
     }
 
-    @EventHandler
+    // fixme Can't trigger from separate thread
     public void onPlayerSleep(PlayerBedEnterEvent playerBedEnterEvent) {
-        if(playerBedEnterEvent.getBedEnterResult().equals(PlayerBedEnterEvent.BedEnterResult.OK)) {
-            Location bedLocation = playerBedEnterEvent.getBed().getLocation();
-            Objects.requireNonNull(bedLocation.getWorld()).getPlayers().forEach(p->p.sendMessage(playerBedEnterEvent.getPlayer().getName() + " is sleeping."));
-            Objects.requireNonNull(bedLocation.getWorld()).setTime(0);
+        if (playerBedEnterEvent.getBedEnterResult().equals(PlayerBedEnterEvent.BedEnterResult.OK)) {
+            TimerTask timerTask = new SleepTimerTask(playerBedEnterEvent);
+            long delay = Duration.ofSeconds(2).toMillis();
+            dayChangeTimer.schedule(timerTask, delay);
+            shouldSkip = true;
+        }
+    }
+
+    public void onPlayerLeaveBed(PlayerBedLeaveEvent bedLeaveEvent) {
+        if (shouldSkip) {
+            if (bedLeaveEvent.isCancelled()) {
+                dayChangeTimer.cancel();
+                shouldSkip = false;
+            } else {
+                shouldSkip = true;
+            }
         }
     }
 }

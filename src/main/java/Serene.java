@@ -1,5 +1,6 @@
-import listeners.SereneListener;
-import org.bukkit.event.Listener;
+import listeners.ExperienceListener;
+import listeners.SleepListener;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,8 +11,9 @@ public class Serene extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        Listener sereneListener = new SereneListener();
-        getServer().getPluginManager().registerEvents(sereneListener, this);
+        PluginManager pluginManager = getServer().getPluginManager();
+        pluginManager.registerEvents(new SleepListener(), this);
+        pluginManager.registerEvents(new ExperienceListener(), this);
         logger.info("Started Serene...");
     }
 }

@@ -2,10 +2,10 @@ package listeners;
 
 import org.junit.jupiter.api.Test;
 
+import static listeners.SleepListener.nextDayFullTime;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static utils.SleepTimerTask.nextDayFullTime;
 
-class SereneListenerTest {
+class SleepListenerTest {
 
     @Test
     void nextDayFullTimeFirstDay() {

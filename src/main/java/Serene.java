@@ -11,6 +11,7 @@ public class Serene extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        this.saveDefaultConfig();
         PluginManager pluginManager = getServer().getPluginManager();
         pluginManager.registerEvents(new SleepListener(), this);
         pluginManager.registerEvents(new ExperienceListener(), this);

@@ -20,10 +20,10 @@ public class ExperienceListener implements Listener {
     }
 
     @EventHandler
-    public void handle(PlayerExpChangeEvent playerExpChangeEvent) {
+    public void onExperienceChange(PlayerExpChangeEvent playerExpChangeEvent) {
         Player player = playerExpChangeEvent.getPlayer();
         int level = player.getLevel();
-        if (level < 30) {
+        if (level > 20 && level < 30) {
             int originalAmount = playerExpChangeEvent.getAmount();
             databaseClient.addExperienceForPlayer(player, originalAmount);
             long experienceForPlayer = databaseClient.getExperienceForPlayer(player);

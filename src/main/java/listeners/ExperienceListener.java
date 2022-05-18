@@ -37,11 +37,11 @@ public class ExperienceListener implements Listener {
                         finalAmount,
                         level);
                 databaseClient.setExperienceForPlayer(player, Math.max(0, experienceForPlayer - REWARD_THRESHOLD));
-                player.sendTitle("Bonus experience of %s received".formatted(additional),
-                        "Every %s experience after level 21".formatted(REWARD_THRESHOLD),
-                        1,
-                        2,
-                        1);
+                player.sendTitle(null,
+                        "Bonus experience of %s received".formatted(additional),
+                        10,
+                        70,
+                        20);
             }
         }
     }

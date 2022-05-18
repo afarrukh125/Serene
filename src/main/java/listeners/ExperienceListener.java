@@ -23,12 +23,13 @@ public class ExperienceListener implements Listener {
     public void onExperienceChange(PlayerExpChangeEvent playerExpChangeEvent) {
         Player player = playerExpChangeEvent.getPlayer();
         int level = player.getLevel();
-        if (level > 20 && level < 30) {
+        if (level > 20) {
             int originalAmount = playerExpChangeEvent.getAmount();
             databaseClient.addExperienceForPlayer(player, originalAmount);
             long experienceForPlayer = databaseClient.getExperienceForPlayer(player);
             if (experienceForPlayer >= REWARD_THRESHOLD) {
-                int finalAmount = originalAmount + BONUS + (2 * level);
+                int additional = BONUS + (2 * level);
+                int finalAmount = originalAmount + additional;
                 playerExpChangeEvent.setAmount(finalAmount);
                 LOG.info("Applying bonus to player {} | Original amount: {} Final experience amount: {} Level before changes: {}",
                         player.getDisplayName(),
@@ -36,6 +37,11 @@ public class ExperienceListener implements Listener {
                         finalAmount,
                         level);
                 databaseClient.setExperienceForPlayer(player, Math.max(0, experienceForPlayer - REWARD_THRESHOLD));
+                player.sendTitle("Bonus experience of %s received".formatted(additional),
+                        "Every %s experience after level 21".formatted(REWARD_THRESHOLD),
+                        1,
+                        2,
+                        1);
             }
         }
     }

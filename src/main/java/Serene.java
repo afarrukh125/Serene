@@ -1,3 +1,4 @@
+import database.SereneDatabaseClient;
 import listeners.ExperienceListener;
 import listeners.SleepListener;
 import org.bukkit.plugin.PluginManager;
@@ -14,7 +15,12 @@ public class Serene extends JavaPlugin {
         this.saveDefaultConfig();
         PluginManager pluginManager = getServer().getPluginManager();
         pluginManager.registerEvents(new SleepListener(), this);
-        pluginManager.registerEvents(new ExperienceListener(), this);
+        SereneDatabaseClient databaseClient = getDatabaseClient();
+        pluginManager.registerEvents(new ExperienceListener(databaseClient), this);
         LOG.info("Started Serene...");
+    }
+
+    private SereneDatabaseClient getDatabaseClient() {
+        return SereneDatabaseClient.create(this.getConfig());
     }
 }

@@ -1,5 +1,6 @@
 package listeners;
 
+import database.SereneDatabaseClient;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -9,24 +10,33 @@ import org.slf4j.LoggerFactory;
 
 public class ExperienceListener implements Listener {
 
+    public static final int BONUS = 100;
+    public static final int REWARD_THRESHOLD = 100;
     private static final Logger LOG = LoggerFactory.getLogger(ExperienceListener.class);
+    private final SereneDatabaseClient databaseClient;
+
+    public ExperienceListener(SereneDatabaseClient databaseClient) {
+        this.databaseClient = databaseClient;
+    }
 
     @EventHandler
     public void handle(PlayerExpChangeEvent playerExpChangeEvent) {
-        int originalAmount = playerExpChangeEvent.getAmount();
         Player player = playerExpChangeEvent.getPlayer();
         int level = player.getLevel();
-        double bonus = Math.ceil((double) level / 4);
-        int finalAmount = originalAmount + (int) bonus;
-
         if (level < 30) {
-            playerExpChangeEvent.setAmount(finalAmount);
-            LOG.info("Player {} | Original amount: {} Bonus: {} Final experience amount: {} (Level {})",
-                    player.getDisplayName(),
-                    originalAmount,
-                    bonus,
-                    finalAmount,
-                    level);
+            int originalAmount = playerExpChangeEvent.getAmount();
+            databaseClient.addExperienceForPlayer(player, originalAmount);
+            long experienceForPlayer = databaseClient.getExperienceForPlayer(player);
+            if (experienceForPlayer >= REWARD_THRESHOLD) {
+                int finalAmount = originalAmount + BONUS + (2 * level);
+                playerExpChangeEvent.setAmount(finalAmount);
+                LOG.info("Applying bonus to player {} | Original amount: {} Final experience amount: {} Level before changes: {}",
+                        player.getDisplayName(),
+                        originalAmount,
+                        finalAmount,
+                        level);
+                databaseClient.setExperienceForPlayer(player, Math.max(0, experienceForPlayer - REWARD_THRESHOLD));
+            }
         }
     }
 }

@@ -49,15 +49,14 @@ public class SleepListener implements Listener {
 
     @EventHandler
     public void onPlayerLeaveBed(PlayerBedLeaveEvent playerBedLeaveEvent) {
-        Player sleepingPlayer = playerBedLeaveEvent.getPlayer();
         if (playerBedLeaveEvent.getPlayer().getWorld().getPlayers().size() == 1)
             return;
-        if (playerBedLeaveEvent.isCancelled() && atomicPlayerReference.get().equals(sleepingPlayer)) {
+        Player sleepingPlayer = playerBedLeaveEvent.getPlayer();
+        if (playerBedLeaveEvent.isCancelled() && atomicPlayerReference.get().equals(sleepingPlayer))
             atomicPlayerReference = new AtomicReference<>();
-            List<Player> players = playerBedLeaveEvent.getBed().getWorld().getPlayers();
-            for (Player player : players)
-                player.setSleepingIgnored(false);
-        }
+        List<Player> players = playerBedLeaveEvent.getBed().getWorld().getPlayers();
+        for (Player player : players)
+            player.setSleepingIgnored(false);
     }
 
 

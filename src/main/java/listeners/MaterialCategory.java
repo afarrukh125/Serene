@@ -8,7 +8,18 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static org.bukkit.Material.APPLE;
+import static org.bukkit.Material.BEEF;
+import static org.bukkit.Material.BREAD;
+import static org.bukkit.Material.CHICKEN;
 import static org.bukkit.Material.COAL_ORE;
+import static org.bukkit.Material.COD;
+import static org.bukkit.Material.COOKED_BEEF;
+import static org.bukkit.Material.COOKED_CHICKEN;
+import static org.bukkit.Material.COOKED_COD;
+import static org.bukkit.Material.COOKED_MUTTON;
+import static org.bukkit.Material.COOKED_RABBIT;
+import static org.bukkit.Material.COOKED_SALMON;
 import static org.bukkit.Material.COPPER_ORE;
 import static org.bukkit.Material.DEEPSLATE_COAL_ORE;
 import static org.bukkit.Material.DEEPSLATE_COPPER_ORE;
@@ -23,12 +34,30 @@ import static org.bukkit.Material.EMERALD_ORE;
 import static org.bukkit.Material.GOLD_ORE;
 import static org.bukkit.Material.IRON_ORE;
 import static org.bukkit.Material.LAPIS_ORE;
+import static org.bukkit.Material.MUTTON;
 import static org.bukkit.Material.NETHER_GOLD_ORE;
 import static org.bukkit.Material.NETHER_QUARTZ_ORE;
+import static org.bukkit.Material.RABBIT;
 import static org.bukkit.Material.REDSTONE_ORE;
+import static org.bukkit.Material.SALMON;
 
 public enum MaterialCategory {
-    EDIBLE(Constants.filteredByPredicate(Material::isEdible)),
+    FOOD(Set.of(APPLE,
+            BREAD,
+            BEEF,
+            CHICKEN,
+            MUTTON,
+            RABBIT,
+            COD,
+            SALMON,
+            COOKED_BEEF,
+            COOKED_CHICKEN,
+            COOKED_MUTTON,
+            COOKED_RABBIT,
+            COOKED_COD,
+            COOKED_SALMON)),
+    ITEM(Constants.filteredByPredicate(Material::isItem)),
+    MISC(Collections.emptySet()),
     ORE(Set.of(COAL_ORE,
             IRON_ORE,
             COPPER_ORE,
@@ -46,10 +75,8 @@ public enum MaterialCategory {
             DEEPSLATE_GOLD_ORE,
             DEEPSLATE_EMERALD_ORE,
             DEEPSLATE_LAPIS_ORE,
-            DEEPSLATE_REDSTONE_ORE
-    )),
-    SOLID(Constants.filteredByPredicate(Material::isSolid)),
-    ITEM(Constants.filteredByPredicate(Material::isItem));
+            DEEPSLATE_REDSTONE_ORE)),
+    SOLID(Constants.filteredByPredicate(Material::isSolid));
 
     private final Set<Material> materials;
 
@@ -59,6 +86,14 @@ public enum MaterialCategory {
 
     public Set<Material> getMaterials() {
         return Collections.unmodifiableSet(materials);
+    }
+
+    public MaterialCategory getCategoryFor(Material material) {
+        for (MaterialCategory category : MaterialCategory.values()) {
+            if (category.materials.contains(material))
+                return category;
+        }
+        return MISC;
     }
 
     private static class Constants {

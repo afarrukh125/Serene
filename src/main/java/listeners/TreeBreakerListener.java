@@ -12,6 +12,8 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.Damageable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -124,16 +126,18 @@ public class TreeBreakerListener implements Listener {
                 }
             }
         }
-
         // Do not break random stack of logs with no leaves (might be a building with a stack of logs somewhere)
         if (leaves.size() > 0) {
             Damageable damageable = (Damageable) item.getItemMeta();
             for (Block block : seenLogs.stream().map(Location::getBlock).toList()) {
                 int currentDamage = damageable.getDamage();
                 int unbreakingLevel = damageable.getEnchantLevel(Enchantment.DURABILITY);
-                boolean ignoreDamage = shouldIgnoreDamage(unbreakingLevel);
-                if (!ignoreDamage)
+                boolean takeDamage = shouldTakeDamage(unbreakingLevel);
+                if (takeDamage) {
                     damageable.setDamage(currentDamage + 1);
+                    currentDamage++;
+                }
+                LOG.info("Ignoring damage: {}", takeDamage);
                 int currentDurability = item.getType().getMaxDurability() - currentDamage;
                 if (currentDurability <= 0) {
                     PlayerInventory inventory = blockBreakEvent.getPlayer().getInventory();
@@ -146,9 +150,12 @@ public class TreeBreakerListener implements Listener {
             }
             item.setItemMeta(damageable);
         }
+
     }
 
-    private boolean shouldIgnoreDamage(int unbreakingLevel) {
+    private static final Logger LOG = LoggerFactory.getLogger(TreeBreakerListener.class);
+
+    private boolean shouldTakeDamage(int unbreakingLevel) {
         // Uses formula from https://minecraft.fandom.com/wiki/Unbreaking#Usage
         if (unbreakingLevel == 0)
             return false;

@@ -22,6 +22,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
+import static java.util.Objects.requireNonNull;
 import static org.bukkit.Material.ACACIA_LEAVES;
 import static org.bukkit.Material.ACACIA_LOG;
 import static org.bukkit.Material.BIRCH_LEAVES;
@@ -128,7 +129,7 @@ public class TreeBreakerListener implements Listener {
         }
         // Do not break random stack of logs with no leaves (might be a building with a stack of logs somewhere)
         if (leaves.size() > 0) {
-            Damageable damageable = (Damageable) item.getItemMeta();
+            Damageable damageable = requireNonNull((Damageable) item.getItemMeta());
             for (Block block : seenLogs.stream().map(Location::getBlock).toList()) {
                 int currentDamage = damageable.getDamage();
                 int unbreakingLevel = damageable.getEnchantLevel(Enchantment.DURABILITY);
@@ -137,13 +138,12 @@ public class TreeBreakerListener implements Listener {
                     damageable.setDamage(currentDamage + 1);
                     currentDamage++;
                 }
-                LOG.info("Ignoring damage: {}", takeDamage);
                 int currentDurability = item.getType().getMaxDurability() - currentDamage;
                 if (currentDurability <= 0) {
                     PlayerInventory inventory = blockBreakEvent.getPlayer().getInventory();
                     inventory.remove(item);
                     inventory.setItemInMainHand(new ItemStack(Material.AIR, 0));
-                    world.playSound(originalBlockLocation, Sound.ENTITY_ITEM_BREAK, 1, 4);
+                    world.playSound(originalBlockLocation, Sound.ENTITY_ITEM_BREAK, 1, 2);
                     return;
                 }
                 block.breakNaturally();
@@ -158,7 +158,7 @@ public class TreeBreakerListener implements Listener {
     private boolean shouldTakeDamage(int unbreakingLevel) {
         // Uses formula from https://minecraft.fandom.com/wiki/Unbreaking#Usage
         if (unbreakingLevel == 0)
-            return false;
+            return true;
         return ThreadLocalRandom.current().nextInt(unbreakingLevel + 1) == 0;
     }
 }

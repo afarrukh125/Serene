@@ -15,8 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Set;
-import java.util.Stack;
 
 import static org.bukkit.Material.ACACIA_LEAVES;
 import static org.bukkit.Material.ACACIA_LOG;
@@ -85,7 +87,6 @@ public class TreeBreakerListener implements Listener {
         Location locationBelowBlock = new Location(world, location.getX(), location.getY() - 1., location.getZ());
         ItemStack itemInMainHand = blockBreakEvent.getPlayer().getInventory().getItemInMainHand();
         Material armedMaterial = itemInMainHand.getType();
-        LOG.info("Currently armed material is {}", armedMaterial);
         if (AXES.contains(armedMaterial)
                 && LOG_MATERIALS.contains(type)
                 && blockBreakEvent.getPlayer().isSneaking()
@@ -100,14 +101,14 @@ public class TreeBreakerListener implements Listener {
 
     private void handleBreaking(BlockBreakEvent blockBreakEvent, ItemStack item) {
         World world = blockBreakEvent.getBlock().getWorld();
-        Stack<Location> locationsToCheck = new Stack<>();
-        Set<Location> seenLogs = new HashSet<>();
+        Queue<Location> locationsToCheck = new LinkedList<>();
+        Set<Location> seenLogs = new LinkedHashSet<>();
         Set<Block> leaves = new HashSet<>();
         Location originalBlockLocation = blockBreakEvent.getBlock().getLocation();
         locationsToCheck.add(originalBlockLocation);
 
         while (!locationsToCheck.isEmpty()) {
-            Location location = locationsToCheck.pop();
+            Location location = locationsToCheck.poll();
 
             for (int x = -1; x <= 1; x++) {
                 for (int y = -1; y <= 1; y++) {
@@ -130,9 +131,7 @@ public class TreeBreakerListener implements Listener {
         if (leaves.size() > 0) {
             Damageable damageable = (Damageable) item.getItemMeta();
             for (Block block : seenLogs.stream().map(Location::getBlock).toList()) {
-                LOG.info("Max durability is {}", item.getType().getMaxDurability());
                 int currentDamage = damageable.getDamage();
-                LOG.info("Item damage is {}", currentDamage);
                 damageable.setDamage(currentDamage + 1);
                 int currentDurability = item.getType().getMaxDurability() - currentDamage;
                 if (currentDurability <= 0) {

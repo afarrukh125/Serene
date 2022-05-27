@@ -26,6 +26,7 @@ import static org.bukkit.Material.ACACIA_LOG;
 import static org.bukkit.Material.BIRCH_LEAVES;
 import static org.bukkit.Material.BIRCH_LOG;
 import static org.bukkit.Material.COARSE_DIRT;
+import static org.bukkit.Material.DARK_OAK_LEAVES;
 import static org.bukkit.Material.DARK_OAK_LOG;
 import static org.bukkit.Material.DIAMOND_AXE;
 import static org.bukkit.Material.DIRT;
@@ -58,6 +59,7 @@ public class TreeBreakerListener implements Listener {
 
     private static final Set<Material> LEAVES = Set.of(ACACIA_LEAVES,
             BIRCH_LEAVES,
+            DARK_OAK_LEAVES,
             JUNGLE_LEAVES,
             OAK_LEAVES,
             SPRUCE_LEAVES);
@@ -119,8 +121,9 @@ public class TreeBreakerListener implements Listener {
                             locationsToCheck.add(locationToCheck);
                             seenLogs.add(locationToCheck);
                         }
-                        if (LEAVES.contains(material))
+                        if (LEAVES.contains(material)) {
                             leaves.add(blockToCheck);
+                        }
                     }
                 }
             }

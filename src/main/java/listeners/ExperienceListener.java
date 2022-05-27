@@ -31,11 +31,6 @@ public class ExperienceListener implements Listener {
                 int additional = BONUS + (2 * level);
                 int finalAmount = originalAmount + additional;
                 playerExpChangeEvent.setAmount(finalAmount);
-                LOG.info("Applying bonus to player {} | Original amount: {} Final experience amount: {} Level before changes: {}",
-                        player.getDisplayName(),
-                        originalAmount,
-                        finalAmount,
-                        level);
                 databaseClient.setExperienceForPlayer(player, Math.max(0, experienceForPlayer - REWARD_THRESHOLD));
                 player.sendTitle("Experience bonus received",
                         "Bonus experience of %s received".formatted(additional),

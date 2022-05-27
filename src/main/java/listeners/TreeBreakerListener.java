@@ -5,20 +5,20 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.Damageable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.bukkit.Material.ACACIA_LEAVES;
 import static org.bukkit.Material.ACACIA_LOG;
@@ -76,8 +76,6 @@ public class TreeBreakerListener implements Listener {
             DIAMOND_AXE,
             NETHERITE_AXE);
 
-    private static final Logger LOG = LoggerFactory.getLogger(TreeBreakerListener.class);
-
     @EventHandler
     public void onTreeBreak(BlockBreakEvent blockBreakEvent) {
         Block brokenBlock = blockBreakEvent.getBlock();
@@ -132,18 +130,28 @@ public class TreeBreakerListener implements Listener {
             Damageable damageable = (Damageable) item.getItemMeta();
             for (Block block : seenLogs.stream().map(Location::getBlock).toList()) {
                 int currentDamage = damageable.getDamage();
-                damageable.setDamage(currentDamage + 1);
+                int unbreakingLevel = damageable.getEnchantLevel(Enchantment.DURABILITY);
+                boolean ignoreDamage = shouldIgnoreDamage(unbreakingLevel);
+                if (!ignoreDamage)
+                    damageable.setDamage(currentDamage + 1);
                 int currentDurability = item.getType().getMaxDurability() - currentDamage;
                 if (currentDurability <= 0) {
                     PlayerInventory inventory = blockBreakEvent.getPlayer().getInventory();
                     inventory.remove(item);
                     inventory.setItemInMainHand(new ItemStack(Material.AIR, 0));
-                    world.playSound(originalBlockLocation, Sound.ENTITY_ITEM_BREAK, 1, 1);
+                    world.playSound(originalBlockLocation, Sound.ENTITY_ITEM_BREAK, 1, 4);
                     return;
                 }
                 block.breakNaturally();
             }
             item.setItemMeta(damageable);
         }
+    }
+
+    private boolean shouldIgnoreDamage(int unbreakingLevel) {
+        // Uses formula from https://minecraft.fandom.com/wiki/Unbreaking#Usage
+        if (unbreakingLevel == 0)
+            return false;
+        return ThreadLocalRandom.current().nextInt(unbreakingLevel + 1) == 0;
     }
 }

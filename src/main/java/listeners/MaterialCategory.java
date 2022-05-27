@@ -2,6 +2,7 @@ package listeners;
 
 import org.bukkit.Material;
 
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -26,7 +27,6 @@ import static org.bukkit.Material.NETHER_GOLD_ORE;
 import static org.bukkit.Material.NETHER_QUARTZ_ORE;
 import static org.bukkit.Material.REDSTONE_ORE;
 
-@SuppressWarnings("ALL")
 public enum MaterialCategory {
     EDIBLE(Constants.filteredByPredicate(Material::isEdible)),
     ORE(Set.of(COAL_ORE,
@@ -48,15 +48,17 @@ public enum MaterialCategory {
             DEEPSLATE_LAPIS_ORE,
             DEEPSLATE_REDSTONE_ORE
     )),
-    BLOCK(Constants.filteredByPredicate(m -> !m.isTransparent() && m.isBlock())),
-    TRANSPARENT(Constants.filteredByPredicate(m -> m.isTransparent() && m.isBlock())),
     SOLID(Constants.filteredByPredicate(Material::isSolid)),
     ITEM(Constants.filteredByPredicate(Material::isItem));
 
-    private Set<Material> materials;
+    private final Set<Material> materials;
 
     MaterialCategory(Set<Material> materials) {
         this.materials = materials;
+    }
+
+    public Set<Material> getMaterials() {
+        return Collections.unmodifiableSet(materials);
     }
 
     private static class Constants {

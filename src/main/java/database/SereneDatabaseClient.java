@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory;
 import static java.util.Objects.requireNonNull;
 
 public interface SereneDatabaseClient {
-    Logger LOG = LoggerFactory.getLogger(SereneDatabaseClient.class);
 
     static SereneDatabaseClient create(FileConfiguration config) {
+        Logger logger = LoggerFactory.getLogger(SereneDatabaseClient.class);
         try {
             String dbBasePath = "neo4j.db.";
             String uri = requireNonNull(config.get(dbBasePath + "uri")).toString();
@@ -23,8 +23,7 @@ public interface SereneDatabaseClient {
             driver.verifyConnectivity();
             return new Neo4jSereneClient(driver);
         } catch (Exception e) {
-            LOG.info("Could not create Neo4j database client, using default no-op database client");
-            e.printStackTrace();
+            logger.info("Could not create Neo4j database client, using default no-op database client. {}", e.getLocalizedMessage());
             return new NoOpDatabaseClient();
         }
     }

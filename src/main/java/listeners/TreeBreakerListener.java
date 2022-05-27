@@ -12,8 +12,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.Damageable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -152,8 +150,6 @@ public class TreeBreakerListener implements Listener {
         }
 
     }
-
-    private static final Logger LOG = LoggerFactory.getLogger(TreeBreakerListener.class);
 
     private boolean shouldTakeDamage(int unbreakingLevel) {
         // Uses formula from https://minecraft.fandom.com/wiki/Unbreaking#Usage

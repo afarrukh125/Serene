@@ -1,5 +1,6 @@
 import database.SereneDatabaseClient;
 import listeners.ExperienceListener;
+import listeners.InventorySorterListener;
 import listeners.SleepListener;
 import listeners.TreeBreakerListener;
 import org.bukkit.plugin.PluginManager;
@@ -19,6 +20,7 @@ public class Serene extends JavaPlugin {
         SereneDatabaseClient databaseClient = getDatabaseClient();
         pluginManager.registerEvents(new ExperienceListener(databaseClient), this);
         pluginManager.registerEvents(new TreeBreakerListener(), this);
+        pluginManager.registerEvents(new InventorySorterListener(), this);
         LOG.info("Started Serene...");
     }
 

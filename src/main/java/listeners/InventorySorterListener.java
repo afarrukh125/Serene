@@ -44,16 +44,16 @@ public class InventorySorterListener implements Listener {
                     ItemStack[] contents = chest.getInventory().getContents();
                     int rowSize = 9;
                     int colSize = contents.length == SMALL_CHEST_SIZE ? SMALL_CHEST_COL_SIZE : LARGE_CHEST_COL_SIZE;
-                    ItemStack[] newItemStack = generateOrganisedItemStacks(contents.length, organisedMaterialGroups, rowSize, colSize);
+                    ItemStack[] newItemStack = generateFinalSortedItemStacks(contents.length, organisedMaterialGroups, rowSize, colSize);
                 }
             }
         }
     }
 
-    private ItemStack[] generateOrganisedItemStacks(int numStacks,
-                                                    Map<Material, List<ItemStack>> organisedMaterialGroups,
-                                                    int rowSize,
-                                                    int colSize) {
+    private ItemStack[] generateFinalSortedItemStacks(int numStacks,
+                                                      Map<Material, List<ItemStack>> organisedMaterialGroups,
+                                                      int rowSize,
+                                                      int colSize) {
         ItemStack[] newStacks = new ItemStack[numStacks];
         return null;
     }

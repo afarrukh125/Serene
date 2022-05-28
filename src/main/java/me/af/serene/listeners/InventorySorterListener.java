@@ -107,7 +107,7 @@ public class InventorySorterListener implements Listener {
 
     // Places organised groups into final storted items
     private ItemStack[] generateFinalSortedItemStacks(
-            List<MaterialItemStack> organisedMaterialGroups,
+            List<MaterialItemStack> materialItemStacks,
             int rowSize,
             int colSize,
             Location location) {
@@ -116,42 +116,26 @@ public class InventorySorterListener implements Listener {
         List<MaterialItemStack> notPlaced = new ArrayList<>();
 
         if (seenChestLocations.contains(location)) {
-            alternatePrioritisingHorizontal(organisedMaterialGroups, newStacks, notPlaced);
-            alternatePrioritisingVertical(organisedMaterialGroups, newStacks, notPlaced);
+
+            for (MaterialItemStack materialItemStack : materialItemStacks) {
+                populateVertically(materialItemStack, newStacks, notPlaced);
+            }
             seenChestLocations.remove(location);
         } else {
-            alternatePrioritisingVertical(organisedMaterialGroups, newStacks, notPlaced);
-            alternatePrioritisingHorizontal(organisedMaterialGroups, newStacks, notPlaced);
+            for (MaterialItemStack materialItemStack : materialItemStacks) {
+                populateHorizontally(materialItemStack, newStacks, notPlaced);
+            }
             seenChestLocations.add(location);
         }
-        if (!notPlaced.isEmpty())
+        removeDummies(newStacks);
+        if (!notPlaced.isEmpty()) {
             dumpRemaining(newStacks, notPlaced);
+        }
         return flatten(newStacks);
     }
 
-    private void alternatePrioritisingHorizontal(List<MaterialItemStack> materialItemStacks, ItemStack[][] newStacks, List<MaterialItemStack> notPlaced) {
-        int x = 0;
-        for (var materialItemStack : materialItemStacks) {
-            if (x % 2 == 0) {
-                populateHorizontally(materialItemStack, newStacks, notPlaced);
-            } else {
-                populateVertically(materialItemStack, newStacks, notPlaced);
-            }
-            x++;
-        }
-    }
+    private void removeDummies(ItemStack[][] newStacks) {
 
-    private void alternatePrioritisingVertical(List<MaterialItemStack> materialItemStacks, ItemStack[][] newStacks, List<MaterialItemStack> notPlaced) {
-        int x;
-        x = 0;
-        for (var materialItemStack : materialItemStacks) {
-            if (x % 2 == 0) {
-                populateVertically(materialItemStack, newStacks, notPlaced);
-            } else {
-                populateHorizontally(materialItemStack, newStacks, notPlaced);
-            }
-            x++;
-        }
     }
 
     private void populateHorizontally(MaterialItemStack materialItemStack,
@@ -161,7 +145,7 @@ public class InventorySorterListener implements Listener {
         if (itemStacks.isEmpty())
             return;
         boolean done = false;
-        for (int x = newStacks[0].length - 1; x >= 0; x--) {
+        for (int x = 0; x < newStacks.length; x++) {
             for (int y = 0; y < newStacks.length; y++) {
                 var horizontalCoordinates = canFitHorizontally(itemStacks.size(), newStacks, x, y);
                 if (!horizontalCoordinates.isEmpty()) {
@@ -170,8 +154,9 @@ public class InventorySorterListener implements Listener {
                     break;
                 }
             }
-            if (done)
+            if (done) {
                 break;
+            }
         }
         if (!done) {
             notPlaced.add(materialItemStack);
@@ -194,23 +179,12 @@ public class InventorySorterListener implements Listener {
                     break;
                 }
             }
-            if (done)
+            if (done) {
                 break;
-        }
-        if (!done)
-            notPlaced.add(materialItemStack);
-    }
-
-    private void dumpRemaining(ItemStack[][] newStacks,
-                               List<MaterialItemStack> couldntBePlaced) {
-        for (var materialItemStack : couldntBePlaced) {
-            var stacks = materialItemStack.itemStacks();
-            for (int i = 0; i < newStacks.length; i++) {
-                for (int j = 0; j < newStacks[i].length && !stacks.isEmpty(); j++) {
-                    if (newStacks[i][j] == null)
-                        newStacks[i][j] = stacks.poll();
-                }
             }
+        }
+        if (!done) {
+            notPlaced.add(materialItemStack);
         }
     }
 
@@ -229,18 +203,12 @@ public class InventorySorterListener implements Listener {
         return coordinates;
     }
 
-    private void populate(Queue<ItemStack> itemStacks, ItemStack[][] newStacks, List<Coordinate> coordinates) {
-        for (var coordinate : coordinates) {
-            newStacks[coordinate.y()][coordinate.x()] = itemStacks.poll();
-        }
-    }
-
     private List<Coordinate> canFitHorizontally(int size, ItemStack[][] newStacks, int startX, int startY) {
         if (newStacks[startY].length - startX < size) {
             return emptyList();
         }
         List<Coordinate> coordinates = new ArrayList<>();
-        for (int x = newStacks[0].length - 1; x >= startX; x--) {
+        for (int x = startX; x < newStacks[0].length; x++) {
             if (newStacks[startY][x] != null) {
                 return emptyList();
             } else {
@@ -248,6 +216,26 @@ public class InventorySorterListener implements Listener {
             }
         }
         return coordinates;
+    }
+
+    private void populate(Queue<ItemStack> itemStacks, ItemStack[][] newStacks, List<Coordinate> coordinates) {
+        for (var coordinate : coordinates) {
+            newStacks[coordinate.y()][coordinate.x()] = itemStacks.poll();
+        }
+    }
+
+    private void dumpRemaining(ItemStack[][] newStacks,
+                               List<MaterialItemStack> couldntBePlaced) {
+        for (var materialItemStack : couldntBePlaced) {
+            var stacks = materialItemStack.itemStacks();
+            for (int i = newStacks.length - 1; i >= 0; i--) {
+                for (int j = newStacks[i].length - 1; j >= 0 && !stacks.isEmpty(); j--) {
+                    if (newStacks[i][j] == null) {
+                        newStacks[i][j] = stacks.poll();
+                    }
+                }
+            }
+        }
     }
 
     private ItemStack[] flatten(ItemStack[][] newStacks) {

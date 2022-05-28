@@ -4,14 +4,11 @@ import me.af.serene.database.SereneDatabaseClient;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerExpChangeEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ExperienceListener implements Listener {
 
     public static final int BONUS = 100;
     public static final int REWARD_THRESHOLD = 100;
-    private static final Logger LOG = LoggerFactory.getLogger(ExperienceListener.class);
     private final SereneDatabaseClient databaseClient;
 
     public ExperienceListener(SereneDatabaseClient databaseClient) {

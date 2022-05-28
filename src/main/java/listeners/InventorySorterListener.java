@@ -107,32 +107,63 @@ public class InventorySorterListener implements Listener {
         List<Material> dumpMaterials = new ArrayList<>();
 
         for (Material material : materials) {
-            var itemStacks = organisedMaterialGroups.get(material);
-            boolean done = false;
-            for (int y = 0; y < newStacks.length; y++) {
-                for (int x = 0; x < newStacks[y].length; x++) {
-                    var horizontalCoordinates = canFitHorizontally(itemStacks.size(), newStacks, x, y);
-                    if (!horizontalCoordinates.isEmpty()) {
-                        populate(itemStacks, newStacks, horizontalCoordinates);
-                        done = true;
-                        break;
-                    }
-                    var verticalCoordinates = canFitVertically(itemStacks.size(), newStacks, x, y);
-                    if (!verticalCoordinates.isEmpty()) {
-                        populate(itemStacks, newStacks, verticalCoordinates);
-                        done = true;
-                        break;
-                    }
-                }
-                if (done)
-                    break;
-            }
-            if (!done)
-                dumpMaterials.add(material);
+            populateHorizontally(organisedMaterialGroups, newStacks, dumpMaterials, material);
+        }
 
+        for (Material material : materials) {
+            populateVertically(organisedMaterialGroups, newStacks, dumpMaterials, material);
         }
         dumpRemaining(newStacks, dumpMaterials, organisedMaterialGroups);
         return flatten(newStacks);
+    }
+
+    private void populateHorizontally(Map<Material, Queue<ItemStack>> organisedMaterialGroups,
+                                      ItemStack[][] newStacks,
+                                      List<Material> dumpMaterials,
+                                      Material material) {
+        var itemStacks = organisedMaterialGroups.get(material);
+        if (itemStacks.isEmpty())
+            return;
+        boolean done = false;
+        for (int x = 0; x < newStacks[0].length; x++) {
+            for (int y = 0; y < newStacks.length; y++) {
+                var horizontalCoordinates = canFitHorizontally(itemStacks.size(), newStacks, x, y);
+                if (!horizontalCoordinates.isEmpty()) {
+                    populate(itemStacks, newStacks, horizontalCoordinates);
+                    done = true;
+                    break;
+                }
+            }
+            if (done)
+                break;
+        }
+        if (!done) {
+            dumpMaterials.add(material);
+        }
+    }
+
+    private void populateVertically(Map<Material, Queue<ItemStack>> organisedMaterialGroups,
+                                    ItemStack[][] newStacks,
+                                    List<Material> dumpMaterials,
+                                    Material material) {
+        var itemStacks = organisedMaterialGroups.get(material);
+        if (itemStacks.isEmpty())
+            return;
+        boolean done = false;
+        for (int x = 0; x < newStacks[0].length; x++) {
+            for (int y = 0; y < newStacks.length; y++) {
+                var verticalCoordinates = canFitVertically(itemStacks.size(), newStacks, x, y);
+                if (!verticalCoordinates.isEmpty()) {
+                    populate(itemStacks, newStacks, verticalCoordinates);
+                    done = true;
+                    break;
+                }
+            }
+            if (done)
+                break;
+        }
+        if (!done)
+            dumpMaterials.add(material);
     }
 
     private void dumpRemaining(ItemStack[][] newStacks,

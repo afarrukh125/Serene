@@ -14,14 +14,13 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
+import java.util.Queue;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparingInt;
@@ -44,103 +43,29 @@ public class InventorySorterListener implements Listener {
                 boolean usedFeather = playerInteractEvent.hasItem() && requireNonNull(playerInteractEvent.getItem()).getType().equals(Material.FEATHER);
                 if (rightClicked && usedFeather && sneaking) {
                     Chest chest = (Chest) playerInteractEvent.getClickedBlock().getState();
-                    Map<Material, List<ItemStack>> organisedMaterialGroups = getOrganisedGroups(chest);
+                    Map<Material, Queue<ItemStack>> organisedMaterialGroups = getOrganisedGroups(chest);
                     ItemStack[] contents = chest.getInventory().getContents();
                     int rowSize = 9;
                     int colSize = contents.length == SMALL_CHEST_SIZE ? SMALL_CHEST_COL_SIZE : LARGE_CHEST_COL_SIZE;
-                    ItemStack[] newItemStacks = generateFinalSortedItemStacks(contents.length, organisedMaterialGroups, rowSize, colSize);
+                    ItemStack[] newItemStacks = generateFinalSortedItemStacks(organisedMaterialGroups, rowSize, colSize);
                     chest.getInventory().setContents(newItemStacks);
                 }
             }
         }
     }
 
-    private ItemStack[] generateFinalSortedItemStacks(int numStacks,
-                                                      Map<Material, List<ItemStack>> organisedMaterialGroups,
-                                                      int rowSize,
-                                                      int colSize) {
-        ItemStack[] newStacks = new ItemStack[numStacks];
-
-        List<Material> materials = new ArrayList<>(organisedMaterialGroups.keySet());
-        materials.sort(comparingInt(m -> organisedMaterialGroups.get(m).stream().mapToInt(ItemStack::getAmount).sum()).reversed());
-        Set<Material> dumpedMaterials = new HashSet<>();
-        for (Material material : materials) {
-            List<ItemStack> itemStacks = organisedMaterialGroups.get(material);
-            boolean placed = false;
-            for (int i = 0; i < newStacks.length; i++) {
-                if (canFitVertically(itemStacks.size(), newStacks, i, rowSize)) {
-                    populateVertically(itemStacks, newStacks, i, rowSize);
-                    placed = true;
-                    break;
-                } else if (canFitHorizontally(itemStacks.size(), newStacks, i)) {
-                    populateHorizontally(itemStacks, newStacks, i);
-                    placed = true;
-                    break;
-                }
-            }
-            if (!placed)
-                dumpedMaterials.add(material);
-        }
-        for (Material material : dumpedMaterials) {
-            Iterator<ItemStack> iterator = organisedMaterialGroups.get(material).iterator();
-            for (int i = 0; i < newStacks.length && iterator.hasNext(); i++) {
-                if (newStacks[i] == null) {
-                    newStacks[i] = iterator.next();
-                }
-            }
-        }
-        return newStacks;
-    }
-
-    private boolean canFitHorizontally(int numStacks, ItemStack[] itemStacks, int index) {
-        return canFit(numStacks, itemStacks, index, 1);
-    }
-
-    private void populateHorizontally(List<ItemStack> itemStacks, ItemStack[] newStacks, int index) {
-        populate(itemStacks, newStacks, index, 1);
-    }
-
-    private boolean canFitVertically(int numStacks,
-                                     ItemStack[] itemStacks,
-                                     int index,
-                                     int rowSize) {
-        return canFit(numStacks, itemStacks, index, rowSize);
-    }
-
-    private void populateVertically(List<ItemStack> itemStacks, ItemStack[] newStacks, int index, int rowSize) {
-        populate(itemStacks, newStacks, index, rowSize);
-    }
-
-    private boolean canFit(int numStacks, ItemStack[] itemStacks, int index, int increment) {
-        for (int i = index; i <= index + (numStacks * increment); i += increment) {
-            if (i < 0 || i >= itemStacks.length)
-                return false;
-            if (itemStacks[i] != null)
-                return false;
-        }
-        return true;
-    }
-
-    private void populate(List<ItemStack> itemStacks, ItemStack[] newStacks, int index, int increment) {
-        int numStacks = itemStacks.size();
-        Iterator<ItemStack> iterator = itemStacks.iterator();
-        for (int i = index; i <= index + (numStacks * increment); i += increment) {
-            if (!iterator.hasNext())
-                break;
-            newStacks[i] = iterator.next();
-        }
-    }
-
-    private Map<Material, List<ItemStack>> getOrganisedGroups(Chest chest) {
+    private Map<Material, Queue<ItemStack>> getOrganisedGroups(Chest chest) {
         Inventory inventory = chest.getInventory();
-        Map<Material, List<ItemStack>> itemsToStacks = Arrays.stream(inventory.getContents())
+        var itemsToStacks = Arrays.stream(inventory.getContents())
                 .filter(Objects::nonNull)
                 .collect(Collectors.groupingBy(ItemStack::getType));
 
-        Map<Material, List<ItemStack>> reorganisedStacks = new HashMap<>();
+        Map<Material, Queue<ItemStack>> reorganisedStacks = new HashMap<>();
         for (Material material : itemsToStacks.keySet()) {
-            List<ItemStack> allStacks = new ArrayList<>();
-            Map<ItemMeta, List<ItemStack>> groupedByMeta = itemsToStacks.get(material).stream().collect(Collectors.groupingBy(ItemStack::getItemMeta));
+            LinkedList<ItemStack> allStacks = new LinkedList<>();
+            var groupedByMeta = itemsToStacks.get(material)
+                    .stream()
+                    .collect(Collectors.groupingBy(ItemStack::getItemMeta));
             for (ItemMeta itemMeta : groupedByMeta.keySet()) {
                 int currentCount = 0;
                 int maxSize = material.getMaxStackSize();
@@ -168,6 +93,106 @@ public class InventorySorterListener implements Listener {
             reorganisedStacks.put(material, allStacks);
         }
         return reorganisedStacks;
+    }
+
+    private ItemStack[] generateFinalSortedItemStacks(
+            Map<Material, Queue<ItemStack>> organisedMaterialGroups,
+            int rowSize,
+            int colSize) {
+        ItemStack[][] newStacks = new ItemStack[colSize][rowSize];
+
+        List<Material> materials = new ArrayList<>(organisedMaterialGroups.keySet());
+        materials.sort(comparingInt(m -> organisedMaterialGroups.get(m).stream().mapToInt(ItemStack::getAmount).sum()).reversed());
+
+        List<Material> dumpMaterials = new ArrayList<>();
+
+        for (Material material : materials) {
+            var itemStacks = organisedMaterialGroups.get(material);
+            boolean done = false;
+            for (int y = 0; y < newStacks.length; y++) {
+                for (int x = 0; x < newStacks[y].length; x++) {
+                    var horizontalCoordinates = canFitHorizontally(itemStacks.size(), newStacks, x, y);
+                    if (!horizontalCoordinates.isEmpty()) {
+                        populate(itemStacks, newStacks, horizontalCoordinates);
+                        done = true;
+                        break;
+                    }
+                    var verticalCoordinates = canFitVertically(itemStacks.size(), newStacks, x, y);
+                    if (!verticalCoordinates.isEmpty()) {
+                        populate(itemStacks, newStacks, verticalCoordinates);
+                        done = true;
+                        break;
+                    }
+                }
+                if (done)
+                    break;
+            }
+            if (!done)
+                dumpMaterials.add(material);
+
+        }
+        dumpRemaining(newStacks, dumpMaterials, organisedMaterialGroups);
+        return flatten(newStacks);
+    }
+
+    private void dumpRemaining(ItemStack[][] newStacks,
+                               List<Material> couldntBePlaced,
+                               Map<Material, Queue<ItemStack>> organisedMaterialGroups) {
+        for (Material material : couldntBePlaced) {
+            var stacks = organisedMaterialGroups.get(material);
+            for (int i = 0; i < newStacks.length; i++) {
+                for (int j = 0; j < newStacks[i].length && !stacks.isEmpty(); j++) {
+                    if (newStacks[i][j] == null)
+                        newStacks[i][j] = stacks.poll();
+                }
+            }
+        }
+    }
+
+    private List<Coordinate> canFitVertically(int size, ItemStack[][] newStacks, int startX, int startY) {
+        if (newStacks.length - startY < size) {
+            return Collections.emptyList();
+        }
+        List<Coordinate> coordinates = new ArrayList<>();
+        for (int y = startY; y < newStacks.length; y++) {
+            if (newStacks[y][startX] != null) {
+                return Collections.emptyList();
+            } else {
+                coordinates.add(new Coordinate(startX, y));
+            }
+        }
+        return coordinates;
+    }
+
+    private void populate(Queue<ItemStack> itemStacks, ItemStack[][] newStacks, List<Coordinate> coordinates) {
+        for (Coordinate coordinate : coordinates) {
+            newStacks[coordinate.y()][coordinate.x()] = itemStacks.poll();
+        }
+    }
+
+    private List<Coordinate> canFitHorizontally(int size, ItemStack[][] newStacks, int startX, int startY) {
+        if (newStacks[startY].length - startX < size) {
+            return Collections.emptyList();
+        }
+        List<Coordinate> coordinates = new ArrayList<>();
+        for (int x = startX; x < newStacks[0].length; x++) {
+            if (newStacks[startY][x] != null) {
+                return Collections.emptyList();
+            } else {
+                coordinates.add(new Coordinate(x, startY));
+            }
+        }
+        return coordinates;
+    }
+
+    private ItemStack[] flatten(ItemStack[][] newStacks) {
+        List<ItemStack> allStacks = new ArrayList<>();
+        for (int i = 0; i < newStacks.length; i++) {
+            for (int j = 0; j < newStacks[0].length; j++) {
+                allStacks.add(newStacks[i][j]);
+            }
+        }
+        return allStacks.toArray(ItemStack[]::new);
     }
 }
 

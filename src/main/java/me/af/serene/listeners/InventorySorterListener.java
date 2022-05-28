@@ -179,7 +179,7 @@ public class InventorySorterListener implements Listener {
         if (itemStacks.isEmpty())
             return;
         boolean done = false;
-        for (int x = 0; x < newStacks.length; x++) {
+        for (int x = newStacks[0].length - 1; x >= 0; x--) {
             for (int y = 0; y < newStacks.length; y++) {
                 if (newStacks[y][x] != null)
                     continue;
@@ -246,7 +246,7 @@ public class InventorySorterListener implements Listener {
             return emptyList();
         }
         List<Coordinate> coordinates = new ArrayList<>();
-        for (int x = startX; x < newStacks[0].length; x++) {
+        for (int x = newStacks[0].length - 1; x >= startX; x--) {
             if (newStacks[startY][x] != null) {
                 return emptyList();
             } else {

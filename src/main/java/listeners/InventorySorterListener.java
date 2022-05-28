@@ -106,15 +106,36 @@ public class InventorySorterListener implements Listener {
 
         List<Material> dumpMaterials = new ArrayList<>();
 
-        for (Material material : materials) {
-            populateHorizontally(organisedMaterialGroups, newStacks, dumpMaterials, material);
-        }
-
-        for (Material material : materials) {
-            populateVertically(organisedMaterialGroups, newStacks, dumpMaterials, material);
-        }
-        dumpRemaining(newStacks, dumpMaterials, organisedMaterialGroups);
+        alternatePrioritisingHorizontal(organisedMaterialGroups, newStacks, materials, dumpMaterials);
+        alternatePrioritisingVertical(organisedMaterialGroups, newStacks, materials, dumpMaterials);
+        if (!dumpMaterials.isEmpty())
+            dumpRemaining(newStacks, dumpMaterials, organisedMaterialGroups);
         return flatten(newStacks);
+    }
+
+    private void alternatePrioritisingHorizontal(Map<Material, Queue<ItemStack>> organisedMaterialGroups, ItemStack[][] newStacks, List<Material> materials, List<Material> dumpMaterials) {
+        int x = 0;
+        for (Material material : materials) {
+            if (x % 2 == 0) {
+                populateHorizontally(organisedMaterialGroups, newStacks, dumpMaterials, material);
+            } else {
+                populateVertically(organisedMaterialGroups, newStacks, dumpMaterials, material);
+            }
+            x++;
+        }
+    }
+
+    private void alternatePrioritisingVertical(Map<Material, Queue<ItemStack>> organisedMaterialGroups, ItemStack[][] newStacks, List<Material> materials, List<Material> dumpMaterials) {
+        int x;
+        x = 0;
+        for (Material material : materials) {
+            if (x % 2 == 0) {
+                populateVertically(organisedMaterialGroups, newStacks, dumpMaterials, material);
+            } else {
+                populateHorizontally(organisedMaterialGroups, newStacks, dumpMaterials, material);
+            }
+            x++;
+        }
     }
 
     private void populateHorizontally(Map<Material, Queue<ItemStack>> organisedMaterialGroups,

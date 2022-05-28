@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -102,7 +101,8 @@ public class InventorySorterListener implements Listener {
             }
             reorganisedStacks.add(new MaterialItemStack(material, allStacks));
         }
-        reorganisedStacks.sort(Comparator.comparingInt(m -> m.itemStacks().size()));
+        // Place biggest stacks first
+        reorganisedStacks.sort((o1, o2) -> o2.itemStacks().size() - o1.itemStacks().size());
         return reorganisedStacks;
     }
 

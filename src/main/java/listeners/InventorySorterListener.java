@@ -1,5 +1,6 @@
 package listeners;
 
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Chest;
 import org.bukkit.event.EventHandler;
@@ -35,7 +36,7 @@ public class InventorySorterListener implements Listener {
     public static final int SMALL_CHEST_COL_SIZE = 3;
     public static final int SMALL_CHEST_SIZE = 27;
 
-    private final Set<Inventory> seenInventories = new HashSet<>();
+    private final Set<Location> seenChestLocations = new HashSet<>();
 
     @EventHandler
     public void onChestOpenEvent(PlayerInteractEvent playerInteractEvent) {
@@ -49,13 +50,14 @@ public class InventorySorterListener implements Listener {
                     Chest chest = (Chest) playerInteractEvent.getClickedBlock().getState();
                     Map<Material, Queue<ItemStack>> organisedMaterialGroups = getOrganisedGroups(chest);
                     Inventory inventory = chest.getInventory();
+                    Location location = inventory.getLocation();
                     ItemStack[] contents = inventory.getContents();
                     int rowSize = 9;
                     int colSize = contents.length == SMALL_CHEST_SIZE ? SMALL_CHEST_COL_SIZE : LARGE_CHEST_COL_SIZE;
                     ItemStack[] newItemStacks = generateFinalSortedItemStacks(organisedMaterialGroups,
                             rowSize,
                             colSize,
-                            inventory);
+                            location);
                     inventory.setContents(newItemStacks);
                 }
             }
@@ -107,7 +109,7 @@ public class InventorySorterListener implements Listener {
             Map<Material, Queue<ItemStack>> organisedMaterialGroups,
             int rowSize,
             int colSize,
-            Inventory inventory) {
+            Location inventory) {
         ItemStack[][] newStacks = new ItemStack[colSize][rowSize];
 
         List<Material> materials = new ArrayList<>(organisedMaterialGroups.keySet());
@@ -115,14 +117,14 @@ public class InventorySorterListener implements Listener {
 
         List<Material> dumpMaterials = new ArrayList<>();
 
-        if (seenInventories.contains(inventory)) {
+        if (seenChestLocations.contains(inventory)) {
             alternatePrioritisingHorizontal(organisedMaterialGroups, newStacks, materials, dumpMaterials);
             alternatePrioritisingVertical(organisedMaterialGroups, newStacks, materials, dumpMaterials);
-            seenInventories.remove(inventory);
+            seenChestLocations.remove(inventory);
         } else {
             alternatePrioritisingVertical(organisedMaterialGroups, newStacks, materials, dumpMaterials);
             alternatePrioritisingHorizontal(organisedMaterialGroups, newStacks, materials, dumpMaterials);
-            seenInventories.add(inventory);
+            seenChestLocations.add(inventory);
         }
         if (!dumpMaterials.isEmpty())
             dumpRemaining(newStacks, dumpMaterials, organisedMaterialGroups);

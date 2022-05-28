@@ -109,7 +109,7 @@ public class InventorySorterListener implements Listener {
             Map<Material, Queue<ItemStack>> organisedMaterialGroups,
             int rowSize,
             int colSize,
-            Location inventory) {
+            Location location) {
         ItemStack[][] newStacks = new ItemStack[colSize][rowSize];
 
         List<Material> materials = new ArrayList<>(organisedMaterialGroups.keySet());
@@ -117,14 +117,14 @@ public class InventorySorterListener implements Listener {
 
         List<Material> dumpMaterials = new ArrayList<>();
 
-        if (seenChestLocations.contains(inventory)) {
+        if (seenChestLocations.contains(location)) {
             alternatePrioritisingHorizontal(organisedMaterialGroups, newStacks, materials, dumpMaterials);
             alternatePrioritisingVertical(organisedMaterialGroups, newStacks, materials, dumpMaterials);
-            seenChestLocations.remove(inventory);
+            seenChestLocations.remove(location);
         } else {
             alternatePrioritisingVertical(organisedMaterialGroups, newStacks, materials, dumpMaterials);
             alternatePrioritisingHorizontal(organisedMaterialGroups, newStacks, materials, dumpMaterials);
-            seenChestLocations.add(inventory);
+            seenChestLocations.add(location);
         }
         if (!dumpMaterials.isEmpty())
             dumpRemaining(newStacks, dumpMaterials, organisedMaterialGroups);

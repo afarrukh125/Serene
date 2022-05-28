@@ -146,7 +146,7 @@ public class InventorySorterListener implements Listener {
         if (itemStacks.isEmpty())
             return;
         boolean done = false;
-        for (int x = 0; x < newStacks[0].length; x++) {
+        for (int x = newStacks[0].length - 1; x >= 0; x--) {
             for (int y = 0; y < newStacks.length; y++) {
                 var horizontalCoordinates = canFitHorizontally(itemStacks.size(), newStacks, x, y);
                 if (!horizontalCoordinates.isEmpty()) {
@@ -227,7 +227,7 @@ public class InventorySorterListener implements Listener {
             return Collections.emptyList();
         }
         List<Coordinate> coordinates = new ArrayList<>();
-        for (int x = startX; x < newStacks[0].length; x++) {
+        for (int x = newStacks[0].length - 1; x >= startX; x--) {
             if (newStacks[startY][x] != null) {
                 return Collections.emptyList();
             } else {

@@ -1,6 +1,7 @@
 package me.af.serene.listeners;
 
 import me.af.serene.model.Coordinate;
+import me.af.serene.model.MaterialItemStack;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Chest;
@@ -17,26 +18,23 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static java.util.Comparator.comparingInt;
 import static java.util.Objects.requireNonNull;
 
 public class InventorySorterListener implements Listener {
 
-    private static final Logger LOG = LoggerFactory.getLogger(InventorySorterListener.class);
     public static final int LARGE_CHEST_COL_SIZE = 6;
     public static final int SMALL_CHEST_COL_SIZE = 3;
     public static final int SMALL_CHEST_SIZE = 27;
-
+    private static final Logger LOG = LoggerFactory.getLogger(InventorySorterListener.class);
     private final Set<Location> seenChestLocations = new HashSet<>();
 
     @EventHandler
@@ -49,7 +47,7 @@ public class InventorySorterListener implements Listener {
                 boolean usedFeather = playerInteractEvent.hasItem() && requireNonNull(playerInteractEvent.getItem()).getType().equals(Material.FEATHER);
                 if (rightClicked && usedFeather && sneaking) {
                     Chest chest = (Chest) playerInteractEvent.getClickedBlock().getState();
-                    Map<Material, Queue<ItemStack>> organisedMaterialGroups = getOrganisedGroups(chest);
+                    var organisedMaterialGroups = getOrganisedGroups(chest);
                     Inventory inventory = chest.getInventory();
                     Location location = inventory.getLocation();
                     ItemStack[] contents = inventory.getContents();
@@ -65,13 +63,14 @@ public class InventorySorterListener implements Listener {
         }
     }
 
-    private Map<Material, Queue<ItemStack>> getOrganisedGroups(Chest chest) {
+    // Collates all unorganised items into groups
+    private List<MaterialItemStack> getOrganisedGroups(Chest chest) {
         Inventory inventory = chest.getInventory();
         var itemsToStacks = Arrays.stream(inventory.getContents())
                 .filter(Objects::nonNull)
                 .collect(Collectors.groupingBy(ItemStack::getType));
 
-        Map<Material, Queue<ItemStack>> reorganisedStacks = new HashMap<>();
+        List<MaterialItemStack> reorganisedStacks = new ArrayList<>();
         for (Material material : itemsToStacks.keySet()) {
             LinkedList<ItemStack> allStacks = new LinkedList<>();
             var groupedByMeta = itemsToStacks.get(material)
@@ -101,67 +100,65 @@ public class InventorySorterListener implements Listener {
                     allStacks.add(finalStack);
                 }
             }
-            reorganisedStacks.put(material, allStacks);
+            reorganisedStacks.add(new MaterialItemStack(material, allStacks));
         }
+        reorganisedStacks.sort(Comparator.comparingInt(m -> m.itemStacks().size()));
         return reorganisedStacks;
     }
 
+    // Places organised groups into final storted items
     private ItemStack[] generateFinalSortedItemStacks(
-            Map<Material, Queue<ItemStack>> organisedMaterialGroups,
+            List<MaterialItemStack> organisedMaterialGroups,
             int rowSize,
             int colSize,
             Location location) {
         ItemStack[][] newStacks = new ItemStack[colSize][rowSize];
 
-        List<Material> materials = new ArrayList<>(organisedMaterialGroups.keySet());
-        materials.sort(comparingInt(m -> organisedMaterialGroups.get(m).stream().mapToInt(ItemStack::getAmount).sum()).reversed());
-
-        List<Material> dumpMaterials = new ArrayList<>();
+        List<MaterialItemStack> notPlaced = new ArrayList<>();
 
         if (seenChestLocations.contains(location)) {
-            alternatePrioritisingHorizontal(organisedMaterialGroups, newStacks, materials, dumpMaterials);
-            alternatePrioritisingVertical(organisedMaterialGroups, newStacks, materials, dumpMaterials);
+            alternatePrioritisingHorizontal(organisedMaterialGroups, newStacks, notPlaced);
+            alternatePrioritisingVertical(organisedMaterialGroups, newStacks, notPlaced);
             seenChestLocations.remove(location);
         } else {
-            alternatePrioritisingVertical(organisedMaterialGroups, newStacks, materials, dumpMaterials);
-            alternatePrioritisingHorizontal(organisedMaterialGroups, newStacks, materials, dumpMaterials);
+            alternatePrioritisingVertical(organisedMaterialGroups, newStacks, notPlaced);
+            alternatePrioritisingHorizontal(organisedMaterialGroups, newStacks, notPlaced);
             seenChestLocations.add(location);
         }
-        if (!dumpMaterials.isEmpty())
-            dumpRemaining(newStacks, dumpMaterials, organisedMaterialGroups);
+        if (!notPlaced.isEmpty())
+            dumpRemaining(newStacks, notPlaced);
         return flatten(newStacks);
     }
 
-    private void alternatePrioritisingHorizontal(Map<Material, Queue<ItemStack>> organisedMaterialGroups, ItemStack[][] newStacks, List<Material> materials, List<Material> dumpMaterials) {
+    private void alternatePrioritisingHorizontal(List<MaterialItemStack> materialItemStacks, ItemStack[][] newStacks, List<MaterialItemStack> notPlaced) {
         int x = 0;
-        for (Material material : materials) {
+        for (MaterialItemStack materialItemStack : materialItemStacks) {
             if (x % 2 == 0) {
-                populateHorizontally(organisedMaterialGroups, newStacks, dumpMaterials, material);
+                populateHorizontally(materialItemStack, newStacks, notPlaced);
             } else {
-                populateVertically(organisedMaterialGroups, newStacks, dumpMaterials, material);
+                populateVertically(materialItemStack, newStacks, notPlaced);
             }
             x++;
         }
     }
 
-    private void alternatePrioritisingVertical(Map<Material, Queue<ItemStack>> organisedMaterialGroups, ItemStack[][] newStacks, List<Material> materials, List<Material> dumpMaterials) {
+    private void alternatePrioritisingVertical(List<MaterialItemStack> materialItemStacks, ItemStack[][] newStacks, List<MaterialItemStack> notPlaced) {
         int x;
         x = 0;
-        for (Material material : materials) {
+        for (MaterialItemStack materialItemStack : materialItemStacks) {
             if (x % 2 == 0) {
-                populateVertically(organisedMaterialGroups, newStacks, dumpMaterials, material);
+                populateVertically(materialItemStack, newStacks, notPlaced);
             } else {
-                populateHorizontally(organisedMaterialGroups, newStacks, dumpMaterials, material);
+                populateHorizontally(materialItemStack, newStacks, notPlaced);
             }
             x++;
         }
     }
 
-    private void populateHorizontally(Map<Material, Queue<ItemStack>> organisedMaterialGroups,
+    private void populateHorizontally(MaterialItemStack materialItemStack,
                                       ItemStack[][] newStacks,
-                                      List<Material> dumpMaterials,
-                                      Material material) {
-        var itemStacks = organisedMaterialGroups.get(material);
+                                      List<MaterialItemStack> notPlaced) {
+        var itemStacks = materialItemStack.itemStacks();
         if (itemStacks.isEmpty())
             return;
         boolean done = false;
@@ -178,15 +175,14 @@ public class InventorySorterListener implements Listener {
                 break;
         }
         if (!done) {
-            dumpMaterials.add(material);
+            notPlaced.add(materialItemStack);
         }
     }
 
-    private void populateVertically(Map<Material, Queue<ItemStack>> organisedMaterialGroups,
+    private void populateVertically(MaterialItemStack materialItemStack,
                                     ItemStack[][] newStacks,
-                                    List<Material> dumpMaterials,
-                                    Material material) {
-        var itemStacks = organisedMaterialGroups.get(material);
+                                    List<MaterialItemStack> notPlaced) {
+        var itemStacks = materialItemStack.itemStacks();
         if (itemStacks.isEmpty())
             return;
         boolean done = false;
@@ -203,14 +199,13 @@ public class InventorySorterListener implements Listener {
                 break;
         }
         if (!done)
-            dumpMaterials.add(material);
+            notPlaced.add(materialItemStack);
     }
 
     private void dumpRemaining(ItemStack[][] newStacks,
-                               List<Material> couldntBePlaced,
-                               Map<Material, Queue<ItemStack>> organisedMaterialGroups) {
-        for (Material material : couldntBePlaced) {
-            var stacks = organisedMaterialGroups.get(material);
+                               List<MaterialItemStack> couldntBePlaced) {
+        for (MaterialItemStack materialItemStack : couldntBePlaced) {
+            var stacks = materialItemStack.itemStacks();
             for (int i = 0; i < newStacks.length; i++) {
                 for (int j = 0; j < newStacks[i].length && !stacks.isEmpty(); j++) {
                     if (newStacks[i][j] == null)

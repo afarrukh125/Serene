@@ -16,11 +16,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparingInt;
@@ -33,6 +35,8 @@ public class InventorySorterListener implements Listener {
     public static final int SMALL_CHEST_COL_SIZE = 3;
     public static final int SMALL_CHEST_SIZE = 27;
 
+    private final Set<Inventory> seenInventories = new HashSet<>();
+
     @EventHandler
     public void onChestOpenEvent(PlayerInteractEvent playerInteractEvent) {
         if (playerInteractEvent.getClickedBlock() != null) {
@@ -44,11 +48,15 @@ public class InventorySorterListener implements Listener {
                 if (rightClicked && usedFeather && sneaking) {
                     Chest chest = (Chest) playerInteractEvent.getClickedBlock().getState();
                     Map<Material, Queue<ItemStack>> organisedMaterialGroups = getOrganisedGroups(chest);
-                    ItemStack[] contents = chest.getInventory().getContents();
+                    Inventory inventory = chest.getInventory();
+                    ItemStack[] contents = inventory.getContents();
                     int rowSize = 9;
                     int colSize = contents.length == SMALL_CHEST_SIZE ? SMALL_CHEST_COL_SIZE : LARGE_CHEST_COL_SIZE;
-                    ItemStack[] newItemStacks = generateFinalSortedItemStacks(organisedMaterialGroups, rowSize, colSize);
-                    chest.getInventory().setContents(newItemStacks);
+                    ItemStack[] newItemStacks = generateFinalSortedItemStacks(organisedMaterialGroups,
+                            rowSize,
+                            colSize,
+                            inventory);
+                    inventory.setContents(newItemStacks);
                 }
             }
         }
@@ -98,7 +106,8 @@ public class InventorySorterListener implements Listener {
     private ItemStack[] generateFinalSortedItemStacks(
             Map<Material, Queue<ItemStack>> organisedMaterialGroups,
             int rowSize,
-            int colSize) {
+            int colSize,
+            Inventory inventory) {
         ItemStack[][] newStacks = new ItemStack[colSize][rowSize];
 
         List<Material> materials = new ArrayList<>(organisedMaterialGroups.keySet());
@@ -106,8 +115,15 @@ public class InventorySorterListener implements Listener {
 
         List<Material> dumpMaterials = new ArrayList<>();
 
-        alternatePrioritisingHorizontal(organisedMaterialGroups, newStacks, materials, dumpMaterials);
-        alternatePrioritisingVertical(organisedMaterialGroups, newStacks, materials, dumpMaterials);
+        if (seenInventories.contains(inventory)) {
+            alternatePrioritisingHorizontal(organisedMaterialGroups, newStacks, materials, dumpMaterials);
+            alternatePrioritisingVertical(organisedMaterialGroups, newStacks, materials, dumpMaterials);
+            seenInventories.remove(inventory);
+        } else {
+            alternatePrioritisingVertical(organisedMaterialGroups, newStacks, materials, dumpMaterials);
+            alternatePrioritisingHorizontal(organisedMaterialGroups, newStacks, materials, dumpMaterials);
+            seenInventories.add(inventory);
+        }
         if (!dumpMaterials.isEmpty())
             dumpRemaining(newStacks, dumpMaterials, organisedMaterialGroups);
         return flatten(newStacks);

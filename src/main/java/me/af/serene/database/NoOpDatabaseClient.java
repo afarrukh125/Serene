@@ -1,4 +1,4 @@
-package database;
+package me.af.serene.database;
 
 import org.bukkit.entity.Player;
 

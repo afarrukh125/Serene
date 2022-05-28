@@ -1,4 +1,4 @@
-package listeners;
+package me.af.serene.listeners;
 
 import org.bukkit.Location;
 import org.bukkit.World;

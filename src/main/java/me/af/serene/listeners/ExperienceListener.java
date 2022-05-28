@@ -1,6 +1,6 @@
-package listeners;
+package me.af.serene.listeners;
 
-import database.SereneDatabaseClient;
+import me.af.serene.database.SereneDatabaseClient;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

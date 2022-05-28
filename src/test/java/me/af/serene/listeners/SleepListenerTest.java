@@ -1,8 +1,8 @@
-package listeners;
+package me.af.serene.listeners;
 
 import org.junit.jupiter.api.Test;
 
-import static listeners.SleepListener.nextDayFullTime;
+import static me.af.serene.listeners.SleepListener.nextDayFullTime;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class SleepListenerTest {

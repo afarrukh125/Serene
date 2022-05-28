@@ -1,4 +1,4 @@
-package listeners;
+package me.af.serene.model;
 
 import org.bukkit.Material;
 

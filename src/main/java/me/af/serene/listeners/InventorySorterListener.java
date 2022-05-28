@@ -1,5 +1,6 @@
-package listeners;
+package me.af.serene.listeners;
 
+import me.af.serene.model.Coordinate;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Chest;

@@ -1,7 +1,5 @@
 package me.af.serene.listeners;
 
-import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -10,7 +8,6 @@ import org.bukkit.event.player.PlayerBedLeaveEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Objects.requireNonNull;
@@ -27,7 +24,7 @@ public class SleepListener implements Listener {
     }
 
     public static long nextDayFullTime(long currentTime) {
-        long daysElapsed = currentTime / FULL_DAY_TIME;
+        var daysElapsed = currentTime / FULL_DAY_TIME;
         return (daysElapsed + 1) * FULL_DAY_TIME;
     }
 
@@ -36,9 +33,9 @@ public class SleepListener implements Listener {
         if (playerBedEnterEvent.getBedEnterResult().equals(PlayerBedEnterEvent.BedEnterResult.OK)) {
             if (playerBedEnterEvent.getPlayer().getWorld().getPlayers().size() == 1)
                 return;
-            Player sleepingPlayer = playerBedEnterEvent.getPlayer();
-            List<Player> players = playerBedEnterEvent.getBed().getWorld().getPlayers();
-            for (Player player : players) {
+            var sleepingPlayer = playerBedEnterEvent.getPlayer();
+            var players = playerBedEnterEvent.getBed().getWorld().getPlayers();
+            for (var player : players) {
                 if (!player.equals(sleepingPlayer))
                     player.setSleepingIgnored(true);
             }
@@ -51,27 +48,27 @@ public class SleepListener implements Listener {
     public void onPlayerLeaveBed(PlayerBedLeaveEvent playerBedLeaveEvent) {
         if (playerBedLeaveEvent.getPlayer().getWorld().getPlayers().size() == 1)
             return;
-        Player sleepingPlayer = playerBedLeaveEvent.getPlayer();
+        var sleepingPlayer = playerBedLeaveEvent.getPlayer();
         if (playerBedLeaveEvent.isCancelled() && atomicPlayerReference.get().equals(sleepingPlayer))
             atomicPlayerReference = new AtomicReference<>();
-        List<Player> players = playerBedLeaveEvent.getBed().getWorld().getPlayers();
-        for (Player player : players)
+        var players = playerBedLeaveEvent.getBed().getWorld().getPlayers();
+        for (var player : players)
             player.setSleepingIgnored(false);
     }
 
 
     private void notifyAllPlayersOfSleepEvent(PlayerBedEnterEvent playerBedEnterEvent) {
-        Player sleepingPlayer = playerBedEnterEvent.getPlayer();
-        String sleepingPlayerName = sleepingPlayer.getName();
-        World world = requireNonNull(sleepingPlayer.getWorld());
-        List<Player> players = world.getPlayers();
-        for (Player p : players)
+        var sleepingPlayer = playerBedEnterEvent.getPlayer();
+        var sleepingPlayerName = sleepingPlayer.getName();
+        var world = requireNonNull(sleepingPlayer.getWorld());
+        var players = world.getPlayers();
+        for (var p : players)
             p.sendMessage(sleepingPlayerName + " has triggered sleep");
     }
 
     private void apply(PlayerBedEnterEvent playerBedEnterEvent) {
-        Location bedLocation = playerBedEnterEvent.getBed().getLocation();
-        World world = requireNonNull(bedLocation.getWorld());
+        var bedLocation = playerBedEnterEvent.getBed().getLocation();
+        var world = requireNonNull(bedLocation.getWorld());
         long currentFullTime = world.getFullTime();
         LOG.info("World time is {}", currentFullTime);
         long targetTime = SleepListener.nextDayFullTime(currentFullTime);

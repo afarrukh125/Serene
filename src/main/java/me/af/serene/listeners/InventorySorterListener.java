@@ -17,16 +17,16 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
-import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.groupingBy;
 
 public class InventorySorterListener implements Listener {
 
@@ -45,14 +45,13 @@ public class InventorySorterListener implements Listener {
                 boolean rightClicked = playerInteractEvent.getAction().equals(Action.RIGHT_CLICK_BLOCK);
                 boolean usedFeather = playerInteractEvent.hasItem() && requireNonNull(playerInteractEvent.getItem()).getType().equals(Material.FEATHER);
                 if (rightClicked && usedFeather && sneaking) {
-                    Chest chest = (Chest) playerInteractEvent.getClickedBlock().getState();
+                    var chest = (Chest) playerInteractEvent.getClickedBlock().getState();
                     var organisedMaterialGroups = getOrganisedGroups(chest);
-                    Inventory inventory = chest.getInventory();
-                    Location location = inventory.getLocation();
-                    ItemStack[] contents = inventory.getContents();
+                    var inventory = chest.getInventory();
+                    var location = inventory.getLocation();
                     int rowSize = 9;
-                    int colSize = contents.length == SMALL_CHEST_SIZE ? SMALL_CHEST_COL_SIZE : LARGE_CHEST_COL_SIZE;
-                    ItemStack[] newItemStacks = generateFinalSortedItemStacks(organisedMaterialGroups,
+                    int colSize = inventory.getContents().length == SMALL_CHEST_SIZE ? SMALL_CHEST_COL_SIZE : LARGE_CHEST_COL_SIZE;
+                    var newItemStacks = generateFinalSortedItemStacks(organisedMaterialGroups,
                             rowSize,
                             colSize,
                             location);
@@ -67,18 +66,18 @@ public class InventorySorterListener implements Listener {
         Inventory inventory = chest.getInventory();
         var itemsToStacks = Arrays.stream(inventory.getContents())
                 .filter(Objects::nonNull)
-                .collect(Collectors.groupingBy(ItemStack::getType));
+                .collect(groupingBy(ItemStack::getType));
 
         List<MaterialItemStack> reorganisedStacks = new ArrayList<>();
-        for (Material material : itemsToStacks.keySet()) {
+        for (var material : itemsToStacks.keySet()) {
             LinkedList<ItemStack> allStacks = new LinkedList<>();
             var groupedByMeta = itemsToStacks.get(material)
                     .stream()
-                    .collect(Collectors.groupingBy(ItemStack::getItemMeta));
+                    .collect(groupingBy(ItemStack::getItemMeta));
             for (ItemMeta itemMeta : groupedByMeta.keySet()) {
                 int currentCount = 0;
                 int maxSize = material.getMaxStackSize();
-                LinkedList<ItemStack> itemStacks = new LinkedList<>(groupedByMeta.get(itemMeta));
+                var itemStacks = new LinkedList<>(groupedByMeta.get(itemMeta));
                 ItemStack next = null;
                 while (!itemStacks.isEmpty()) {
                     next = itemStacks.poll();
@@ -112,7 +111,7 @@ public class InventorySorterListener implements Listener {
             int rowSize,
             int colSize,
             Location location) {
-        ItemStack[][] newStacks = new ItemStack[colSize][rowSize];
+        var newStacks = new ItemStack[colSize][rowSize];
 
         List<MaterialItemStack> notPlaced = new ArrayList<>();
 
@@ -132,7 +131,7 @@ public class InventorySorterListener implements Listener {
 
     private void alternatePrioritisingHorizontal(List<MaterialItemStack> materialItemStacks, ItemStack[][] newStacks, List<MaterialItemStack> notPlaced) {
         int x = 0;
-        for (MaterialItemStack materialItemStack : materialItemStacks) {
+        for (var materialItemStack : materialItemStacks) {
             if (x % 2 == 0) {
                 populateHorizontally(materialItemStack, newStacks, notPlaced);
             } else {
@@ -145,7 +144,7 @@ public class InventorySorterListener implements Listener {
     private void alternatePrioritisingVertical(List<MaterialItemStack> materialItemStacks, ItemStack[][] newStacks, List<MaterialItemStack> notPlaced) {
         int x;
         x = 0;
-        for (MaterialItemStack materialItemStack : materialItemStacks) {
+        for (var materialItemStack : materialItemStacks) {
             if (x % 2 == 0) {
                 populateVertically(materialItemStack, newStacks, notPlaced);
             } else {
@@ -204,7 +203,7 @@ public class InventorySorterListener implements Listener {
 
     private void dumpRemaining(ItemStack[][] newStacks,
                                List<MaterialItemStack> couldntBePlaced) {
-        for (MaterialItemStack materialItemStack : couldntBePlaced) {
+        for (var materialItemStack : couldntBePlaced) {
             var stacks = materialItemStack.itemStacks();
             for (int i = 0; i < newStacks.length; i++) {
                 for (int j = 0; j < newStacks[i].length && !stacks.isEmpty(); j++) {
@@ -217,12 +216,12 @@ public class InventorySorterListener implements Listener {
 
     private List<Coordinate> canFitVertically(int size, ItemStack[][] newStacks, int startX, int startY) {
         if (newStacks.length - startY < size) {
-            return Collections.emptyList();
+            return emptyList();
         }
         List<Coordinate> coordinates = new ArrayList<>();
         for (int y = startY; y < newStacks.length; y++) {
             if (newStacks[y][startX] != null) {
-                return Collections.emptyList();
+                return emptyList();
             } else {
                 coordinates.add(new Coordinate(startX, y));
             }
@@ -231,19 +230,19 @@ public class InventorySorterListener implements Listener {
     }
 
     private void populate(Queue<ItemStack> itemStacks, ItemStack[][] newStacks, List<Coordinate> coordinates) {
-        for (Coordinate coordinate : coordinates) {
+        for (var coordinate : coordinates) {
             newStacks[coordinate.y()][coordinate.x()] = itemStacks.poll();
         }
     }
 
     private List<Coordinate> canFitHorizontally(int size, ItemStack[][] newStacks, int startX, int startY) {
         if (newStacks[startY].length - startX < size) {
-            return Collections.emptyList();
+            return emptyList();
         }
         List<Coordinate> coordinates = new ArrayList<>();
         for (int x = newStacks[0].length - 1; x >= startX; x--) {
             if (newStacks[startY][x] != null) {
-                return Collections.emptyList();
+                return emptyList();
             } else {
                 coordinates.add(new Coordinate(x, startY));
             }

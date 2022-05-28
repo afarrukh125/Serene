@@ -1,7 +1,6 @@
 package me.af.serene.listeners;
 
 import me.af.serene.database.SereneDatabaseClient;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerExpChangeEvent;
@@ -21,15 +20,15 @@ public class ExperienceListener implements Listener {
 
     @EventHandler
     public void onExperienceChange(PlayerExpChangeEvent playerExpChangeEvent) {
-        Player player = playerExpChangeEvent.getPlayer();
-        int level = player.getLevel();
+        var player = playerExpChangeEvent.getPlayer();
+        var level = player.getLevel();
         if (level > 20) {
-            int originalAmount = playerExpChangeEvent.getAmount();
+            var originalAmount = playerExpChangeEvent.getAmount();
             databaseClient.addExperienceForPlayer(player, originalAmount);
-            long experienceForPlayer = databaseClient.getExperienceForPlayer(player);
+            var experienceForPlayer = databaseClient.getExperienceForPlayer(player);
             if (experienceForPlayer >= REWARD_THRESHOLD) {
-                int additional = BONUS + (2 * level);
-                int finalAmount = originalAmount + additional;
+                var additional = BONUS + (2 * level);
+                var finalAmount = originalAmount + additional;
                 playerExpChangeEvent.setAmount(finalAmount);
                 databaseClient.setExperienceForPlayer(player, Math.max(0, experienceForPlayer - REWARD_THRESHOLD));
                 player.sendTitle("Experience bonus received",

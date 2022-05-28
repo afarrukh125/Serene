@@ -10,7 +10,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.Damageable;
 
 import java.util.HashSet;
@@ -81,13 +80,13 @@ public class TreeBreakerListener implements Listener {
 
     @EventHandler
     public void onTreeBreak(BlockBreakEvent blockBreakEvent) {
-        Block brokenBlock = blockBreakEvent.getBlock();
-        Material type = brokenBlock.getType();
-        Location location = brokenBlock.getLocation();
-        World world = blockBreakEvent.getPlayer().getWorld();
-        Location locationBelowBlock = new Location(world, location.getX(), location.getY() - 1., location.getZ());
-        ItemStack itemInMainHand = blockBreakEvent.getPlayer().getInventory().getItemInMainHand();
-        Material armedMaterial = itemInMainHand.getType();
+        var brokenBlock = blockBreakEvent.getBlock();
+        var type = brokenBlock.getType();
+        var location = brokenBlock.getLocation();
+        var world = blockBreakEvent.getPlayer().getWorld();
+        var locationBelowBlock = new Location(world, location.getX(), location.getY() - 1., location.getZ());
+        var itemInMainHand = blockBreakEvent.getPlayer().getInventory().getItemInMainHand();
+        var armedMaterial = itemInMainHand.getType();
         if (AXES.contains(armedMaterial)
                 && LOG_MATERIALS.contains(type)
                 && blockBreakEvent.getPlayer().isSneaking()
@@ -101,22 +100,22 @@ public class TreeBreakerListener implements Listener {
     }
 
     private void handleBreaking(BlockBreakEvent blockBreakEvent, ItemStack item) {
-        World world = blockBreakEvent.getBlock().getWorld();
+        var world = blockBreakEvent.getBlock().getWorld();
         Queue<Location> locationsToCheck = new LinkedList<>();
         Set<Location> seenLogs = new LinkedHashSet<>();
         Set<Block> leaves = new HashSet<>();
-        Location originalBlockLocation = blockBreakEvent.getBlock().getLocation();
+        var originalBlockLocation = blockBreakEvent.getBlock().getLocation();
         locationsToCheck.add(originalBlockLocation);
 
         while (!locationsToCheck.isEmpty()) {
-            Location location = locationsToCheck.poll();
+            var location = locationsToCheck.poll();
 
             for (int x = -1; x <= 1; x++) {
                 for (int y = -1; y <= 1; y++) {
                     for (int z = -1; z <= 1; z++) {
-                        Location locationToCheck = new Location(world, location.getX() + x, location.getY() + y, location.getZ() + z);
-                        Block blockToCheck = world.getBlockAt(locationToCheck);
-                        Material material = blockToCheck.getType();
+                        var locationToCheck = new Location(world, location.getX() + x, location.getY() + y, location.getZ() + z);
+                        var blockToCheck = world.getBlockAt(locationToCheck);
+                        var material = blockToCheck.getType();
                         if (LOG_MATERIALS.contains(material) && !seenLogs.contains(locationToCheck)) {
                             locationsToCheck.add(locationToCheck);
                             seenLogs.add(locationToCheck);
@@ -130,8 +129,8 @@ public class TreeBreakerListener implements Listener {
         }
         // Do not break random stack of logs with no leaves (might be a building with a stack of logs somewhere)
         if (leaves.size() > 0) {
-            Damageable damageable = requireNonNull((Damageable) item.getItemMeta());
-            for (Block block : seenLogs.stream().map(Location::getBlock).toList()) {
+            var damageable = requireNonNull((Damageable) item.getItemMeta());
+            for (var block : seenLogs.stream().map(Location::getBlock).toList()) {
                 int currentDamage = damageable.getDamage();
                 int unbreakingLevel = damageable.getEnchantLevel(Enchantment.DURABILITY);
                 boolean takeDamage = shouldTakeDamage(unbreakingLevel);
@@ -141,7 +140,7 @@ public class TreeBreakerListener implements Listener {
                 }
                 int currentDurability = item.getType().getMaxDurability() - currentDamage;
                 if (currentDurability <= 0) {
-                    PlayerInventory inventory = blockBreakEvent.getPlayer().getInventory();
+                    var inventory = blockBreakEvent.getPlayer().getInventory();
                     inventory.remove(item);
                     inventory.setItemInMainHand(new ItemStack(Material.AIR, 0));
                     world.playSound(originalBlockLocation, Sound.ENTITY_ITEM_BREAK, 1, 2);

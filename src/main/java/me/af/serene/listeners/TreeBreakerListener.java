@@ -1,25 +1,21 @@
 package me.af.serene.listeners;
 
+import me.af.serene.util.Utils;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.Damageable;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 
-import static java.util.Objects.requireNonNull;
 import static org.bukkit.Material.ACACIA_LEAVES;
 import static org.bukkit.Material.ACACIA_LOG;
 import static org.bukkit.Material.BIRCH_LEAVES;
@@ -80,18 +76,19 @@ public class TreeBreakerListener implements Listener {
 
     @EventHandler
     public void onTreeBreak(BlockBreakEvent blockBreakEvent) {
-        var brokenBlock = blockBreakEvent.getBlock();
-        var type = brokenBlock.getType();
-        var location = brokenBlock.getLocation();
-        var world = blockBreakEvent.getPlayer().getWorld();
-        var locationBelowBlock = new Location(world, location.getX(), location.getY() - 1., location.getZ());
         var itemInMainHand = blockBreakEvent.getPlayer().getInventory().getItemInMainHand();
         var armedMaterial = itemInMainHand.getType();
-        if (AXES.contains(armedMaterial)
-                && LOG_MATERIALS.contains(type)
-                && blockBreakEvent.getPlayer().isSneaking()
-                && canTreeGrow(world, locationBelowBlock)) {
-            handleBreaking(blockBreakEvent, itemInMainHand);
+        if (AXES.contains(armedMaterial)) {
+            var brokenBlock = blockBreakEvent.getBlock();
+            var type = brokenBlock.getType();
+            var location = brokenBlock.getLocation();
+            var world = blockBreakEvent.getPlayer().getWorld();
+            var locationBelowBlock = new Location(world, location.getX(), location.getY() - 1., location.getZ());
+            if (LOG_MATERIALS.contains(type)
+                    && blockBreakEvent.getPlayer().isSneaking()
+                    && canTreeGrow(world, locationBelowBlock)) {
+                handleBreaking(blockBreakEvent, itemInMainHand);
+            }
         }
     }
 
@@ -102,7 +99,7 @@ public class TreeBreakerListener implements Listener {
     private void handleBreaking(BlockBreakEvent blockBreakEvent, ItemStack item) {
         var world = blockBreakEvent.getBlock().getWorld();
         Queue<Location> locationsToCheck = new LinkedList<>();
-        Set<Location> seenLogs = new LinkedHashSet<>();
+        Set<Block> seenLogs = new LinkedHashSet<>();
         Set<Block> leaves = new HashSet<>();
         var originalBlockLocation = blockBreakEvent.getBlock().getLocation();
         locationsToCheck.add(originalBlockLocation);
@@ -116,9 +113,9 @@ public class TreeBreakerListener implements Listener {
                         var locationToCheck = new Location(world, location.getX() + x, location.getY() + y, location.getZ() + z);
                         var blockToCheck = world.getBlockAt(locationToCheck);
                         var material = blockToCheck.getType();
-                        if (LOG_MATERIALS.contains(material) && !seenLogs.contains(locationToCheck)) {
+                        if (LOG_MATERIALS.contains(material) && !seenLogs.contains(blockToCheck)) {
                             locationsToCheck.add(locationToCheck);
-                            seenLogs.add(locationToCheck);
+                            seenLogs.add(blockToCheck);
                         }
                         if (LEAVES.contains(material)) {
                             leaves.add(blockToCheck);
@@ -129,34 +126,8 @@ public class TreeBreakerListener implements Listener {
         }
         // Do not break random stack of logs with no leaves (might be a building with a stack of logs somewhere)
         if (leaves.size() > 0) {
-            var damageable = requireNonNull((Damageable) item.getItemMeta());
-            for (var block : seenLogs.stream().map(Location::getBlock).toList()) {
-                int currentDamage = damageable.getDamage();
-                int unbreakingLevel = damageable.getEnchantLevel(Enchantment.DURABILITY);
-                boolean takeDamage = shouldTakeDamage(unbreakingLevel);
-                if (takeDamage) {
-                    damageable.setDamage(currentDamage + 1);
-                    currentDamage++;
-                }
-                int currentDurability = item.getType().getMaxDurability() - currentDamage;
-                if (currentDurability <= 0) {
-                    var inventory = blockBreakEvent.getPlayer().getInventory();
-                    inventory.remove(item);
-                    inventory.setItemInMainHand(new ItemStack(Material.AIR, 0));
-                    world.playSound(originalBlockLocation, Sound.ENTITY_ITEM_BREAK, 1, 2);
-                    return;
-                }
-                block.breakNaturally();
-            }
-            item.setItemMeta(damageable);
+            Utils.breakWithEnchantmentAwareness(blockBreakEvent, item, world, seenLogs, originalBlockLocation);
         }
-
     }
 
-    private boolean shouldTakeDamage(int unbreakingLevel) {
-        // Uses formula from https://minecraft.fandom.com/wiki/Unbreaking#Usage
-        if (unbreakingLevel == 0)
-            return true;
-        return ThreadLocalRandom.current().nextInt(unbreakingLevel + 1) == 0;
-    }
 }

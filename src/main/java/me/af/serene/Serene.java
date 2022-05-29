@@ -1,9 +1,9 @@
 package me.af.serene;
 
-import me.af.serene.database.SereneDatabaseClient;
 import me.af.serene.listeners.InventorySorterListener;
 import me.af.serene.listeners.SleepListener;
 import me.af.serene.listeners.TreeBreakerListener;
+import me.af.serene.listeners.VeinBreakerListener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
@@ -20,10 +20,7 @@ public class Serene extends JavaPlugin {
         pluginManager.registerEvents(new SleepListener(), this);
         pluginManager.registerEvents(new TreeBreakerListener(), this);
         pluginManager.registerEvents(new InventorySorterListener(), this);
+        pluginManager.registerEvents(new VeinBreakerListener(), this);
         LOG.info("Started Serene...");
-    }
-
-    private SereneDatabaseClient getDatabaseClient() {
-        return SereneDatabaseClient.create(this.getConfig());
     }
 }

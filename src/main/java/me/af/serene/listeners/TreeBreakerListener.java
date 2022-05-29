@@ -3,12 +3,15 @@ package me.af.serene.listeners;
 import me.af.serene.util.Utils;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -16,6 +19,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Set;
 
+import static java.util.Objects.requireNonNull;
 import static org.bukkit.Material.ACACIA_LEAVES;
 import static org.bukkit.Material.ACACIA_LOG;
 import static org.bukkit.Material.BIRCH_LEAVES;
@@ -99,6 +103,7 @@ public class TreeBreakerListener implements Listener {
     private void handleBreaking(BlockBreakEvent blockBreakEvent, ItemStack item) {
         var world = blockBreakEvent.getBlock().getWorld();
         Queue<Location> locationsToCheck = new LinkedList<>();
+        var blockState = blockBreakEvent.getBlock().getState();
         Set<Block> seenLogs = new LinkedHashSet<>();
         Set<Block> leaves = new HashSet<>();
         var originalBlockLocation = blockBreakEvent.getBlock().getLocation();
@@ -126,8 +131,36 @@ public class TreeBreakerListener implements Listener {
         }
         // Do not break random stack of logs with no leaves (might be a building with a stack of logs somewhere)
         if (leaves.size() > 0) {
-            Utils.breakWithEnchantmentAwareness(blockBreakEvent, item, world, seenLogs, originalBlockLocation);
+            breakWithEnchantmentAwareness(blockBreakEvent, item, world, seenLogs, originalBlockLocation);
         }
     }
 
+
+    public static void breakWithEnchantmentAwareness(BlockBreakEvent blockBreakEvent,
+                                                     ItemStack item,
+                                                     World world,
+                                                     Set<Block> seenBlocks,
+                                                     Location originalBlockLocation) {
+        var damageable = requireNonNull((Damageable) item.getItemMeta());
+        for (var block : seenBlocks) {
+            int currentDamage = damageable.getDamage();
+            int unbreakingLevel = damageable.getEnchantLevel(Enchantment.DURABILITY);
+            boolean takeDamage = Utils.shouldTakeDamage(unbreakingLevel);
+            if (takeDamage) {
+                damageable.setDamage(currentDamage + 1);
+                currentDamage++;
+            }
+            int currentDurability = item.getType().getMaxDurability() - currentDamage;
+            if (currentDurability <= 0) {
+                var inventory = blockBreakEvent.getPlayer().getInventory();
+                inventory.remove(item);
+                inventory.setItemInMainHand(new ItemStack(Material.AIR, 0));
+                world.playSound(originalBlockLocation, Sound.ENTITY_ITEM_BREAK, 1, 2);
+                break;
+            }
+            block.breakNaturally();
+        }
+        blockBreakEvent.setDropItems(true);
+        item.setItemMeta(damageable);
+    }
 }

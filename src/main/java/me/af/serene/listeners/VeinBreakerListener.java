@@ -1,15 +1,18 @@
 package me.af.serene.listeners;
 
-import me.af.serene.util.ExperienceRange;
+import me.af.serene.util.DropData;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,7 +22,9 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 
-import static me.af.serene.util.Utils.breakWithEnchantmentAwareness;
+import static java.util.Objects.requireNonNull;
+import static me.af.serene.util.Utils.shouldTakeDamage;
+import static org.bukkit.Material.COAL;
 import static org.bukkit.Material.COAL_ORE;
 import static org.bukkit.Material.COPPER_ORE;
 import static org.bukkit.Material.DEEPSLATE_COAL_ORE;
@@ -30,24 +35,32 @@ import static org.bukkit.Material.DEEPSLATE_GOLD_ORE;
 import static org.bukkit.Material.DEEPSLATE_IRON_ORE;
 import static org.bukkit.Material.DEEPSLATE_LAPIS_ORE;
 import static org.bukkit.Material.DEEPSLATE_REDSTONE_ORE;
+import static org.bukkit.Material.DIAMOND;
 import static org.bukkit.Material.DIAMOND_ORE;
 import static org.bukkit.Material.DIAMOND_PICKAXE;
+import static org.bukkit.Material.EMERALD;
 import static org.bukkit.Material.EMERALD_ORE;
 import static org.bukkit.Material.GOLDEN_PICKAXE;
 import static org.bukkit.Material.GOLD_ORE;
 import static org.bukkit.Material.IRON_ORE;
 import static org.bukkit.Material.IRON_PICKAXE;
+import static org.bukkit.Material.LAPIS_LAZULI;
 import static org.bukkit.Material.LAPIS_ORE;
 import static org.bukkit.Material.NETHERITE_PICKAXE;
 import static org.bukkit.Material.NETHER_GOLD_ORE;
 import static org.bukkit.Material.NETHER_QUARTZ_ORE;
+import static org.bukkit.Material.QUARTZ;
+import static org.bukkit.Material.RAW_COPPER;
+import static org.bukkit.Material.RAW_GOLD;
+import static org.bukkit.Material.RAW_IRON;
+import static org.bukkit.Material.REDSTONE;
 import static org.bukkit.Material.REDSTONE_ORE;
 import static org.bukkit.Material.STONE_PICKAXE;
 import static org.bukkit.Material.WOODEN_PICKAXE;
 
 public class VeinBreakerListener implements Listener {
 
-    private static final Map<Material, ExperienceRange> ORE_TO_EXPERIENCE = createMaterialExperienceMap();
+    private static final Map<Material, DropData> ORE_TO_DROP_DATA = createMaterialExperienceMap();
 
     private static final Set<Material> PICKAXES = Set.of(
             WOODEN_PICKAXE,
@@ -66,7 +79,7 @@ public class VeinBreakerListener implements Listener {
         var brokenBlock = blockBreakEvent.getBlock();
         Material blockType = brokenBlock.getType();
         boolean sneaking = blockBreakEvent.getPlayer().isSneaking();
-        if (PICKAXES.contains(armedMaterial) && ORE_TO_EXPERIENCE.containsKey(blockType) && sneaking) {
+        if (PICKAXES.contains(armedMaterial) && ORE_TO_DROP_DATA.containsKey(blockType) && sneaking) {
             handleBreaking(blockBreakEvent, itemInMainHand, blockType);
         }
     }
@@ -75,7 +88,7 @@ public class VeinBreakerListener implements Listener {
         var world = blockBreakEvent.getBlock().getWorld();
         Queue<Location> locationsToCheck = new LinkedList<>();
         var originalBlockLocation = blockBreakEvent.getBlock().getLocation();
-        var originalBlockData = blockBreakEvent.getBlock().getBlockData();
+        var originalBlockData = blockBreakEvent.getBlock().getState();
         Set<Block> seenOres = new HashSet<>();
         locationsToCheck.add(originalBlockLocation);
 
@@ -88,7 +101,7 @@ public class VeinBreakerListener implements Listener {
                         var locationToCheck = new Location(world, location.getX() + x, location.getY() + y, location.getZ() + z);
                         var blockToCheck = world.getBlockAt(locationToCheck);
                         var material = blockToCheck.getType();
-                        if (ORE_TO_EXPERIENCE.containsKey(material) && material.equals(originalMaterial) && !seenOres.contains(blockToCheck)) {
+                        if (ORE_TO_DROP_DATA.containsKey(material) && material.equals(originalMaterial) && !seenOres.contains(blockToCheck)) {
                             locationsToCheck.add(locationToCheck);
                             seenOres.add(blockToCheck);
                         }
@@ -97,15 +110,57 @@ public class VeinBreakerListener implements Listener {
             }
         }
 
-        grantExperience(blockBreakEvent, originalMaterial, world, originalBlockLocation, seenOres);
-        breakWithEnchantmentAwareness(blockBreakEvent, item, world, seenOres, originalBlockLocation);
+        if (item.hasItemMeta() && !item.getItemMeta().hasEnchant(Enchantment.SILK_TOUCH))
+            grantExperience(blockBreakEvent, originalMaterial, world, originalBlockLocation, seenOres);
+        breakWithEnchantmentAwareness(blockBreakEvent, item, world, seenOres, originalBlockLocation, originalBlockData);
+    }
+
+    public static void breakWithEnchantmentAwareness(BlockBreakEvent blockBreakEvent,
+                                                     ItemStack item,
+                                                     World world,
+                                                     Set<Block> seenBlocks,
+                                                     Location originalBlockLocation,
+                                                     BlockState blockState) {
+        var damageable = requireNonNull((Damageable) item.getItemMeta());
+        int numBrokenBlocks = 0;
+        for (var block : seenBlocks) {
+            int currentDamage = damageable.getDamage();
+            int unbreakingLevel = damageable.getEnchantLevel(Enchantment.DURABILITY);
+            boolean takeDamage = shouldTakeDamage(unbreakingLevel);
+            if (takeDamage) {
+                damageable.setDamage(currentDamage + 1);
+                currentDamage++;
+            }
+            int currentDurability = item.getType().getMaxDurability() - currentDamage;
+            if (currentDurability <= 0) {
+                var inventory = blockBreakEvent.getPlayer().getInventory();
+                inventory.remove(item);
+                inventory.setItemInMainHand(new ItemStack(Material.AIR, 0));
+                world.playSound(originalBlockLocation, Sound.ENTITY_ITEM_BREAK, 1, 2);
+                break;
+            }
+            block.setType(Material.AIR);
+            numBrokenBlocks++;
+        }
+        ItemStack stackToDrop = new ItemStack(blockState.getType(), numBrokenBlocks);
+        if (item.hasItemMeta() && item.getItemMeta().hasEnchant(Enchantment.SILK_TOUCH)) {
+            world.dropItem(originalBlockLocation, stackToDrop);
+        } else {
+            world.dropItem(originalBlockLocation, new ItemStack(getDropMaterial(blockState.getType()), numBrokenBlocks));
+        }
+        blockBreakEvent.setDropItems(false);
+        item.setItemMeta(damageable);
+    }
+
+    private static Material getDropMaterial(Material type) {
+        return ORE_TO_DROP_DATA.get(type).materialToDrop();
     }
 
     private void grantExperience(BlockBreakEvent blockBreakEvent, Material originalMaterial, World world, Location originalBlockLocation, Set<Block> seenOres) {
         int exp = 0;
-        var experienceRange = ORE_TO_EXPERIENCE.get(originalMaterial);
+        var experienceRange = ORE_TO_DROP_DATA.get(originalMaterial);
         for (int i = 0; i < seenOres.size(); i++) {
-            exp += random.nextInt(experienceRange.min(), experienceRange.max());
+            exp += random.nextInt(experienceRange.minExp(), experienceRange.maxExp());
         }
         if (exp > 0) {
             world.playSound(originalBlockLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 1.25f);
@@ -113,29 +168,29 @@ public class VeinBreakerListener implements Listener {
         blockBreakEvent.getPlayer().giveExp(exp);
     }
 
-    private static Map<Material, ExperienceRange> createMaterialExperienceMap() {
+    private static Map<Material, DropData> createMaterialExperienceMap() {
         // Experience values taken from https://minecraft.fandom.com/wiki/Experience#Sources
-        Map<Material, ExperienceRange> regularOres = new HashMap<>(Map.of(
-                COAL_ORE, ExperienceRange.of(0, 3),
-                IRON_ORE, ExperienceRange.none(),
-                COPPER_ORE, ExperienceRange.none(),
-                DIAMOND_ORE, ExperienceRange.of(3, 8),
-                GOLD_ORE, ExperienceRange.none(),
-                EMERALD_ORE, ExperienceRange.of(3, 8),
-                LAPIS_ORE, ExperienceRange.of(2, 6),
-                REDSTONE_ORE, ExperienceRange.of(1, 6)));
+        Map<Material, DropData> regularOres = new HashMap<>(Map.of(
+                COAL_ORE, DropData.withMinMaxExp(0, 3, COAL),
+                IRON_ORE, DropData.noExp(RAW_IRON),
+                COPPER_ORE, DropData.noExp(RAW_COPPER),
+                DIAMOND_ORE, DropData.withMinMaxExp(3, 8, DIAMOND),
+                GOLD_ORE, DropData.noExp(RAW_GOLD),
+                EMERALD_ORE, DropData.withMinMaxExp(3, 8, EMERALD),
+                LAPIS_ORE, DropData.withMinMaxExp(2, 6, LAPIS_LAZULI),
+                REDSTONE_ORE, DropData.withMinMaxExp(1, 6, REDSTONE)));
 
-        Map<Material, ExperienceRange> remainingOres = Map.of(
-                NETHER_GOLD_ORE, ExperienceRange.none(),
-                NETHER_QUARTZ_ORE, ExperienceRange.of(3, 8),
-                DEEPSLATE_COAL_ORE, ExperienceRange.of(0, 3),
-                DEEPSLATE_IRON_ORE, ExperienceRange.none(),
-                DEEPSLATE_COPPER_ORE, ExperienceRange.none(),
-                DEEPSLATE_DIAMOND_ORE, ExperienceRange.of(3, 8),
-                DEEPSLATE_GOLD_ORE, ExperienceRange.none(),
-                DEEPSLATE_EMERALD_ORE, ExperienceRange.of(3, 8),
-                DEEPSLATE_LAPIS_ORE, ExperienceRange.of(2, 6),
-                DEEPSLATE_REDSTONE_ORE, ExperienceRange.of(1, 6));
+        Map<Material, DropData> remainingOres = Map.of(
+                NETHER_GOLD_ORE, DropData.noExp(Material.GOLD_NUGGET),
+                NETHER_QUARTZ_ORE, DropData.withMinMaxExp(3, 8, QUARTZ),
+                DEEPSLATE_COAL_ORE, DropData.withMinMaxExp(0, 3, COAL),
+                DEEPSLATE_IRON_ORE, DropData.noExp(RAW_IRON),
+                DEEPSLATE_COPPER_ORE, DropData.noExp(RAW_COPPER),
+                DEEPSLATE_DIAMOND_ORE, DropData.withMinMaxExp(3, 8, DIAMOND),
+                DEEPSLATE_GOLD_ORE, DropData.noExp(RAW_GOLD),
+                DEEPSLATE_EMERALD_ORE, DropData.withMinMaxExp(3, 8, EMERALD),
+                DEEPSLATE_LAPIS_ORE, DropData.withMinMaxExp(2, 6, LAPIS_LAZULI),
+                DEEPSLATE_REDSTONE_ORE, DropData.withMinMaxExp(1, 6, REDSTONE));
         regularOres.putAll(remainingOres);
         return regularOres;
     }

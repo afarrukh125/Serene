@@ -3,7 +3,6 @@ package me.af.serene.listeners;
 import me.af.serene.util.Utils;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
@@ -146,21 +145,12 @@ public class TreeBreakerListener implements Listener {
             int currentDamage = damageable.getDamage();
             int unbreakingLevel = damageable.getEnchantLevel(Enchantment.DURABILITY);
             boolean takeDamage = Utils.shouldTakeDamage(unbreakingLevel);
-            if (takeDamage) {
-                damageable.setDamage(currentDamage + 1);
-                currentDamage++;
-            }
-            int currentDurability = item.getType().getMaxDurability() - currentDamage;
-            if (currentDurability <= 0) {
-                var inventory = blockBreakEvent.getPlayer().getInventory();
-                inventory.remove(item);
-                inventory.setItemInMainHand(new ItemStack(Material.AIR, 0));
-                world.playSound(originalBlockLocation, Sound.ENTITY_ITEM_BREAK, 1, 2);
+            if (Utils.isToolBrokenAfterApplyingDamage(blockBreakEvent, item, world, originalBlockLocation, damageable, currentDamage, takeDamage))
                 break;
-            }
             block.breakNaturally();
         }
         blockBreakEvent.setDropItems(true);
         item.setItemMeta(damageable);
     }
+
 }

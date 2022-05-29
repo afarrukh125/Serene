@@ -23,6 +23,7 @@ import java.util.Random;
 import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
+import static me.af.serene.util.Utils.isToolBrokenAfterApplyingDamage;
 import static me.af.serene.util.Utils.shouldTakeDamage;
 import static org.bukkit.Material.COAL;
 import static org.bukkit.Material.COAL_ORE;
@@ -112,44 +113,44 @@ public class VeinBreakerListener implements Listener {
 
         if (item.hasItemMeta() && !item.getItemMeta().hasEnchant(Enchantment.SILK_TOUCH))
             grantExperience(blockBreakEvent, originalMaterial, world, originalBlockLocation, seenOres);
-        breakWithEnchantmentAwareness(blockBreakEvent, item, world, seenOres, originalBlockLocation, originalBlockData);
+        breakOresWithEnchantmentAwareness(blockBreakEvent, item, world, seenOres, originalBlockLocation, originalBlockData);
     }
 
-    public static void breakWithEnchantmentAwareness(BlockBreakEvent blockBreakEvent,
-                                                     ItemStack item,
-                                                     World world,
-                                                     Set<Block> seenBlocks,
-                                                     Location originalBlockLocation,
-                                                     BlockState blockState) {
+    public static void breakOresWithEnchantmentAwareness(BlockBreakEvent blockBreakEvent,
+                                                         ItemStack item,
+                                                         World world,
+                                                         Set<Block> seenBlocks,
+                                                         Location originalBlockLocation,
+                                                         BlockState blockState) {
         var damageable = requireNonNull((Damageable) item.getItemMeta());
         int numBrokenBlocks = 0;
+        int bonus = 0;
         for (var block : seenBlocks) {
             int currentDamage = damageable.getDamage();
             int unbreakingLevel = damageable.getEnchantLevel(Enchantment.DURABILITY);
             boolean takeDamage = shouldTakeDamage(unbreakingLevel);
-            if (takeDamage) {
-                damageable.setDamage(currentDamage + 1);
-                currentDamage++;
-            }
-            int currentDurability = item.getType().getMaxDurability() - currentDamage;
-            if (currentDurability <= 0) {
-                var inventory = blockBreakEvent.getPlayer().getInventory();
-                inventory.remove(item);
-                inventory.setItemInMainHand(new ItemStack(Material.AIR, 0));
-                world.playSound(originalBlockLocation, Sound.ENTITY_ITEM_BREAK, 1, 2);
+            if (isToolBrokenAfterApplyingDamage(blockBreakEvent, item, world, originalBlockLocation, damageable, currentDamage, takeDamage))
                 break;
-            }
             block.setType(Material.AIR);
             numBrokenBlocks++;
+
+            if (item.hasItemMeta() && item.getItemMeta().hasEnchant(Enchantment.LOOT_BONUS_BLOCKS)) {
+                bonus += calculateFortuneBonus(block, item.getItemMeta().getEnchantLevel(Enchantment.LOOT_BONUS_BLOCKS));
+            }
         }
         ItemStack stackToDrop = new ItemStack(blockState.getType(), numBrokenBlocks);
         if (item.hasItemMeta() && item.getItemMeta().hasEnchant(Enchantment.SILK_TOUCH)) {
             world.dropItem(originalBlockLocation, stackToDrop);
         } else {
-            world.dropItem(originalBlockLocation, new ItemStack(getDropMaterial(blockState.getType()), numBrokenBlocks));
+            world.dropItem(originalBlockLocation, new ItemStack(getDropMaterial(blockState.getType()), numBrokenBlocks + bonus));
         }
         blockBreakEvent.setDropItems(false);
         item.setItemMeta(damageable);
+    }
+
+    private static int calculateFortuneBonus(Block block, int enchantLevel) {
+        // TODO complete
+        return 0;
     }
 
     private static Material getDropMaterial(Material type) {

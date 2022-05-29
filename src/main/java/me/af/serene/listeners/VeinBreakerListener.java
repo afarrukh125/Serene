@@ -6,7 +6,6 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -113,18 +112,15 @@ public class VeinBreakerListener implements Listener {
 
         if (item.hasItemMeta() && !item.getItemMeta().hasEnchant(Enchantment.SILK_TOUCH))
             grantExperience(blockBreakEvent, originalMaterial, world, originalBlockLocation, seenOres);
-        breakOresWithEnchantmentAwareness(blockBreakEvent, item, world, seenOres, originalBlockLocation, originalBlockData);
+        breakOresWithDamageAwareness(blockBreakEvent, item, world, seenOres, originalBlockLocation);
     }
 
-    public static void breakOresWithEnchantmentAwareness(BlockBreakEvent blockBreakEvent,
-                                                         ItemStack item,
-                                                         World world,
-                                                         Set<Block> seenBlocks,
-                                                         Location originalBlockLocation,
-                                                         BlockState blockState) {
+    public static void breakOresWithDamageAwareness(BlockBreakEvent blockBreakEvent,
+                                                    ItemStack item,
+                                                    World world,
+                                                    Set<Block> seenBlocks,
+                                                    Location originalBlockLocation) {
         var damageable = requireNonNull((Damageable) item.getItemMeta());
-        int numBrokenBlocks = 0;
-        int bonus = 0;
         for (var block : seenBlocks) {
             int currentDamage = damageable.getDamage();
             int unbreakingLevel = damageable.getEnchantLevel(Enchantment.DURABILITY);
@@ -137,30 +133,9 @@ public class VeinBreakerListener implements Listener {
                     currentDamage,
                     takeDamage))
                 break;
-            block.setType(Material.AIR);
-            numBrokenBlocks++;
-
-            if (item.hasItemMeta() && item.getItemMeta().hasEnchant(Enchantment.LOOT_BONUS_BLOCKS)) {
-                bonus += calculateFortuneBonus(block, item.getItemMeta().getEnchantLevel(Enchantment.LOOT_BONUS_BLOCKS));
-            }
+            block.breakNaturally(item);
         }
-        ItemStack stackToDrop = new ItemStack(blockState.getType(), numBrokenBlocks);
-        if (item.hasItemMeta() && item.getItemMeta().hasEnchant(Enchantment.SILK_TOUCH)) {
-            world.dropItem(originalBlockLocation, stackToDrop);
-        } else {
-            world.dropItem(originalBlockLocation, new ItemStack(getDropMaterial(blockState.getType()), numBrokenBlocks + bonus));
-        }
-        blockBreakEvent.setDropItems(false);
         item.setItemMeta(damageable);
-    }
-
-    private static int calculateFortuneBonus(Block block, int enchantLevel) {
-        // TODO complete
-        return 0;
-    }
-
-    private static Material getDropMaterial(Material type) {
-        return ORE_TO_DROP_DATA.get(type).materialToDrop();
     }
 
     private void grantExperience(BlockBreakEvent blockBreakEvent, Material originalMaterial, World world, Location originalBlockLocation, Set<Block> seenOres) {

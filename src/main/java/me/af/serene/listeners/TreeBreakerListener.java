@@ -131,16 +131,16 @@ public class TreeBreakerListener implements Listener {
         }
         // Do not break random stack of logs with no leaves (might be a building with a stack of logs somewhere)
         if (leaves.size() > 0) {
-            breakWithEnchantmentAwareness(blockBreakEvent, item, world, seenLogs, originalBlockLocation);
+            breakWithDamageAwareness(blockBreakEvent, item, world, seenLogs, originalBlockLocation);
         }
     }
 
 
-    public static void breakWithEnchantmentAwareness(BlockBreakEvent blockBreakEvent,
-                                                     ItemStack item,
-                                                     World world,
-                                                     Set<Block> seenBlocks,
-                                                     Location originalBlockLocation) {
+    public static void breakWithDamageAwareness(BlockBreakEvent blockBreakEvent,
+                                                ItemStack item,
+                                                World world,
+                                                Set<Block> seenBlocks,
+                                                Location originalBlockLocation) {
         var damageable = requireNonNull((Damageable) item.getItemMeta());
         for (var block : seenBlocks) {
             int currentDamage = damageable.getDamage();
@@ -156,7 +156,6 @@ public class TreeBreakerListener implements Listener {
                 break;
             block.breakNaturally();
         }
-        blockBreakEvent.setDropItems(true);
         item.setItemMeta(damageable);
     }
 

@@ -19,6 +19,7 @@ import java.util.Queue;
 import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
+import static me.af.serene.util.Utils.isToolBrokenAfterApplyingDamage;
 import static org.bukkit.Material.ACACIA_LEAVES;
 import static org.bukkit.Material.ACACIA_LOG;
 import static org.bukkit.Material.BIRCH_LEAVES;
@@ -145,7 +146,13 @@ public class TreeBreakerListener implements Listener {
             int currentDamage = damageable.getDamage();
             int unbreakingLevel = damageable.getEnchantLevel(Enchantment.DURABILITY);
             boolean takeDamage = Utils.shouldTakeDamage(unbreakingLevel);
-            if (Utils.isToolBrokenAfterApplyingDamage(blockBreakEvent, item, world, originalBlockLocation, damageable, currentDamage, takeDamage))
+            if (isToolBrokenAfterApplyingDamage(blockBreakEvent,
+                    item,
+                    world,
+                    originalBlockLocation,
+                    damageable,
+                    currentDamage,
+                    takeDamage))
                 break;
             block.breakNaturally();
         }

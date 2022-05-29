@@ -129,7 +129,13 @@ public class VeinBreakerListener implements Listener {
             int currentDamage = damageable.getDamage();
             int unbreakingLevel = damageable.getEnchantLevel(Enchantment.DURABILITY);
             boolean takeDamage = shouldTakeDamage(unbreakingLevel);
-            if (isToolBrokenAfterApplyingDamage(blockBreakEvent, item, world, originalBlockLocation, damageable, currentDamage, takeDamage))
+            if (isToolBrokenAfterApplyingDamage(blockBreakEvent,
+                    item,
+                    world,
+                    originalBlockLocation,
+                    damageable,
+                    currentDamage,
+                    takeDamage))
                 break;
             block.setType(Material.AIR);
             numBrokenBlocks++;

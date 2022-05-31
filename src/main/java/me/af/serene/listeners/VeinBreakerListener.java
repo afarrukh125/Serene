@@ -24,7 +24,6 @@ import java.util.Set;
 import static java.util.Objects.requireNonNull;
 import static me.af.serene.util.Utils.isToolBrokenAfterApplyingDamage;
 import static me.af.serene.util.Utils.shouldTakeDamage;
-import static org.bukkit.Material.COAL;
 import static org.bukkit.Material.COAL_ORE;
 import static org.bukkit.Material.COPPER_ORE;
 import static org.bukkit.Material.DEEPSLATE_COAL_ORE;
@@ -35,25 +34,17 @@ import static org.bukkit.Material.DEEPSLATE_GOLD_ORE;
 import static org.bukkit.Material.DEEPSLATE_IRON_ORE;
 import static org.bukkit.Material.DEEPSLATE_LAPIS_ORE;
 import static org.bukkit.Material.DEEPSLATE_REDSTONE_ORE;
-import static org.bukkit.Material.DIAMOND;
 import static org.bukkit.Material.DIAMOND_ORE;
 import static org.bukkit.Material.DIAMOND_PICKAXE;
-import static org.bukkit.Material.EMERALD;
 import static org.bukkit.Material.EMERALD_ORE;
 import static org.bukkit.Material.GOLDEN_PICKAXE;
 import static org.bukkit.Material.GOLD_ORE;
 import static org.bukkit.Material.IRON_ORE;
 import static org.bukkit.Material.IRON_PICKAXE;
-import static org.bukkit.Material.LAPIS_LAZULI;
 import static org.bukkit.Material.LAPIS_ORE;
 import static org.bukkit.Material.NETHERITE_PICKAXE;
 import static org.bukkit.Material.NETHER_GOLD_ORE;
 import static org.bukkit.Material.NETHER_QUARTZ_ORE;
-import static org.bukkit.Material.QUARTZ;
-import static org.bukkit.Material.RAW_COPPER;
-import static org.bukkit.Material.RAW_GOLD;
-import static org.bukkit.Material.RAW_IRON;
-import static org.bukkit.Material.REDSTONE;
 import static org.bukkit.Material.REDSTONE_ORE;
 import static org.bukkit.Material.STONE_PICKAXE;
 import static org.bukkit.Material.WOODEN_PICKAXE;
@@ -153,26 +144,26 @@ public class VeinBreakerListener implements Listener {
     private static Map<Material, DropData> createMaterialExperienceMap() {
         // Experience values taken from https://minecraft.fandom.com/wiki/Experience#Sources
         Map<Material, DropData> regularOres = new HashMap<>(Map.of(
-                COAL_ORE, DropData.withMinMaxExp(0, 3, COAL),
-                IRON_ORE, DropData.noExp(RAW_IRON),
-                COPPER_ORE, DropData.noExp(RAW_COPPER),
-                DIAMOND_ORE, DropData.withMinMaxExp(3, 8, DIAMOND),
-                GOLD_ORE, DropData.noExp(RAW_GOLD),
-                EMERALD_ORE, DropData.withMinMaxExp(3, 8, EMERALD),
-                LAPIS_ORE, DropData.withMinMaxExp(2, 6, LAPIS_LAZULI),
-                REDSTONE_ORE, DropData.withMinMaxExp(1, 6, REDSTONE)));
+                COAL_ORE, DropData.withMinMaxExp(0, 3),
+                IRON_ORE, DropData.noExp(),
+                COPPER_ORE, DropData.noExp(),
+                DIAMOND_ORE, DropData.withMinMaxExp(3, 8),
+                GOLD_ORE, DropData.noExp(),
+                EMERALD_ORE, DropData.withMinMaxExp(3, 8),
+                LAPIS_ORE, DropData.withMinMaxExp(2, 6),
+                REDSTONE_ORE, DropData.withMinMaxExp(1, 6)));
 
         Map<Material, DropData> remainingOres = Map.of(
-                NETHER_GOLD_ORE, DropData.noExp(Material.GOLD_NUGGET),
-                NETHER_QUARTZ_ORE, DropData.withMinMaxExp(3, 8, QUARTZ),
-                DEEPSLATE_COAL_ORE, DropData.withMinMaxExp(0, 3, COAL),
-                DEEPSLATE_IRON_ORE, DropData.noExp(RAW_IRON),
-                DEEPSLATE_COPPER_ORE, DropData.noExp(RAW_COPPER),
-                DEEPSLATE_DIAMOND_ORE, DropData.withMinMaxExp(3, 8, DIAMOND),
-                DEEPSLATE_GOLD_ORE, DropData.noExp(RAW_GOLD),
-                DEEPSLATE_EMERALD_ORE, DropData.withMinMaxExp(3, 8, EMERALD),
-                DEEPSLATE_LAPIS_ORE, DropData.withMinMaxExp(2, 6, LAPIS_LAZULI),
-                DEEPSLATE_REDSTONE_ORE, DropData.withMinMaxExp(1, 6, REDSTONE));
+                NETHER_GOLD_ORE, DropData.noExp(),
+                NETHER_QUARTZ_ORE, DropData.withMinMaxExp(3, 8),
+                DEEPSLATE_COAL_ORE, DropData.withMinMaxExp(0, 3),
+                DEEPSLATE_IRON_ORE, DropData.noExp(),
+                DEEPSLATE_COPPER_ORE, DropData.noExp(),
+                DEEPSLATE_DIAMOND_ORE, DropData.withMinMaxExp(3, 8),
+                DEEPSLATE_GOLD_ORE, DropData.noExp(),
+                DEEPSLATE_EMERALD_ORE, DropData.withMinMaxExp(3, 8),
+                DEEPSLATE_LAPIS_ORE, DropData.withMinMaxExp(2, 6),
+                DEEPSLATE_REDSTONE_ORE, DropData.withMinMaxExp(1, 6));
         regularOres.putAll(remainingOres);
         return regularOres;
     }

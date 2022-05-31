@@ -1,7 +1,5 @@
 package me.af.serene.util;
 
-import org.bukkit.Material;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -10,16 +8,14 @@ public final class DropData {
     private static final Map<DropData, DropData> pool = new HashMap<>();
     private final int minExp;
     private final int maxExp;
-    private Material materialToDrop;
 
-    private DropData(int minExp, int maxExp, Material materialToDrop) {
+    private DropData(int minExp, int maxExp) {
         this.minExp = minExp;
         this.maxExp = maxExp;
-        this.materialToDrop = materialToDrop;
     }
 
-    public static synchronized DropData withMinMaxExp(int minExp, int maxExp, Material material) {
-        DropData key = new DropData(minExp, maxExp, material);
+    public static synchronized DropData withMinMaxExp(int minExp, int maxExp) {
+        DropData key = new DropData(minExp, maxExp);
         DropData existing = pool.get(key);
         if (existing != null)
             return existing;
@@ -28,8 +24,8 @@ public final class DropData {
         return key;
     }
 
-    public static DropData noExp(Material material) {
-        return withMinMaxExp(0, 1, material);
+    public static DropData noExp() {
+        return withMinMaxExp(0, 1);
     }
 
     public int minExp() {
@@ -38,10 +34,6 @@ public final class DropData {
 
     public int maxExp() {
         return maxExp;
-    }
-
-    public Material materialToDrop() {
-        return materialToDrop;
     }
 
     @Override

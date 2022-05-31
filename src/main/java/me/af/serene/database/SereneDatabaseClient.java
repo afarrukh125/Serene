@@ -23,8 +23,8 @@ public interface SereneDatabaseClient {
             driver.verifyConnectivity();
             return new Neo4jSereneClient(driver);
         } catch (Exception e) {
-            logger.info("Could not create connected database client, using default no-op database client. {}", e.getMessage());
-            return new NoOpDatabaseClient();
+            logger.info("Could not create connected database client, using default session-based client. {}", e.getMessage());
+            return new SessionDatabaseClient();
         }
     }
 
@@ -32,5 +32,5 @@ public interface SereneDatabaseClient {
 
     long getExperienceForPlayer(Player player);
 
-    void setExperienceForPlayer(Player player, long max);
+    void setExperienceForPlayer(Player player, long amount);
 }

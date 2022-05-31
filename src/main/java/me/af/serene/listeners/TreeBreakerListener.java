@@ -6,6 +6,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.type.Leaves;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -131,7 +132,7 @@ public class TreeBreakerListener implements Listener {
             }
         }
         // Do not break random stack of logs with no leaves (might be a building with a stack of logs somewhere)
-        if (leaves.size() > 0 && leaves.stream().noneMatch(b -> ((Leaves) b).isPersistent())) {
+        if (leaves.size() > 0) {
             breakWithDamageAwareness(blockBreakEvent, item, world, seenLogs, originalBlockLocation);
         }
     }

@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import static java.util.Collections.emptySet;
 import static org.bukkit.Material.APPLE;
 import static org.bukkit.Material.BEEF;
+import static org.bukkit.Material.BONE;
 import static org.bukkit.Material.BREAD;
 import static org.bukkit.Material.CHICKEN;
 import static org.bukkit.Material.COAL_ORE;
@@ -32,7 +33,10 @@ import static org.bukkit.Material.DEEPSLATE_LAPIS_ORE;
 import static org.bukkit.Material.DEEPSLATE_REDSTONE_ORE;
 import static org.bukkit.Material.DIAMOND_ORE;
 import static org.bukkit.Material.EMERALD_ORE;
+import static org.bukkit.Material.GHAST_TEAR;
 import static org.bukkit.Material.GOLD_ORE;
+import static org.bukkit.Material.GUNPOWDER;
+import static org.bukkit.Material.INK_SAC;
 import static org.bukkit.Material.IRON_ORE;
 import static org.bukkit.Material.LAPIS_ORE;
 import static org.bukkit.Material.MUTTON;
@@ -41,7 +45,9 @@ import static org.bukkit.Material.NETHER_QUARTZ_ORE;
 import static org.bukkit.Material.PUMPKIN_PIE;
 import static org.bukkit.Material.RABBIT;
 import static org.bukkit.Material.REDSTONE_ORE;
+import static org.bukkit.Material.ROTTEN_FLESH;
 import static org.bukkit.Material.SALMON;
+import static org.bukkit.Material.SPIDER_EYE;
 
 public enum MaterialCategory {
     FOOD(Set.of(APPLE,
@@ -60,6 +66,12 @@ public enum MaterialCategory {
             COOKED_SALMON,
             PUMPKIN_PIE)),
     ITEM(Constants.filteredByPredicate(Material::isItem)),
+    MOB_DROP(Set.of(GUNPOWDER,
+            SPIDER_EYE,
+            BONE,
+            ROTTEN_FLESH,
+            GHAST_TEAR,
+            INK_SAC)),
     MISC(emptySet()),
     ORE(Set.of(COAL_ORE,
             IRON_ORE,
@@ -91,7 +103,7 @@ public enum MaterialCategory {
         return Collections.unmodifiableSet(materials);
     }
 
-    public MaterialCategory getCategoryFor(Material material) {
+    public static MaterialCategory getCategoryFor(Material material) {
         for (MaterialCategory category : MaterialCategory.values()) {
             if (category.materials.contains(material))
                 return category;

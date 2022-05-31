@@ -28,8 +28,8 @@ public class ExperienceListener implements Listener {
                 var finalAmount = originalAmount + additional;
                 playerExpChangeEvent.setAmount(finalAmount);
                 databaseClient.setExperienceForPlayer(player, Math.max(0, experienceForPlayer - REWARD_THRESHOLD));
-                player.sendTitle("",
-                        "Bonus experience of %s received".formatted(additional),
+                player.sendTitle("Bonus experience!",
+                        "%s experience received".formatted(additional),
                         10,
                         70,
                         20);

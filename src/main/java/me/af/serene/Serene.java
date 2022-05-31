@@ -1,5 +1,7 @@
 package me.af.serene;
 
+import me.af.serene.database.SereneDatabaseClient;
+import me.af.serene.listeners.ExperienceListener;
 import me.af.serene.listeners.InventorySorterListener;
 import me.af.serene.listeners.SleepListener;
 import me.af.serene.listeners.TreeBreakerListener;
@@ -22,6 +24,11 @@ public class Serene extends JavaPlugin {
         pluginManager.registerEvents(new TreeBreakerListener(), this);
         pluginManager.registerEvents(new InventorySorterListener(), this);
         pluginManager.registerEvents(new VeinBreakerListener(), this);
+        pluginManager.registerEvents(new ExperienceListener(getDatabaseClient()), this);
         LOG.info("Started Serene...");
+    }
+
+    private SereneDatabaseClient getDatabaseClient() {
+        return SereneDatabaseClient.create(this.getConfig());
     }
 }

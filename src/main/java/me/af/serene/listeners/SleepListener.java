@@ -5,16 +5,14 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.awt.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Objects.requireNonNull;
 
 public class SleepListener implements Listener {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SleepListener.class);
     private static final int FULL_DAY_TIME = 24000;
 
     private AtomicReference<Player> atomicPlayerReference;
@@ -63,15 +61,7 @@ public class SleepListener implements Listener {
         var world = requireNonNull(sleepingPlayer.getWorld());
         var players = world.getPlayers();
         for (var p : players)
-            p.sendMessage(sleepingPlayerName + " has triggered sleep");
+            p.sendMessage(Color.GREEN + sleepingPlayerName + " has triggered sleep");
     }
 
-    private void apply(PlayerBedEnterEvent playerBedEnterEvent) {
-        var bedLocation = playerBedEnterEvent.getBed().getLocation();
-        var world = requireNonNull(bedLocation.getWorld());
-        long currentFullTime = world.getFullTime();
-        LOG.info("World time is {}", currentFullTime);
-        long targetTime = SleepListener.nextDayFullTime(currentFullTime);
-        world.setFullTime(targetTime);
-    }
 }

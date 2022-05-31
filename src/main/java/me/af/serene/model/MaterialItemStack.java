@@ -7,12 +7,4 @@ import java.util.Queue;
 
 public record MaterialItemStack(Material material,
                                 Queue<ItemStack> itemStacks) {
-
-    public Material getMaterial() {
-        return material;
-    }
-
-    public Queue<ItemStack> getItemStacks() {
-        return itemStacks;
-    }
 }

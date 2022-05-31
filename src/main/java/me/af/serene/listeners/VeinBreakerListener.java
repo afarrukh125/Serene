@@ -79,7 +79,6 @@ public class VeinBreakerListener implements Listener {
         var world = blockBreakEvent.getBlock().getWorld();
         Queue<Location> locationsToCheck = new LinkedList<>();
         var originalBlockLocation = blockBreakEvent.getBlock().getLocation();
-        var originalBlockData = blockBreakEvent.getBlock().getState();
         Set<Block> seenOres = new HashSet<>();
         locationsToCheck.add(originalBlockLocation);
 
@@ -101,6 +100,7 @@ public class VeinBreakerListener implements Listener {
             }
         }
 
+        //noinspection ConstantConditions
         if (item.hasItemMeta() && !item.getItemMeta().hasEnchant(Enchantment.SILK_TOUCH))
             grantExperience(blockBreakEvent, originalMaterial, world, originalBlockLocation, seenOres);
         breakOresWithDamageAwareness(blockBreakEvent, item, world, seenOres, originalBlockLocation);

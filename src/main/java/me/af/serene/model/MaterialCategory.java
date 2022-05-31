@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptySet;
 import static org.bukkit.Material.APPLE;
 import static org.bukkit.Material.BEEF;
 import static org.bukkit.Material.BREAD;
@@ -37,6 +38,7 @@ import static org.bukkit.Material.LAPIS_ORE;
 import static org.bukkit.Material.MUTTON;
 import static org.bukkit.Material.NETHER_GOLD_ORE;
 import static org.bukkit.Material.NETHER_QUARTZ_ORE;
+import static org.bukkit.Material.PUMPKIN_PIE;
 import static org.bukkit.Material.RABBIT;
 import static org.bukkit.Material.REDSTONE_ORE;
 import static org.bukkit.Material.SALMON;
@@ -55,9 +57,10 @@ public enum MaterialCategory {
             COOKED_MUTTON,
             COOKED_RABBIT,
             COOKED_COD,
-            COOKED_SALMON)),
+            COOKED_SALMON,
+            PUMPKIN_PIE)),
     ITEM(Constants.filteredByPredicate(Material::isItem)),
-    MISC(Collections.emptySet()),
+    MISC(emptySet()),
     ORE(Set.of(COAL_ORE,
             IRON_ORE,
             COPPER_ORE,

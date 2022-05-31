@@ -16,7 +16,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,6 +28,7 @@ import java.util.concurrent.TimeUnit;
 
 import static java.lang.Runtime.getRuntime;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.synchronizedList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.groupingBy;
 
@@ -75,7 +75,7 @@ public class InventorySorterListener implements Listener {
                 .collect(groupingBy(ItemStack::getType));
 
         ExecutorService executorService = Executors.newFixedThreadPool(getRuntime().availableProcessors() * 2);
-        List<MaterialItemStack> reorganisedStacks = Collections.synchronizedList(new ArrayList<>());
+        List<MaterialItemStack> reorganisedStacks = synchronizedList(new ArrayList<>());
         for (var material : itemsToStacks.keySet()) {
             executorService.execute(() -> {
                 LinkedList<ItemStack> allStacks = new LinkedList<>();
@@ -257,8 +257,7 @@ public class InventorySorterListener implements Listener {
     }
 
     private void populate(Queue<ItemStack> itemStacks, ItemStack[][] newStacks, List<Coordinate> coordinates) {
-        for (int i = 0; i < coordinates.size(); i++) {
-            var coordinate = coordinates.get(i);
+        for (Coordinate coordinate : coordinates) {
             newStacks[coordinate.y()][coordinate.x()] = itemStacks.poll();
         }
     }
@@ -279,10 +278,8 @@ public class InventorySorterListener implements Listener {
 
     private ItemStack[] flatten(ItemStack[][] newStacks) {
         List<ItemStack> allStacks = new ArrayList<>();
-        for (int i = 0; i < newStacks.length; i++) {
-            for (int j = 0; j < newStacks[0].length; j++) {
-                allStacks.add(newStacks[i][j]);
-            }
+        for (ItemStack[] newStack : newStacks) {
+            allStacks.addAll(Arrays.asList(newStack).subList(0, newStacks[0].length));
         }
         return allStacks.toArray(ItemStack[]::new);
     }

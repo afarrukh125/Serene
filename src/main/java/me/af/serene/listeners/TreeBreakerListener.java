@@ -1,10 +1,10 @@
 package me.af.serene.listeners;
 
-import me.af.serene.util.Utils;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.type.Leaves;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -20,6 +20,7 @@ import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 import static me.af.serene.util.Utils.isToolBrokenAfterApplyingDamage;
+import static me.af.serene.util.Utils.shouldTakeDamage;
 import static org.bukkit.Material.ACACIA_LEAVES;
 import static org.bukkit.Material.ACACIA_LOG;
 import static org.bukkit.Material.BIRCH_LEAVES;
@@ -118,7 +119,7 @@ public class TreeBreakerListener implements Listener {
                         var locationToCheck = new Location(world, location.getX() + x, location.getY() + y, location.getZ() + z);
                         var blockToCheck = world.getBlockAt(locationToCheck);
                         var material = blockToCheck.getType();
-                        if (LOG_MATERIALS.contains(material) && !seenLogs.contains(blockToCheck)) {
+                        if (LOG_MATERIALS.contains(material) && !seenLogs.contains(blockToCheck) && blockToCheck.getType().equals(blockState.getType())) {
                             locationsToCheck.add(locationToCheck);
                             seenLogs.add(blockToCheck);
                         }
@@ -130,7 +131,7 @@ public class TreeBreakerListener implements Listener {
             }
         }
         // Do not break random stack of logs with no leaves (might be a building with a stack of logs somewhere)
-        if (leaves.size() > 0) {
+        if (leaves.size() > 0 && leaves.stream().noneMatch(b -> ((Leaves) b).isPersistent())) {
             breakWithDamageAwareness(blockBreakEvent, item, world, seenLogs, originalBlockLocation);
         }
     }
@@ -145,7 +146,7 @@ public class TreeBreakerListener implements Listener {
         for (var block : seenBlocks) {
             int currentDamage = damageable.getDamage();
             int unbreakingLevel = damageable.getEnchantLevel(Enchantment.DURABILITY);
-            boolean takeDamage = Utils.shouldTakeDamage(unbreakingLevel);
+            boolean takeDamage = shouldTakeDamage(unbreakingLevel);
             if (isToolBrokenAfterApplyingDamage(blockBreakEvent,
                     item,
                     world,

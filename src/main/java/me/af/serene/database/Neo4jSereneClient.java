@@ -10,32 +10,29 @@ public class Neo4jSereneClient implements SereneDatabaseClient {
     private static final String ADD_QUERY =
             """
                     MERGE (world:World {seed: $world_seed})
-                    MERGE (player:Player {uuid: $player_uuid})
+                    MERGE (world)-[:HAS_PLAYER]->(player:Player {uuid: $player_uuid})
                     ON CREATE
                       SET player.accumulated_exp = $accumulated_exp
                     ON MATCH
                       SET player.accumulated_exp = player.accumulated_exp + $accumulated_exp
-                    MERGE (world)-[:HAS_PLAYER]->(player)
                     RETURN player
                     """;
     private static final String GET_QUERY =
             """
                     MERGE (world:World {seed: $world_seed})
-                    MERGE (player:Player {uuid: $player_uuid})
+                    MERGE (world)-[:HAS_PLAYER]->(player:Player {uuid: $player_uuid})
                     ON CREATE
                       SET player.accumulated_exp = 0
-                    MERGE (world)-[:HAS_PLAYER]->(player)
                     RETURN player.accumulated_exp AS accumulated_exp
                     """;
     private static final String SET_QUERY =
             """
                     MERGE (world:World {seed: $world_seed})
-                    MERGE (player:Player {uuid: $player_uuid})
+                    MERGE (world)-[:HAS_PLAYER]->(player:Player {uuid: $player_uuid})
                     ON CREATE
                       SET player.accumulated_exp = $accumulated_exp
                     ON MATCH
                       SET player.accumulated_exp = $accumulated_exp
-                    MERGE (world)-[:HAS_PLAYER]->(player)
                     RETURN player
                     """;
     public static final String ACCUMULATED_EXP = "accumulated_exp";

@@ -21,6 +21,7 @@ public interface SereneDatabaseClient {
             String password = requireNonNull(config.get(dbBasePath + "password")).toString();
             Driver driver = GraphDatabase.driver(uri, AuthTokens.basic(username, password));
             driver.verifyConnectivity();
+            logger.info("Connected to remote database successfully");
             return new Neo4jSereneClient(driver);
         } catch (Exception e) {
             logger.info("Could not create connected database client, using default session-based client. {}", e.getMessage());

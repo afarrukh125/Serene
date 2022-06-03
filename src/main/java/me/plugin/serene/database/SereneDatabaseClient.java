@@ -1,4 +1,4 @@
-package me.af.serene.database;
+package me.plugin.serene.database;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -24,8 +24,8 @@ public interface SereneDatabaseClient {
             logger.info("Connected to remote database successfully");
             return new Neo4jSereneClient(driver);
         } catch (Exception e) {
-            logger.info("Could not create connected database client, using default session-based client. {}", e.getMessage());
-            return new SessionDatabaseClient();
+            logger.info("Could not create connected database client, using default SQL flat file. {}", e.getMessage());
+            return new SQLiteSereneClient();
         }
     }
 

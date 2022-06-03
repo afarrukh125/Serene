@@ -1,4 +1,4 @@
-package me.af.serene.util;
+package me.plugin.serene.util;
 
 import org.bukkit.Location;
 import org.bukkit.Material;

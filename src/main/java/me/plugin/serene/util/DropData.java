@@ -1,4 +1,4 @@
-package me.af.serene.util;
+package me.plugin.serene.util;
 
 import java.util.HashMap;
 import java.util.Map;

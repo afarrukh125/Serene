@@ -1,4 +1,4 @@
-package me.af.serene.model;
+package me.plugin.serene.model;
 
 import org.bukkit.Material;
 

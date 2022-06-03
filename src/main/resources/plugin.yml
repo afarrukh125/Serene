@@ -1,4 +1,4 @@
-main: me.af.serene.Serene
+main: me.plugin.serene.Serene
 version: 1.0
 name: serene
 api-version: 1.18

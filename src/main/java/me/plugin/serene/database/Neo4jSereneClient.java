@@ -1,4 +1,4 @@
-package me.af.serene.database;
+package me.plugin.serene.database;
 
 import org.bukkit.entity.Player;
 import org.neo4j.driver.Driver;

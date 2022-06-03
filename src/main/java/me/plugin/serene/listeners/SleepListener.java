@@ -1,4 +1,4 @@
-package me.af.serene.listeners;
+package me.plugin.serene.listeners;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

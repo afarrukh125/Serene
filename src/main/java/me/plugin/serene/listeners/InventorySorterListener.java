@@ -1,7 +1,7 @@
-package me.af.serene.listeners;
+package me.plugin.serene.listeners;
 
-import me.af.serene.model.Coordinate;
-import me.af.serene.model.MaterialItemStack;
+import me.plugin.serene.model.Coordinate;
+import me.plugin.serene.model.MaterialItemStack;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;

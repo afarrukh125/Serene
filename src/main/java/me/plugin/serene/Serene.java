@@ -1,11 +1,11 @@
-package me.af.serene;
+package me.plugin.serene;
 
-import me.af.serene.database.SereneDatabaseClient;
-import me.af.serene.listeners.ExperienceListener;
-import me.af.serene.listeners.InventorySorterListener;
-import me.af.serene.listeners.SleepListener;
-import me.af.serene.listeners.TreeBreakerListener;
-import me.af.serene.listeners.VeinBreakerListener;
+import me.plugin.serene.database.SereneDatabaseClient;
+import me.plugin.serene.listeners.ExperienceListener;
+import me.plugin.serene.listeners.InventorySorterListener;
+import me.plugin.serene.listeners.SleepListener;
+import me.plugin.serene.listeners.TreeBreakerListener;
+import me.plugin.serene.listeners.VeinBreakerListener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;

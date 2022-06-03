@@ -1,6 +1,6 @@
-package me.af.serene.listeners;
+package me.plugin.serene.listeners;
 
-import me.af.serene.util.DropData;
+import me.plugin.serene.util.DropData;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -22,8 +22,8 @@ import java.util.Random;
 import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
-import static me.af.serene.util.Utils.isToolBrokenAfterApplyingDamage;
-import static me.af.serene.util.Utils.shouldTakeDamage;
+import static me.plugin.serene.util.Utils.isToolBrokenAfterApplyingDamage;
+import static me.plugin.serene.util.Utils.shouldTakeDamage;
 import static org.bukkit.Material.COAL_ORE;
 import static org.bukkit.Material.COPPER_ORE;
 import static org.bukkit.Material.DEEPSLATE_COAL_ORE;

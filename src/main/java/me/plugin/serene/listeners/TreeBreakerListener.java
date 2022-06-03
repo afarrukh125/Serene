@@ -1,12 +1,10 @@
-package me.af.serene.listeners;
+package me.plugin.serene.listeners;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.type.Leaves;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -20,8 +18,8 @@ import java.util.Queue;
 import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
-import static me.af.serene.util.Utils.isToolBrokenAfterApplyingDamage;
-import static me.af.serene.util.Utils.shouldTakeDamage;
+import static me.plugin.serene.util.Utils.isToolBrokenAfterApplyingDamage;
+import static me.plugin.serene.util.Utils.shouldTakeDamage;
 import static org.bukkit.Material.ACACIA_LEAVES;
 import static org.bukkit.Material.ACACIA_LOG;
 import static org.bukkit.Material.BIRCH_LEAVES;

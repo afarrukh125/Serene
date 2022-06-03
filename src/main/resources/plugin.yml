@@ -1,4 +1,12 @@
-main: me.plugin.serene.Serene
+main: me.plugin.serene.core.Serene
 version: 1.0
 name: serene
 api-version: 1.18
+
+commands:
+  veinbreaker:
+    description: Toggle veinbreaker on/off
+    usage: /veinbreaker (on|off)
+  vb:
+    description: Toggle veinbreaker on/off
+    usage: /vb (on|off)

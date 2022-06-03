@@ -12,7 +12,7 @@ import java.util.List;
 public class SQLiteSereneClient implements SereneDatabaseClient {
 
     private static final String RELATIVE_PATH = "plugins/serene/Serene.db";
-    Connection connection;
+    private final Connection connection;
 
     public SQLiteSereneClient() {
         try {
@@ -30,8 +30,7 @@ public class SQLiteSereneClient implements SereneDatabaseClient {
 
     private void createUserTable() {
         try {
-            List<String> queries = List.of("CREATE TABLE player(id VARCHAR(60), exp VARCHAR(60), seed VARCHAR(60))",
-                    "");
+            List<String> queries = List.of("CREATE TABLE player(id VARCHAR(60), exp VARCHAR(60), seed VARCHAR(60), veinBreakerEnabled BOOLEAN)");
             for (var query : queries) {
                 connection.createStatement().execute(query);
             }
@@ -70,11 +69,12 @@ public class SQLiteSereneClient implements SereneDatabaseClient {
 
     private void createEntryForPlayer(Player player, long seed) {
         try {
-            String query = "INSERT INTO player VALUES (?, ?, ?)";
+            String query = "INSERT INTO player VALUES (?, ?, ?, ?)";
             PreparedStatement preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, player.getUniqueId().toString());
             preparedStatement.setLong(2, 0);
             preparedStatement.setLong(3, seed);
+            preparedStatement.setBoolean(4, true);
             preparedStatement.execute();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -101,5 +101,34 @@ public class SQLiteSereneClient implements SereneDatabaseClient {
         ResultSet resultSet = connection.createStatement().executeQuery(query);
         if (!resultSet.next())
             createEntryForPlayer(player, seed);
+    }
+
+    public void setVeinBreakerEnabled(Player player, boolean value) {
+        long seed = player.getWorld().getSeed();
+        try {
+            createPlayerIfNotExisting(player, seed);
+            String query = "UPDATE player SET veinBreakerEnabled=? WHERE id='%s' AND seed=%d".formatted(player.getUniqueId(), seed);
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.setBoolean(1, value);
+            preparedStatement.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public boolean isVeinBreakerEnabled(Player player) {
+        long seed = player.getWorld().getSeed();
+        String query = "SELECT veinBreakerEnabled FROM player WHERE id='%s' AND seed=%s".formatted(player.getUniqueId().toString(), seed);
+        try {
+            createPlayerIfNotExisting(player, seed);
+            ResultSet resultSet = connection.createStatement().executeQuery(query);
+            if (!resultSet.next()) {
+                createEntryForPlayer(player, seed);
+                return true;
+            }
+            return resultSet.getBoolean("veinBreakerEnabled");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

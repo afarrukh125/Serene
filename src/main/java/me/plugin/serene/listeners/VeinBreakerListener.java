@@ -1,5 +1,6 @@
 package me.plugin.serene.listeners;
 
+import me.plugin.serene.database.SQLiteSereneClient;
 import me.plugin.serene.util.DropData;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -7,6 +8,7 @@ import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -62,16 +64,24 @@ public class VeinBreakerListener implements Listener {
             NETHERITE_PICKAXE);
 
     private static final Random random = new Random();
+    private final SQLiteSereneClient database;
+
+    public VeinBreakerListener(SQLiteSereneClient database) {
+        this.database = database;
+    }
 
     @EventHandler
     public void onOreBreak(BlockBreakEvent blockBreakEvent) {
-        var itemInMainHand = blockBreakEvent.getPlayer().getInventory().getItemInMainHand();
-        var armedMaterial = itemInMainHand.getType();
-        var brokenBlock = blockBreakEvent.getBlock();
-        Material blockType = brokenBlock.getType();
-        boolean sneaking = blockBreakEvent.getPlayer().isSneaking();
-        if (PICKAXES.contains(armedMaterial) && ORE_TO_DROP_DATA.containsKey(blockType) && sneaking) {
-            handleBreaking(blockBreakEvent, itemInMainHand, blockType);
+        Player player = blockBreakEvent.getPlayer();
+        if (database.isVeinBreakerEnabled(player)) {
+            var itemInMainHand = player.getInventory().getItemInMainHand();
+            var armedMaterial = itemInMainHand.getType();
+            var brokenBlock = blockBreakEvent.getBlock();
+            Material blockType = brokenBlock.getType();
+            boolean sneaking = player.isSneaking();
+            if (PICKAXES.contains(armedMaterial) && ORE_TO_DROP_DATA.containsKey(blockType) && sneaking) {
+                handleBreaking(blockBreakEvent, itemInMainHand, blockType);
+            }
         }
     }
 
@@ -106,11 +116,11 @@ public class VeinBreakerListener implements Listener {
         breakOresWithDamageAwareness(blockBreakEvent, item, world, seenOres, originalBlockLocation);
     }
 
-    public static void breakOresWithDamageAwareness(BlockBreakEvent blockBreakEvent,
-                                                    ItemStack item,
-                                                    World world,
-                                                    Set<Block> seenBlocks,
-                                                    Location originalBlockLocation) {
+    private static void breakOresWithDamageAwareness(BlockBreakEvent blockBreakEvent,
+                                                     ItemStack item,
+                                                     World world,
+                                                     Set<Block> seenBlocks,
+                                                     Location originalBlockLocation) {
         var damageable = requireNonNull((Damageable) item.getItemMeta());
         for (var block : seenBlocks) {
             int currentDamage = damageable.getDamage();

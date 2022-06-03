@@ -40,7 +40,7 @@ public class SQLiteSereneClient implements SereneDatabaseClient {
     }
 
     private boolean isUserTableCreated() throws SQLException {
-        ResultSet playerTable = connection.createStatement().executeQuery("SELECT name FROM sqlite_master WHERE type = 'table' AND name='player'");
+        var playerTable = connection.createStatement().executeQuery("SELECT name FROM sqlite_master WHERE type = 'table' AND name='player'");
         return playerTable.next();
     }
 
@@ -56,7 +56,7 @@ public class SQLiteSereneClient implements SereneDatabaseClient {
         try {
             long seed = player.getWorld().getSeed();
             String query = "SELECT exp FROM player WHERE id='%s' AND seed=%s".formatted(player.getUniqueId().toString(), seed);
-            ResultSet resultSet = connection.createStatement().executeQuery(query);
+            var resultSet = connection.createStatement().executeQuery(query);
             if (!resultSet.next()) {
                 createEntryForPlayer(player, seed);
                 return 0;
@@ -88,7 +88,7 @@ public class SQLiteSereneClient implements SereneDatabaseClient {
         String query = "UPDATE player SET exp=? WHERE id='%s' AND seed=%d".formatted(player.getUniqueId(), seed);
         try {
             createPlayerIfNotExisting(player, seed);
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            var preparedStatement = connection.prepareStatement(query);
             preparedStatement.setLong(1, amount);
             preparedStatement.execute();
         } catch (SQLException e) {
@@ -98,7 +98,7 @@ public class SQLiteSereneClient implements SereneDatabaseClient {
 
     private void createPlayerIfNotExisting(Player player, long seed) throws SQLException {
         String query = "SELECT exp FROM player WHERE id='%s' AND seed=%s".formatted(player.getUniqueId().toString(), seed);
-        ResultSet resultSet = connection.createStatement().executeQuery(query);
+        var resultSet = connection.createStatement().executeQuery(query);
         if (!resultSet.next())
             createEntryForPlayer(player, seed);
     }
@@ -108,7 +108,7 @@ public class SQLiteSereneClient implements SereneDatabaseClient {
         try {
             createPlayerIfNotExisting(player, seed);
             String query = "UPDATE player SET veinBreakerEnabled=? WHERE id='%s' AND seed=%d".formatted(player.getUniqueId(), seed);
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            var preparedStatement = connection.prepareStatement(query);
             preparedStatement.setBoolean(1, value);
             preparedStatement.execute();
         } catch (SQLException e) {

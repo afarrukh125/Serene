@@ -6,7 +6,6 @@ import me.plugin.serene.exceptions.SereneCommandException;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import static java.util.Objects.requireNonNull;
 
@@ -35,7 +34,7 @@ public class ToggleVeinBreakerCommand implements CommandExecutor {
         String param = args[0];
         try {
             boolean enabled = parseParam(param);
-            Player player = sender.getServer().getPlayer(sender.getName());
+            var player = sender.getServer().getPlayer(sender.getName());
             database.setVeinBreakerEnabled(requireNonNull(player), enabled);
         } catch (SereneCommandException e) {
             sender.sendMessage("Usage: %s (on|off) ".formatted(NAME));

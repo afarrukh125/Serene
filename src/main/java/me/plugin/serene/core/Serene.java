@@ -22,8 +22,8 @@ public class Serene extends JavaPlugin {
     @Override
     public void onEnable() {
         this.saveDefaultConfig();
-        SQLiteSereneClient databaseClient = new SQLiteSereneClient();
-        PluginManager pluginManager = getServer().getPluginManager();
+        var databaseClient = new SQLiteSereneClient();
+        var pluginManager = getServer().getPluginManager();
         registerEventListeners(databaseClient, pluginManager);
         setupCommands(databaseClient);
         LOG.info("Started Serene...");

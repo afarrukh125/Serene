@@ -1,7 +1,8 @@
 package me.plugin.serene.listeners;
 
+import com.google.common.collect.ImmutableMap;
 import me.plugin.serene.database.SQLiteSereneClient;
-import me.plugin.serene.util.DropData;
+import me.plugin.serene.util.ExperienceData;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -15,7 +16,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
@@ -53,7 +53,27 @@ import static org.bukkit.Material.WOODEN_PICKAXE;
 
 public class VeinBreakerListener implements Listener {
 
-    private static final Map<Material, DropData> ORE_TO_DROP_DATA = createMaterialExperienceMap();
+    // Experience values taken from https://minecraft.fandom.com/wiki/Experience#Sources
+    private static final Map<Material, ExperienceData> ORE_TO_EXPERIENCE_DATA = ImmutableMap.<Material, ExperienceData>builder()
+            .put(COAL_ORE, ExperienceData.withMinMaxExp(0, 3))
+            .put(IRON_ORE, ExperienceData.noExp())
+            .put(COPPER_ORE, ExperienceData.noExp())
+            .put(DIAMOND_ORE, ExperienceData.withMinMaxExp(3, 8))
+            .put(GOLD_ORE, ExperienceData.noExp())
+            .put(EMERALD_ORE, ExperienceData.withMinMaxExp(3, 8))
+            .put(LAPIS_ORE, ExperienceData.withMinMaxExp(2, 6))
+            .put(REDSTONE_ORE, ExperienceData.withMinMaxExp(1, 6))
+            .put(NETHER_GOLD_ORE, ExperienceData.noExp())
+            .put(NETHER_QUARTZ_ORE, ExperienceData.withMinMaxExp(3, 8))
+            .put(DEEPSLATE_COAL_ORE, ExperienceData.withMinMaxExp(0, 3))
+            .put(DEEPSLATE_IRON_ORE, ExperienceData.noExp())
+            .put(DEEPSLATE_COPPER_ORE, ExperienceData.noExp())
+            .put(DEEPSLATE_DIAMOND_ORE, ExperienceData.withMinMaxExp(3, 8))
+            .put(DEEPSLATE_GOLD_ORE, ExperienceData.noExp())
+            .put(DEEPSLATE_EMERALD_ORE, ExperienceData.withMinMaxExp(3, 8))
+            .put(DEEPSLATE_LAPIS_ORE, ExperienceData.withMinMaxExp(2, 6))
+            .put(DEEPSLATE_REDSTONE_ORE, ExperienceData.withMinMaxExp(1, 6))
+            .build();
 
     private static final Set<Material> PICKAXES = Set.of(
             WOODEN_PICKAXE,
@@ -79,7 +99,7 @@ public class VeinBreakerListener implements Listener {
             var brokenBlock = blockBreakEvent.getBlock();
             Material blockType = brokenBlock.getType();
             boolean sneaking = player.isSneaking();
-            if (PICKAXES.contains(armedMaterial) && ORE_TO_DROP_DATA.containsKey(blockType) && sneaking) {
+            if (PICKAXES.contains(armedMaterial) && ORE_TO_EXPERIENCE_DATA.containsKey(blockType) && sneaking) {
                 handleBreaking(blockBreakEvent, itemInMainHand, blockType);
             }
         }
@@ -101,7 +121,7 @@ public class VeinBreakerListener implements Listener {
                         var locationToCheck = new Location(world, location.getX() + x, location.getY() + y, location.getZ() + z);
                         var blockToCheck = world.getBlockAt(locationToCheck);
                         var material = blockToCheck.getType();
-                        if (ORE_TO_DROP_DATA.containsKey(material) && material.equals(originalMaterial) && !seenOres.contains(blockToCheck)) {
+                        if (ORE_TO_EXPERIENCE_DATA.containsKey(material) && material.equals(originalMaterial) && !seenOres.contains(blockToCheck)) {
                             locationsToCheck.add(locationToCheck);
                             seenOres.add(blockToCheck);
                         }
@@ -141,7 +161,7 @@ public class VeinBreakerListener implements Listener {
 
     private void grantExperience(BlockBreakEvent blockBreakEvent, Material originalMaterial, World world, Location originalBlockLocation, Set<Block> seenOres) {
         int exp = 0;
-        var experienceRange = ORE_TO_DROP_DATA.get(originalMaterial);
+        var experienceRange = ORE_TO_EXPERIENCE_DATA.get(originalMaterial);
         for (int i = 0; i < seenOres.size(); i++) {
             exp += random.nextInt(experienceRange.minExp(), experienceRange.maxExp());
         }
@@ -151,30 +171,4 @@ public class VeinBreakerListener implements Listener {
         blockBreakEvent.getPlayer().giveExp(exp);
     }
 
-    private static Map<Material, DropData> createMaterialExperienceMap() {
-        // Experience values taken from https://minecraft.fandom.com/wiki/Experience#Sources
-        Map<Material, DropData> regularOres = new HashMap<>(Map.of(
-                COAL_ORE, DropData.withMinMaxExp(0, 3),
-                IRON_ORE, DropData.noExp(),
-                COPPER_ORE, DropData.noExp(),
-                DIAMOND_ORE, DropData.withMinMaxExp(3, 8),
-                GOLD_ORE, DropData.noExp(),
-                EMERALD_ORE, DropData.withMinMaxExp(3, 8),
-                LAPIS_ORE, DropData.withMinMaxExp(2, 6),
-                REDSTONE_ORE, DropData.withMinMaxExp(1, 6)));
-
-        Map<Material, DropData> remainingOres = Map.of(
-                NETHER_GOLD_ORE, DropData.noExp(),
-                NETHER_QUARTZ_ORE, DropData.withMinMaxExp(3, 8),
-                DEEPSLATE_COAL_ORE, DropData.withMinMaxExp(0, 3),
-                DEEPSLATE_IRON_ORE, DropData.noExp(),
-                DEEPSLATE_COPPER_ORE, DropData.noExp(),
-                DEEPSLATE_DIAMOND_ORE, DropData.withMinMaxExp(3, 8),
-                DEEPSLATE_GOLD_ORE, DropData.noExp(),
-                DEEPSLATE_EMERALD_ORE, DropData.withMinMaxExp(3, 8),
-                DEEPSLATE_LAPIS_ORE, DropData.withMinMaxExp(2, 6),
-                DEEPSLATE_REDSTONE_ORE, DropData.withMinMaxExp(1, 6));
-        regularOres.putAll(remainingOres);
-        return regularOres;
-    }
 }

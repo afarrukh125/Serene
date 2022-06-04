@@ -4,19 +4,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public final class DropData {
-    private static final Map<DropData, DropData> pool = new HashMap<>();
+public final class ExperienceData {
+    private static final Map<ExperienceData, ExperienceData> pool = new HashMap<>();
     private final int minExp;
     private final int maxExp;
 
-    private DropData(int minExp, int maxExp) {
+    private ExperienceData(int minExp, int maxExp) {
         this.minExp = minExp;
         this.maxExp = maxExp;
     }
 
-    public static synchronized DropData withMinMaxExp(int minExp, int maxExp) {
-        DropData key = new DropData(minExp, maxExp);
-        DropData existing = pool.get(key);
+    public static synchronized ExperienceData withMinMaxExp(int minExp, int maxExp) {
+        ExperienceData key = new ExperienceData(minExp, maxExp);
+        ExperienceData existing = pool.get(key);
         if (existing != null)
             return existing;
         else
@@ -24,7 +24,7 @@ public final class DropData {
         return key;
     }
 
-    public static DropData noExp() {
+    public static ExperienceData noExp() {
         return withMinMaxExp(0, 1);
     }
 
@@ -40,7 +40,7 @@ public final class DropData {
     public boolean equals(Object obj) {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (DropData) obj;
+        var that = (ExperienceData) obj;
         return this.minExp == that.minExp &&
                 this.maxExp == that.maxExp;
     }

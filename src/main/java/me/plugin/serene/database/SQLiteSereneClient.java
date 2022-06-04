@@ -11,7 +11,7 @@ import java.util.List;
 
 public class SQLiteSereneClient implements SereneDatabaseClient {
 
-    private static final String RELATIVE_PATH = "plugins/serene/Serene.db";
+    private static final String RELATIVE_PATH = "plugins/serene/Serene.sqlite";
     private final Connection connection;
 
     public SQLiteSereneClient() {

@@ -36,6 +36,7 @@ public class ToggleVeinBreakerCommand implements CommandExecutor {
             boolean enabled = parseParam(param);
             var player = sender.getServer().getPlayer(sender.getName());
             database.setVeinBreakerEnabled(requireNonNull(player), enabled);
+            player.sendMessage("Veinbreaker is now %s".formatted(enabled ? "enabled" : "disabled"));
         } catch (SereneCommandException e) {
             sender.sendMessage("Usage: %s (on|off) ".formatted(NAME));
         } catch (NullPointerException e) {

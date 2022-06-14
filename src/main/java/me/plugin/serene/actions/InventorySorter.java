@@ -1,4 +1,4 @@
-package me.plugin.serene.listeners;
+package me.plugin.serene.actions;
 
 import me.plugin.serene.model.Coordinate;
 import me.plugin.serene.model.MaterialItemStack;
@@ -6,8 +6,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.block.Chest;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
@@ -32,7 +30,7 @@ import static java.util.Collections.synchronizedList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.groupingBy;
 
-public class InventorySorterListener implements Listener {
+public class InventorySorter {
 
     public static final int ROW_SIZE = 9;
     public static final int LARGE_CHEST_COL_SIZE = 6;
@@ -40,8 +38,8 @@ public class InventorySorterListener implements Listener {
     public static final int SMALL_CHEST_SIZE = 27;
     private final Set<Location> seenChestLocations = new HashSet<>();
 
-    @EventHandler
-    public void onChestOpenEvent(PlayerInteractEvent playerInteractEvent) {
+    public void handleEvent(PlayerInteractEvent playerInteractEvent) {
+
         if (playerInteractEvent.getClickedBlock() != null) {
             boolean wasChest = requireNonNull(playerInteractEvent.getClickedBlock()).getType().equals(Material.CHEST);
             if (wasChest) {
@@ -66,6 +64,7 @@ public class InventorySorterListener implements Listener {
             }
         }
     }
+
 
     // Collates all unorganised items into groups
     private List<MaterialItemStack> getOrganisedGroups(Chest chest) {
@@ -284,4 +283,3 @@ public class InventorySorterListener implements Listener {
         return allStacks.toArray(ItemStack[]::new);
     }
 }
-

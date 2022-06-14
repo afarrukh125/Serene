@@ -1,4 +1,4 @@
-package me.plugin.serene.listeners;
+package me.plugin.serene.actions;
 
 import com.google.common.collect.ImmutableMap;
 import me.plugin.serene.database.SereneDatabaseClient;
@@ -10,8 +10,6 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
@@ -51,7 +49,7 @@ import static org.bukkit.Material.REDSTONE_ORE;
 import static org.bukkit.Material.STONE_PICKAXE;
 import static org.bukkit.Material.WOODEN_PICKAXE;
 
-public class VeinBreakerListener implements Listener {
+public class VeinBreaker {
 
     // Experience values taken from https://minecraft.fandom.com/wiki/Experience#Sources
     private static final Map<Material, ExperienceData> ORE_TO_EXPERIENCE_DATA = ImmutableMap.<Material, ExperienceData>builder()
@@ -86,12 +84,11 @@ public class VeinBreakerListener implements Listener {
     private static final Random random = new Random();
     private final SereneDatabaseClient database;
 
-    public VeinBreakerListener(SereneDatabaseClient database) {
+    public VeinBreaker(SereneDatabaseClient database) {
         this.database = database;
     }
 
-    @EventHandler
-    public void onOreBreak(BlockBreakEvent blockBreakEvent) {
+    public void handleEvent(BlockBreakEvent blockBreakEvent) {
         Player player = blockBreakEvent.getPlayer();
         if (database.isVeinBreakerEnabled(player)) {
             var itemInMainHand = player.getInventory().getItemInMainHand();
@@ -104,6 +101,7 @@ public class VeinBreakerListener implements Listener {
             }
         }
     }
+
 
     private void handleBreaking(BlockBreakEvent blockBreakEvent, ItemStack item, Material originalMaterial) {
         var world = blockBreakEvent.getBlock().getWorld();

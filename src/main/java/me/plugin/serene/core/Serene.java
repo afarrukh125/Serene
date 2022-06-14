@@ -2,12 +2,7 @@ package me.plugin.serene.core;
 
 import me.plugin.serene.core.command.ToggleVeinBreakerCommand;
 import me.plugin.serene.database.SereneDatabaseClient;
-import me.plugin.serene.listeners.ExperienceListener;
-import me.plugin.serene.listeners.InventorySorterListener;
-import me.plugin.serene.listeners.SleepListener;
-import me.plugin.serene.listeners.TreeBreakerListener;
-import me.plugin.serene.listeners.VeinBreakerListener;
-import org.bukkit.plugin.PluginManager;
+import me.plugin.serene.listeners.EventListener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,20 +17,11 @@ public class Serene extends JavaPlugin {
     @Override
     public void onEnable() {
         this.saveDefaultConfig();
-        var databaseClient = SereneDatabaseClient.create();
         var pluginManager = getServer().getPluginManager();
-        registerEventListeners(databaseClient, pluginManager);
+        var databaseClient = SereneDatabaseClient.create();
+        pluginManager.registerEvents(new EventListener(databaseClient), this);
         setupCommands(databaseClient);
         LOG.info("Started Serene...");
-
-    }
-
-    private void registerEventListeners(SereneDatabaseClient databaseClient, PluginManager pluginManager) {
-        pluginManager.registerEvents(new SleepListener(), this);
-        pluginManager.registerEvents(new TreeBreakerListener(), this);
-        pluginManager.registerEvents(new InventorySorterListener(), this);
-        pluginManager.registerEvents(new VeinBreakerListener(databaseClient), this);
-        pluginManager.registerEvents(new ExperienceListener(databaseClient), this);
     }
 
     private void setupCommands(SereneDatabaseClient databaseClient) {

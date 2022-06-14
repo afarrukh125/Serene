@@ -1,12 +1,10 @@
-package me.plugin.serene.listeners;
+package me.plugin.serene.actions;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
@@ -47,8 +45,7 @@ import static org.bukkit.Material.SPRUCE_LOG;
 import static org.bukkit.Material.STONE_AXE;
 import static org.bukkit.Material.WOODEN_AXE;
 
-public class TreeBreakerListener implements Listener {
-
+public class TreeBreaker {
     private static final Set<Material> LOG_MATERIALS = Set.of(ACACIA_LOG,
             BIRCH_LOG,
             DARK_OAK_LOG,
@@ -78,8 +75,8 @@ public class TreeBreakerListener implements Listener {
             DIAMOND_AXE,
             NETHERITE_AXE);
 
-    @EventHandler
-    public void onTreeBreak(BlockBreakEvent blockBreakEvent) {
+
+    public void handleEvent(BlockBreakEvent blockBreakEvent) {
         var itemInMainHand = blockBreakEvent.getPlayer().getInventory().getItemInMainHand();
         var armedMaterial = itemInMainHand.getType();
         if (AXES.contains(armedMaterial)) {
@@ -89,8 +86,8 @@ public class TreeBreakerListener implements Listener {
             var world = blockBreakEvent.getPlayer().getWorld();
             var locationBelowBlock = new Location(world, location.getX(), location.getY() - 1., location.getZ());
             if (LOG_MATERIALS.contains(type)
-                    && blockBreakEvent.getPlayer().isSneaking()
-                    && canTreeGrow(world, locationBelowBlock)) {
+                && blockBreakEvent.getPlayer().isSneaking()
+                && canTreeGrow(world, locationBelowBlock)) {
                 handleBreaking(blockBreakEvent, itemInMainHand);
             }
         }
@@ -134,7 +131,6 @@ public class TreeBreakerListener implements Listener {
             breakWithDamageAwareness(blockBreakEvent, item, world, seenLogs, originalBlockLocation);
         }
     }
-
 
     public static void breakWithDamageAwareness(BlockBreakEvent blockBreakEvent,
                                                 ItemStack item,

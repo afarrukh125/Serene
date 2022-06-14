@@ -2,7 +2,7 @@ package me.plugin.serene.listeners;
 
 import org.junit.jupiter.api.Test;
 
-import static me.plugin.serene.listeners.SleepListener.nextDayFullTime;
+import static me.plugin.serene.actions.SleepHandler.nextDayFullTime;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class SleepListenerTest {

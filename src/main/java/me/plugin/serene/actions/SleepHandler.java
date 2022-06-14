@@ -1,8 +1,6 @@
-package me.plugin.serene.listeners;
+package me.plugin.serene.actions;
 
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
 
@@ -11,23 +9,13 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Objects.requireNonNull;
 
-public class SleepListener implements Listener {
-
+public class SleepHandler {
     private static final int FULL_DAY_TIME = 24000;
 
     private AtomicReference<Player> atomicPlayerReference;
 
-    public SleepListener() {
-        atomicPlayerReference = new AtomicReference<>();
-    }
+    public void handleEvent(PlayerBedEnterEvent playerBedEnterEvent) {
 
-    public static long nextDayFullTime(long currentTime) {
-        var daysElapsed = currentTime / FULL_DAY_TIME;
-        return (daysElapsed + 1) * FULL_DAY_TIME;
-    }
-
-    @EventHandler
-    public void onPlayerEnterBed(PlayerBedEnterEvent playerBedEnterEvent) {
         if (playerBedEnterEvent.getBedEnterResult().equals(PlayerBedEnterEvent.BedEnterResult.OK)) {
             if (playerBedEnterEvent.getPlayer().getWorld().getPlayers().size() == 1)
                 return;
@@ -42,8 +30,8 @@ public class SleepListener implements Listener {
         }
     }
 
-    @EventHandler
-    public void onPlayerLeaveBed(PlayerBedLeaveEvent playerBedLeaveEvent) {
+    public void handleEvent(PlayerBedLeaveEvent playerBedLeaveEvent) {
+
         if (playerBedLeaveEvent.getPlayer().getWorld().getPlayers().size() == 1)
             return;
         var sleepingPlayer = playerBedLeaveEvent.getPlayer();
@@ -64,4 +52,9 @@ public class SleepListener implements Listener {
             p.sendMessage(Color.GREEN + sleepingPlayerName + " has triggered sleep");
     }
 
+
+    public static long nextDayFullTime(long currentTime) {
+        var daysElapsed = currentTime / FULL_DAY_TIME;
+        return (daysElapsed + 1) * FULL_DAY_TIME;
+    }
 }

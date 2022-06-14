@@ -1,22 +1,21 @@
-package me.plugin.serene.listeners;
+package me.plugin.serene.actions;
 
 import me.plugin.serene.database.SereneDatabaseClient;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 
-public class ExperienceListener implements Listener {
+public class ExperienceHandler {
 
-    public static final int BONUS = 100;
-    public static final int REWARD_THRESHOLD = 100;
+
+    private static final int BONUS = 100;
+    private static final int REWARD_THRESHOLD = 100;
+
     private final SereneDatabaseClient databaseClient;
 
-    public ExperienceListener(SereneDatabaseClient databaseClient) {
+    public ExperienceHandler(SereneDatabaseClient databaseClient) {
         this.databaseClient = databaseClient;
     }
 
-    @EventHandler
-    public void onExperienceChange(PlayerExpChangeEvent playerExpChangeEvent) {
+    public void handleEvent(PlayerExpChangeEvent playerExpChangeEvent) {
         var player = playerExpChangeEvent.getPlayer();
         var level = player.getLevel();
         if (level > 20) {

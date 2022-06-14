@@ -1,7 +1,7 @@
 package me.plugin.serene.core;
 
 import me.plugin.serene.core.command.ToggleVeinBreakerCommand;
-import me.plugin.serene.database.SQLiteSereneClient;
+import me.plugin.serene.database.SereneDatabaseClient;
 import me.plugin.serene.listeners.ExperienceListener;
 import me.plugin.serene.listeners.InventorySorterListener;
 import me.plugin.serene.listeners.SleepListener;
@@ -22,7 +22,7 @@ public class Serene extends JavaPlugin {
     @Override
     public void onEnable() {
         this.saveDefaultConfig();
-        var databaseClient = new SQLiteSereneClient();
+        var databaseClient = SereneDatabaseClient.create();
         var pluginManager = getServer().getPluginManager();
         registerEventListeners(databaseClient, pluginManager);
         setupCommands(databaseClient);
@@ -30,7 +30,7 @@ public class Serene extends JavaPlugin {
 
     }
 
-    private void registerEventListeners(SQLiteSereneClient databaseClient, PluginManager pluginManager) {
+    private void registerEventListeners(SereneDatabaseClient databaseClient, PluginManager pluginManager) {
         pluginManager.registerEvents(new SleepListener(), this);
         pluginManager.registerEvents(new TreeBreakerListener(), this);
         pluginManager.registerEvents(new InventorySorterListener(), this);
@@ -38,7 +38,7 @@ public class Serene extends JavaPlugin {
         pluginManager.registerEvents(new ExperienceListener(databaseClient), this);
     }
 
-    private void setupCommands(SQLiteSereneClient databaseClient) {
+    private void setupCommands(SereneDatabaseClient databaseClient) {
         requireNonNull(this.getCommand("veinbreaker")).setExecutor(new ToggleVeinBreakerCommand(databaseClient));
         requireNonNull(this.getCommand("vb")).setExecutor(new ToggleVeinBreakerCommand(databaseClient));
     }

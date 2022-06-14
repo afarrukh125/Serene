@@ -12,6 +12,7 @@ import java.util.Map;
 public class SessionDatabaseClient implements SereneDatabaseClient {
 
     private final Map<Player, Long> experienceMap = new HashMap<>();
+    private final Map<Player, Boolean> veinBreaker = new HashMap<>();
 
     @Override
     public void addExperienceForPlayer(Player player, long amount) {
@@ -29,5 +30,16 @@ public class SessionDatabaseClient implements SereneDatabaseClient {
     @Override
     public void setExperienceForPlayer(Player player, long amount) {
         experienceMap.put(player, amount);
+    }
+
+    @Override
+    public void setVeinBreakerEnabled(Player player, boolean enabled) {
+        veinBreaker.put(player, enabled);
+    }
+
+    @Override
+    public boolean isVeinBreakerEnabled(Player player) {
+        veinBreaker.putIfAbsent(player, true);
+        return veinBreaker.get(player);
     }
 }

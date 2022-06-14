@@ -11,8 +11,8 @@ public interface SereneDatabaseClient {
         try {
             return new SQLiteSereneClient();
         } catch (Exception e) {
-            logger.info("Could not create connected database client, using default SQL flat file. {}", e.getMessage());
-            return new NoOpDatabaseClient();
+            logger.info("Could not create connected database client, using default session-based algorithm. {}", e.getMessage());
+            return new SessionDatabaseClient();
         }
     }
 
@@ -21,4 +21,8 @@ public interface SereneDatabaseClient {
     long getExperienceForPlayer(Player player);
 
     void setExperienceForPlayer(Player player, long amount);
+
+    void setVeinBreakerEnabled(Player player, boolean enabled);
+
+    boolean isVeinBreakerEnabled(Player player);
 }

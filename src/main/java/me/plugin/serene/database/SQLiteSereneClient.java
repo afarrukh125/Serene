@@ -14,7 +14,7 @@ public class SQLiteSereneClient implements SereneDatabaseClient {
     private static final String RELATIVE_PATH = "plugins/serene/Serene.sqlite";
     private final Connection connection;
 
-    public SQLiteSereneClient() {
+    SQLiteSereneClient() {
         try {
             connection = DriverManager.getConnection("jdbc:sqlite:%s".formatted(RELATIVE_PATH));
             tableCheck();

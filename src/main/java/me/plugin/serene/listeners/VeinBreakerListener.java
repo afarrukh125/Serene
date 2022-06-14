@@ -1,7 +1,7 @@
 package me.plugin.serene.listeners;
 
 import com.google.common.collect.ImmutableMap;
-import me.plugin.serene.database.SQLiteSereneClient;
+import me.plugin.serene.database.SereneDatabaseClient;
 import me.plugin.serene.util.ExperienceData;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -84,9 +84,9 @@ public class VeinBreakerListener implements Listener {
             NETHERITE_PICKAXE);
 
     private static final Random random = new Random();
-    private final SQLiteSereneClient database;
+    private final SereneDatabaseClient database;
 
-    public VeinBreakerListener(SQLiteSereneClient database) {
+    public VeinBreakerListener(SereneDatabaseClient database) {
         this.database = database;
     }
 

@@ -1,7 +1,7 @@
 package me.plugin.serene.core.command;
 
 
-import me.plugin.serene.database.SQLiteSereneClient;
+import me.plugin.serene.database.SereneDatabaseClient;
 import me.plugin.serene.exceptions.SereneCommandException;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -13,9 +13,9 @@ public class ToggleVeinBreakerCommand implements CommandExecutor {
 
     private static final String NAME = "veinbreaker";
 
-    private final SQLiteSereneClient database;
+    private final SereneDatabaseClient database;
 
-    public ToggleVeinBreakerCommand(SQLiteSereneClient database) {
+    public ToggleVeinBreakerCommand(SereneDatabaseClient database) {
         this.database = database;
     }
 

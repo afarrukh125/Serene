@@ -1,8 +1,12 @@
 package me.plugin.serene.util;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public final class ExperienceData {
     private static final Map<ExperienceData, ExperienceData> pool = new HashMap<>();
@@ -37,24 +41,18 @@ public final class ExperienceData {
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == this) return true;
-        if (obj == null || obj.getClass() != this.getClass()) return false;
-        var that = (ExperienceData) obj;
-        return this.minExp == that.minExp &&
-                this.maxExp == that.maxExp;
+    public boolean equals(Object o) {
+        return EqualsBuilder.reflectionEquals(this, o);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(minExp, maxExp);
+        return HashCodeBuilder.reflectionHashCode(this);
     }
 
     @Override
     public String toString() {
-        return "ExperienceRange[" +
-                "min=" + minExp + ", " +
-                "max=" + maxExp + ']';
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
 
 }

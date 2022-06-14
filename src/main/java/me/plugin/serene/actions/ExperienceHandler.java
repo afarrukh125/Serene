@@ -8,6 +8,7 @@ public class ExperienceHandler {
 
     private static final int BONUS = 100;
     private static final int REWARD_THRESHOLD = 100;
+    public static final int MINIMUM_LEVEL_FOR_BONUS = 20;
 
     private final SereneDatabaseClient databaseClient;
 
@@ -18,7 +19,7 @@ public class ExperienceHandler {
     public void handleEvent(PlayerExpChangeEvent playerExpChangeEvent) {
         var player = playerExpChangeEvent.getPlayer();
         var level = player.getLevel();
-        if (level > 20) {
+        if (level > MINIMUM_LEVEL_FOR_BONUS) {
             var originalAmount = playerExpChangeEvent.getAmount();
             databaseClient.addExperienceForPlayer(player, originalAmount);
             var experienceForPlayer = databaseClient.getExperienceForPlayer(player);

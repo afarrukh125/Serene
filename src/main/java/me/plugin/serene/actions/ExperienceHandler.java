@@ -1,7 +1,10 @@
 package me.plugin.serene.actions;
 
 import me.plugin.serene.database.SereneDatabaseClient;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.player.PlayerExpChangeEvent;
+
+import static java.util.Objects.requireNonNull;
 
 public class ExperienceHandler {
 
@@ -11,9 +14,11 @@ public class ExperienceHandler {
     public static final int MINIMUM_LEVEL_FOR_BONUS = 20;
 
     private final SereneDatabaseClient databaseClient;
+    private final FileConfiguration config;
 
-    public ExperienceHandler(SereneDatabaseClient databaseClient) {
+    public ExperienceHandler(SereneDatabaseClient databaseClient, FileConfiguration config) {
         this.databaseClient = databaseClient;
+        this.config = config;
     }
 
     public void handleEvent(PlayerExpChangeEvent playerExpChangeEvent) {
@@ -28,11 +33,13 @@ public class ExperienceHandler {
                 var finalAmount = originalAmount + additional;
                 playerExpChangeEvent.setAmount(finalAmount);
                 databaseClient.setExperienceForPlayer(player, Math.max(0, experienceForPlayer - REWARD_THRESHOLD));
-                player.sendTitle("Bonus experience!",
-                        "%s experience received".formatted(additional),
-                        10,
-                        70,
-                        20);
+                if (requireNonNull(config.getString("experience.showmessage")).equals("enabled")) {
+                    player.sendTitle("Bonus experience!",
+                            "%s experience received".formatted(additional),
+                            10,
+                            70,
+                            20);
+                }
             }
         }
     }

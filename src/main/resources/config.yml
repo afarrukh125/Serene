@@ -5,3 +5,7 @@ features:
   1psleep: enabled
   veinbreaker: enabled
   treebreaker: enabled
+
+
+experience:
+  showmessage: enabled

@@ -48,18 +48,20 @@ public class InventorySorter {
                 boolean usedFeather = playerInteractEvent.hasItem() && requireNonNull(playerInteractEvent.getItem()).getType().equals(Material.FEATHER);
                 if (rightClicked && usedFeather && sneaking) {
                     var chest = (Chest) playerInteractEvent.getClickedBlock().getState();
-                    var organisedMaterialGroups = getOrganisedGroups(chest);
-                    var inventory = chest.getInventory();
-                    var location = inventory.getLocation();
-                    int colSize = inventory.getContents().length == SMALL_CHEST_SIZE ? SMALL_CHEST_COL_SIZE : LARGE_CHEST_COL_SIZE;
-                    var newItemStacks = generateFinalSortedItemStacks(organisedMaterialGroups,
-                            colSize,
-                            location);
-                    inventory.setContents(newItemStacks);
-                    playerInteractEvent.getPlayer().getWorld().playSound(requireNonNull(location),
-                            Sound.BLOCK_CONDUIT_ACTIVATE,
-                            1,
-                            1);
+                    if (!chest.getInventory().isEmpty()) {
+                        var organisedMaterialGroups = getOrganisedGroups(chest);
+                        var inventory = chest.getInventory();
+                        var location = inventory.getLocation();
+                        int colSize = inventory.getContents().length == SMALL_CHEST_SIZE ? SMALL_CHEST_COL_SIZE : LARGE_CHEST_COL_SIZE;
+                        var newItemStacks = generateFinalSortedItemStacks(organisedMaterialGroups,
+                                colSize,
+                                location);
+                        inventory.setContents(newItemStacks);
+                        playerInteractEvent.getPlayer().getWorld().playSound(requireNonNull(location),
+                                Sound.BLOCK_CONDUIT_ACTIVATE,
+                                1,
+                                1);
+                    }
                 }
             }
         }

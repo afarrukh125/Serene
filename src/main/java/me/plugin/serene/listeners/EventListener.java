@@ -6,7 +6,6 @@ import me.plugin.serene.actions.SleepHandler;
 import me.plugin.serene.actions.TreeBreaker;
 import me.plugin.serene.actions.VeinBreaker;
 import me.plugin.serene.database.SereneDatabaseClient;
-import me.plugin.serene.util.Utils;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -16,7 +15,6 @@ import org.bukkit.event.player.PlayerBedLeaveEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-import static java.util.Objects.requireNonNull;
 import static me.plugin.serene.util.Utils.isFeatureEnabledInConfig;
 
 public class EventListener implements Listener {
@@ -29,7 +27,7 @@ public class EventListener implements Listener {
     private final InventorySorter inventorySorter;
 
     public EventListener(SereneDatabaseClient databaseClient, FileConfiguration config) {
-        this.experienceHandler = new ExperienceHandler(databaseClient);
+        this.experienceHandler = new ExperienceHandler(databaseClient, config);
         this.veinBreaker = new VeinBreaker(databaseClient);
         this.treeBreaker = new TreeBreaker();
         this.sleepHandler = new SleepHandler();

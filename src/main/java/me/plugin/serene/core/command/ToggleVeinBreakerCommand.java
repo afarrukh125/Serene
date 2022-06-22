@@ -3,20 +3,25 @@ package me.plugin.serene.core.command;
 
 import me.plugin.serene.database.SereneDatabaseClient;
 import me.plugin.serene.exceptions.SereneCommandException;
+import me.plugin.serene.util.Utils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
 
 import static java.util.Objects.requireNonNull;
+import static me.plugin.serene.util.Utils.isFeatureEnabledInConfig;
 
 public class ToggleVeinBreakerCommand implements CommandExecutor {
 
     private static final String NAME = "veinbreaker";
 
     private final SereneDatabaseClient database;
+    private final FileConfiguration config;
 
-    public ToggleVeinBreakerCommand(SereneDatabaseClient database) {
+    public ToggleVeinBreakerCommand(SereneDatabaseClient database, FileConfiguration config) {
         this.database = database;
+        this.config = config;
     }
 
     private boolean parseParam(String param) throws SereneCommandException {
@@ -29,6 +34,10 @@ public class ToggleVeinBreakerCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if(!isFeatureEnabledInConfig(config, "veinbreaker")) {
+            sender.sendMessage("Veinbreaker is disabled on this server");
+            return true;
+        }
         if (args.length == 0)
             sender.sendMessage("Usage: %s (on|off) ".formatted(NAME));
         String param = args[0];

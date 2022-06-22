@@ -1,0 +1,7 @@
+features:
+  # Set to disabled to disable a particular module
+  experience: enabled
+  inventorysort: enabled
+  1psleep: enabled
+  veinbreaker: enabled
+  treebreaker: enabled

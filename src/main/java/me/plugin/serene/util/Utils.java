@@ -4,11 +4,14 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 
 import java.util.concurrent.ThreadLocalRandom;
+
+import static java.util.Objects.requireNonNull;
 
 public class Utils {
     public static boolean shouldTakeDamage(int unbreakingLevel) {
@@ -38,5 +41,9 @@ public class Utils {
             return true;
         }
         return false;
+    }
+
+    public static boolean isFeatureEnabledInConfig(FileConfiguration config, String ymlPath) {
+        return requireNonNull(config.get("features." + ymlPath)).equals("enabled");
     }
 }

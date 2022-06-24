@@ -3,6 +3,7 @@ package me.plugin.serene.actions;
 import com.google.common.collect.ImmutableMap;
 import me.plugin.serene.database.SereneDatabaseClient;
 import me.plugin.serene.util.ExperienceData;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -11,6 +12,7 @@ import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 
@@ -165,8 +167,10 @@ public class VeinBreaker {
         }
         if (exp > 0) {
             world.playSound(originalBlockLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 1.25f);
+            Player player = blockBreakEvent.getPlayer();
+            player.giveExp(exp);
+            Bukkit.getPluginManager().callEvent(new PlayerExpChangeEvent(player, exp));
         }
-        blockBreakEvent.getPlayer().giveExp(exp);
     }
 
 }

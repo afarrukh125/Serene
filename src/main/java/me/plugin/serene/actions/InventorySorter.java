@@ -59,7 +59,7 @@ public class InventorySorter {
                         inventory.setContents(newItemStacks);
                         playerInteractEvent.getPlayer().getWorld().playSound(requireNonNull(location),
                                 Sound.BLOCK_CONDUIT_ACTIVATE,
-                                1,
+                                0.7f,
                                 1);
                     }
                 }

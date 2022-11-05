@@ -20,8 +20,8 @@ public class SleepHandler {
     public void handleEvent(PlayerBedEnterEvent playerBedEnterEvent) {
 
         if (playerBedEnterEvent.getBedEnterResult().equals(PlayerBedEnterEvent.BedEnterResult.OK)) {
-//            if (playerBedEnterEvent.getPlayer().getWorld().getPlayers().size() == 1)
-//                return;
+            if (playerBedEnterEvent.getPlayer().getWorld().getPlayers().size() == 1)
+                return;
             var sleepingPlayer = playerBedEnterEvent.getPlayer();
             var players = playerBedEnterEvent.getBed().getWorld().getPlayers();
             for (var player : players) {

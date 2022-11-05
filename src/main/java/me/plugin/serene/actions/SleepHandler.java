@@ -4,7 +4,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
 
-import java.awt.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Objects.requireNonNull;
@@ -14,11 +13,15 @@ public class SleepHandler {
 
     private AtomicReference<Player> atomicPlayerReference;
 
+    public SleepHandler() {
+        this.atomicPlayerReference = new AtomicReference<>();
+    }
+
     public void handleEvent(PlayerBedEnterEvent playerBedEnterEvent) {
 
         if (playerBedEnterEvent.getBedEnterResult().equals(PlayerBedEnterEvent.BedEnterResult.OK)) {
-            if (playerBedEnterEvent.getPlayer().getWorld().getPlayers().size() == 1)
-                return;
+//            if (playerBedEnterEvent.getPlayer().getWorld().getPlayers().size() == 1)
+//                return;
             var sleepingPlayer = playerBedEnterEvent.getPlayer();
             var players = playerBedEnterEvent.getBed().getWorld().getPlayers();
             for (var player : players) {
@@ -49,7 +52,7 @@ public class SleepHandler {
         var world = requireNonNull(sleepingPlayer.getWorld());
         var players = world.getPlayers();
         for (var p : players)
-            p.sendMessage(Color.GREEN + sleepingPlayerName + " has triggered sleep");
+            p.sendMessage(sleepingPlayerName + " has triggered sleep");
     }
 
 

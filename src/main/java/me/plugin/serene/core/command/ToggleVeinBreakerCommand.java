@@ -3,7 +3,6 @@ package me.plugin.serene.core.command;
 
 import me.plugin.serene.database.SereneDatabaseClient;
 import me.plugin.serene.exceptions.SereneCommandException;
-import me.plugin.serene.util.Utils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -22,14 +21,6 @@ public class ToggleVeinBreakerCommand implements CommandExecutor {
     public ToggleVeinBreakerCommand(SereneDatabaseClient database, FileConfiguration config) {
         this.database = database;
         this.config = config;
-    }
-
-    private boolean parseParam(String param) throws SereneCommandException {
-        return switch (param.toLowerCase()) {
-            case "enabled", "on" -> true;
-            case "disabled", "off" -> false;
-            default -> throw new SereneCommandException("Please enter on or off as a parameter");
-        };
     }
 
     @Override
@@ -52,5 +43,13 @@ public class ToggleVeinBreakerCommand implements CommandExecutor {
             sender.sendMessage("Only players in game can invoke this command");
         }
         return true;
+    }
+
+    private boolean parseParam(String param) throws SereneCommandException {
+        return switch (param.toLowerCase()) {
+            case "enabled", "on" -> true;
+            case "disabled", "off" -> false;
+            default -> throw new SereneCommandException("Please enter on or off as a parameter");
+        };
     }
 }

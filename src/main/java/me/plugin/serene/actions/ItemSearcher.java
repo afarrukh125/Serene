@@ -71,10 +71,14 @@ public class ItemSearcher {
             }
 
             if (!foundChests.isEmpty()) {
-                player.sendMessage("Found chests with item %s (Marked with green particle effect)".formatted(targetMaterial));
+                if (foundChests.stream().anyMatch(c -> (c.getLocation().getY() > player.getLocation().getY()) || (c.getLocation().getY() < player.getLocation().getY()))) {
+                    player.sendMessage("Found chests with item %s (Marked with green particle effect, may be above/below you)".formatted(targetMaterial));
+                } else {
+                    player.sendMessage("Found chests with item %s (Marked with green particle effect)".formatted(targetMaterial));
+                }
                 for (Chest chest : foundChests) {
                     player.playEffect(chest.getLocation(), Effect.BONE_MEAL_USE, 35);
-                    player.playSound(chest.getLocation(), Sound.BLOCK_CHEST_LOCKED, 0.7f, 1f);
+                    player.playSound(chest.getLocation(), Sound.BLOCK_CHEST_LOCKED, 0.45f, 0.25f);
                 }
             } else {
                 player.sendMessage("Found no chests nearby with item %s".formatted(targetMaterial));

@@ -20,14 +20,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.Runtime.getRuntime;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.synchronizedList;
 import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.stream.Collectors.groupingBy;
 
 public class InventorySorter {
@@ -75,7 +74,7 @@ public class InventorySorter {
                 .filter(Objects::nonNull)
                 .collect(groupingBy(ItemStack::getType));
 
-        ExecutorService executorService = Executors.newFixedThreadPool(getRuntime().availableProcessors() * 2);
+        var executorService = newFixedThreadPool(getRuntime().availableProcessors() * 2);
         List<MaterialItemStack> reorganisedStacks = synchronizedList(new ArrayList<>());
         for (var material : itemsToStacks.keySet()) {
             executorService.execute(() -> {

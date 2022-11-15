@@ -6,7 +6,7 @@
 
     <groupId>me.plugin</groupId>
     <artifactId>serene</artifactId>
-    <version>1.0</version>
+    <version>1.2</version>
 
     <repositories>
         <repository>

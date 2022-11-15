@@ -35,7 +35,9 @@ public class ExperienceHandler {
                 playerExpChangeEvent.setAmount(finalAmount);
                 databaseClient.setExperienceForPlayer(player, Math.max(0, experienceForPlayer - REWARD_THRESHOLD));
                 if (requireNonNull(config.getString("experience.showmessage")).equals("enabled")) {
-                    player.sendMessage("A bonus of %s experience received!".formatted(additional));
+                    player.sendMessage("A bonus of %s experience received (Level %d/%d)!".formatted(additional,
+                            level,
+                            MAXIMUM_LEVEL_FOR_BONUS));
                 }
             }
         }

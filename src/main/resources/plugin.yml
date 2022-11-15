@@ -1,5 +1,5 @@
 main: me.plugin.serene.core.Serene
-version: 1.1
+version: 1.2
 name: serene
 api-version: 1.19
 

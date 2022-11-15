@@ -6,7 +6,10 @@ api-version: 1.19
 commands:
   veinbreaker:
     description: Toggle veinbreaker on/off
-    usage: /veinbreaker (on|off)
+    usage: /veinbreaker <on|off>
   vb:
     description: Toggle veinbreaker on/off
-    usage: /vb (on|off)
+    usage: /vb <on|off>
+  search:
+    description: Search for an item
+    usage: /search <item name>

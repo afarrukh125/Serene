@@ -3,6 +3,7 @@ package me.plugin.serene.actions;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
@@ -70,9 +71,10 @@ public class ItemSearcher {
             }
 
             if (!foundChests.isEmpty()) {
-                player.sendMessage("Found %d chests with item %s (Marked with green particle effect)".formatted(foundChests.size(), targetMaterial));
+                player.sendMessage("Found chests with item %s (Marked with green particle effect)".formatted(targetMaterial));
                 for (Chest chest : foundChests) {
                     player.playEffect(chest.getLocation(), Effect.BONE_MEAL_USE, 35);
+                    player.playSound(chest.getLocation(), Sound.BLOCK_CHEST_LOCKED, 0.7f, 1f);
                 }
             } else {
                 player.sendMessage("Found no chests nearby with item %s".formatted(targetMaterial));
@@ -82,6 +84,10 @@ public class ItemSearcher {
     }
 
     private Optional<Material> parseTargetMaterialFromParam(String targetItemParam) {
-        return Optional.ofNullable(Material.matchMaterial(targetItemParam));
+        Optional<Material> material = Optional.ofNullable(Material.matchMaterial(targetItemParam));
+        if (material.isEmpty()) {
+            return Optional.ofNullable(Material.matchMaterial(targetItemParam, true));
+        }
+        return material;
     }
 }

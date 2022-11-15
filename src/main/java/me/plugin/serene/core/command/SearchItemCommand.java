@@ -28,7 +28,7 @@ import static java.util.Objects.requireNonNull;
 
 public class SearchItemCommand implements CommandExecutor {
 
-    private static final double MAX_DISTANCE_TO_SEARCH = 5;
+    private static final double MAX_DISTANCE_TO_SEARCH = 10;
     private final FileConfiguration configuration;
 
     private static final Logger LOG = LoggerFactory.getLogger(SearchItemCommand.class);
@@ -74,7 +74,7 @@ public class SearchItemCommand implements CommandExecutor {
 
             LOG.info("Found {} chests with item {}", foundChests.size(), targetMaterial);
             for (Chest chest : foundChests) {
-                player.playEffect(chest.getLocation(), Effect.BONE_MEAL_USE, 10);
+                player.playEffect(chest.getLocation(), Effect.BONE_MEAL_USE, 35);
             }
         }, () -> player.sendMessage("Could not match %s to an item".formatted(targetItemParam)));
         return true;

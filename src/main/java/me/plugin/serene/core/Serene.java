@@ -1,6 +1,7 @@
 package me.plugin.serene.core;
 
 import me.plugin.serene.core.command.SearchItemCommand;
+import me.plugin.serene.core.command.StatsCommand;
 import me.plugin.serene.core.command.ToggleVeinBreakerCommand;
 import me.plugin.serene.database.SereneDatabaseClient;
 import me.plugin.serene.listeners.EventListener;
@@ -31,5 +32,6 @@ public class Serene extends JavaPlugin {
         requireNonNull(this.getCommand("veinbreaker")).setExecutor(new ToggleVeinBreakerCommand(databaseClient, config));
         requireNonNull(this.getCommand("vb")).setExecutor(new ToggleVeinBreakerCommand(databaseClient, config));
         requireNonNull(this.getCommand("search")).setExecutor(new SearchItemCommand(config));
+        requireNonNull(this.getCommand("stats")).setExecutor(new StatsCommand());
     }
 }

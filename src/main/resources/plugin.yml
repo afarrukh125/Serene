@@ -13,3 +13,6 @@ commands:
   search:
     description: Search for an item
     usage: /search <item name>
+  stats:
+    description: View death leaderboard
+    usage: /stats

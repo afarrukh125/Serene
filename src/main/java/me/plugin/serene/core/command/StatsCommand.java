@@ -14,11 +14,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import static java.lang.Runtime.getRuntime;
+import static java.util.concurrent.Executors.newFixedThreadPool;
 
 public class StatsCommand implements CommandExecutor {
 
@@ -28,26 +28,14 @@ public class StatsCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        Map<Statistic, String> results = new ConcurrentHashMap<>();
-        var executor = Executors.newFixedThreadPool(getRuntime().availableProcessors() * 2);
+        Map<Statistic, String> resultStrings = new ConcurrentHashMap<>();
+        var executor = newFixedThreadPool(getRuntime().availableProcessors() * 2);
+        Server server = sender.getServer();
+        OfflinePlayer[] allPlayers = server.getOfflinePlayers();
         for (Statistic statistic : Arrays.stream(Statistic.values()).filter(s -> !s.isSubstatistic()).toList()) {
             executor.submit(() -> {
-
-                Server server = sender.getServer();
-                OfflinePlayer[] allPlayers = server.getOfflinePlayers();
-                StringBuilder sb = new StringBuilder();
-                LOG.info("Using thread {} for statistic {}", Thread.currentThread().getName(), statistic);
-                List<OfflinePlayer> players = Arrays.stream(allPlayers)
-                        .sorted((o1, o2) -> o2.getStatistic(statistic) - o1.getStatistic(statistic))
-                        .limit(LEADERBOARD_LIMIT)
-                        .toList();
-
-                int rank = 1;
-                for (OfflinePlayer player : players) {
-                    int result = parseStatistic(statistic, player);
-                    sb.append("%d. %s - %d\n".formatted(rank++, player.getName(), result));
-                }
-                results.put(statistic, sb.toString().trim());
+                String leaderboardString = getLeaderBoardStringForStatistic(statistic, allPlayers);
+                resultStrings.put(statistic, leaderboardString.trim());
             });
         }
         executor.shutdown();
@@ -56,11 +44,27 @@ public class StatsCommand implements CommandExecutor {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        results.keySet().stream()
+        resultStrings.keySet().stream()
                 .sorted(Comparator.comparing(Enum::name))
-                .map(s -> "\n" + statisticToName(s) + "\n" + results.get(s))
+                .map(s -> "\n" + statisticToName(s) + "\n" + resultStrings.get(s))
                 .forEach(System.out::println);
         return true;
+    }
+
+    private static String getLeaderBoardStringForStatistic(Statistic statistic, OfflinePlayer[] allPlayers) {
+        StringBuilder sb = new StringBuilder();
+        LOG.info("Using thread {} for statistic {}", Thread.currentThread().getName(), statistic);
+        List<OfflinePlayer> players = Arrays.stream(allPlayers)
+                .sorted((o1, o2) -> o2.getStatistic(statistic) - o1.getStatistic(statistic))
+                .limit(LEADERBOARD_LIMIT)
+                .toList();
+
+        int rank = 1;
+        for (OfflinePlayer player : players) {
+            int result = parseStatistic(statistic, player);
+            sb.append("%d. %s - %d\n".formatted(rank++, player.getName(), result));
+        }
+        return sb.toString();
     }
 
     private static String statisticToName(Statistic statistic) {

@@ -30,7 +30,7 @@ public class DeathStatistic implements CustomStatistic {
 
     @Override
     public Optional<String> customMessage(double value) {
-        return Optional.empty();
+        return Optional.of("You have %.0f deaths".formatted(value));
     }
 
     @Override

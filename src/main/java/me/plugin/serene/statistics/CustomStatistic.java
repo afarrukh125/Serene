@@ -2,6 +2,7 @@ package me.plugin.serene.statistics;
 
 import org.bukkit.Statistic;
 
+import java.util.Optional;
 import java.util.Set;
 
 public interface CustomStatistic {
@@ -9,7 +10,9 @@ public interface CustomStatistic {
 
     Set<String> getAliases();
 
-    double translateToReadableValue(double original);
+    double readableValue(double original);
 
     String getMessageSubject();
+
+    Optional<String> customMessage(double value);
 }

@@ -2,6 +2,7 @@ package me.plugin.serene.statistics;
 
 import org.bukkit.Statistic;
 
+import java.util.Optional;
 import java.util.Set;
 
 public class TimePlayedStatistic implements CustomStatistic {
@@ -28,7 +29,12 @@ public class TimePlayedStatistic implements CustomStatistic {
     }
 
     @Override
-    public double translateToReadableValue(double original) {
+    public Optional<String> customMessage(double value) {
+        return Optional.of("You have %.2f hours played".formatted(value));
+    }
+
+    @Override
+    public double readableValue(double original) {
         return original / 20 / 60 / 60;
     }
 }

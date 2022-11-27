@@ -2,6 +2,7 @@ package me.plugin.serene.statistics;
 
 import org.bukkit.Statistic;
 
+import java.util.Optional;
 import java.util.Set;
 
 public class DeathStatistic implements CustomStatistic {
@@ -23,8 +24,13 @@ public class DeathStatistic implements CustomStatistic {
     }
 
     @Override
-    public double translateToReadableValue(double original) {
+    public double readableValue(double original) {
         return original;
+    }
+
+    @Override
+    public Optional<String> customMessage(double value) {
+        return Optional.empty();
     }
 
     @Override

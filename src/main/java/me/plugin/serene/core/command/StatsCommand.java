@@ -26,16 +26,20 @@ public class StatsCommand implements CommandExecutor {
         String statName = String.join(" ", args);
         CustomStatistic statistic = statisticsRepository.getStatisticForString(statName);
         Server server = sender.getServer();
-        if (statistic == null) {
-            sender.sendMessage("Unknown statistic %s".formatted(statName));
+        Player player = server.getPlayer(sender.getName());
+        if (player == null) {
+            sender.sendMessage("Cannot execute this command from console");
         } else {
-            Statistic originalStatistic = statistic.getStatistic();
-            Player player = server.getPlayer(sender.getName());
-            if (player == null) {
-                sender.sendMessage("Cannot execute this command from console");
+            if (statistic == null) {
+                sender.sendMessage("Unknown statistic %s".formatted(statName));
             } else {
+                Statistic originalStatistic = statistic.getStatistic();
+
                 int statValue = player.getStatistic(originalStatistic);
-                sender.sendMessage("You have %d %s".formatted(statValue, statistic.getMessageSubject()));
+                double readableValue = statistic.readableValue(statValue);
+                statistic.customMessage(statValue).ifPresentOrElse(sender::sendMessage,
+                        () -> sender.sendMessage("You have %f %s".formatted(readableValue, statistic.getMessageSubject())));
+
             }
         }
         return true;

@@ -18,7 +18,7 @@ class StatisticsRepositoryTest {
 
         CustomStatistic deaths = statisticsRepository.getStatisticForString(DeathStatistic.MAIN_NAME);
         assertThat(deaths.getStatistic()).isEqualTo(Statistic.DEATHS);
-        assertThat(statisticsRepository.getStatisticForString(DeathStatistic.MAIN_NAME).readableValue(5.)).isEqualTo(5.);
+        assertThat(statisticsRepository.getStatisticForString(DeathStatistic.MAIN_NAME).translateValue(5.)).isEqualTo(5.);
     }
 
     @Test
@@ -28,7 +28,7 @@ class StatisticsRepositoryTest {
 
         CustomStatistic timePlayed = statisticsRepository.getStatisticForString("playtime");
         assertThat(timePlayed.getStatistic()).isEqualTo(Statistic.PLAY_ONE_MINUTE);
-        assertThat(timePlayed.readableValue(2376000)).isEqualTo(33);
+        assertThat(timePlayed.translateValue(2376000)).isEqualTo(33);
     }
 
 }

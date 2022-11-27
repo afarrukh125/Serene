@@ -36,9 +36,9 @@ public class StatsCommand implements CommandExecutor {
                 Statistic originalStatistic = statistic.getStatistic();
 
                 int statValue = player.getStatistic(originalStatistic);
-                double readableValue = statistic.readableValue(statValue);
-                statistic.customMessage(statValue).ifPresentOrElse(sender::sendMessage,
-                        () -> sender.sendMessage("You have %f %s".formatted(readableValue, statistic.getMessageSubject())));
+                double translatedValue = statistic.translateValue(statValue);
+                statistic.customMessage(translatedValue).ifPresentOrElse(sender::sendMessage,
+                        () -> sender.sendMessage("You have %f %s".formatted(translatedValue, statistic.getMessageSubject())));
 
             }
         }

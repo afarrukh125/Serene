@@ -34,7 +34,7 @@ public class TimePlayedStatistic implements CustomStatistic {
     }
 
     @Override
-    public double readableValue(double original) {
+    public double translateValue(double original) {
         return original / 20 / 60 / 60;
     }
 }

@@ -10,7 +10,7 @@ public interface CustomStatistic {
 
     Set<String> getAliases();
 
-    double readableValue(double original);
+    double translateValue(double original);
 
     String getMessageSubject();
 

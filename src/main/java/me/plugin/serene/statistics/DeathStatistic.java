@@ -24,7 +24,7 @@ public class DeathStatistic implements CustomStatistic {
     }
 
     @Override
-    public double readableValue(double original) {
+    public double translateValue(double original) {
         return original;
     }
 

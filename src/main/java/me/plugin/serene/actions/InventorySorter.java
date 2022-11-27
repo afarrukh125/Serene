@@ -5,7 +5,9 @@ import me.plugin.serene.model.MaterialItemStack;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
+import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
@@ -36,27 +38,29 @@ public class InventorySorter {
     public static final int SMALL_CHEST_COL_SIZE = 3;
     public static final int SMALL_CHEST_SIZE = 27;
     private final Set<Location> seenChestLocations = new HashSet<>();
+    private static final Set<Material> CHEST_MATERIALS = Set.of(Material.CHEST, Material.ENDER_CHEST);
 
     public void handleEvent(PlayerInteractEvent playerInteractEvent) {
 
         if (playerInteractEvent.getClickedBlock() != null) {
-            boolean wasChest = requireNonNull(playerInteractEvent.getClickedBlock()).getType().equals(Material.CHEST);
+            Block block = requireNonNull(playerInteractEvent.getClickedBlock());
+            Player player = playerInteractEvent.getPlayer();
+            boolean wasChest = CHEST_MATERIALS.contains(block.getType());
             if (wasChest) {
-                boolean sneaking = playerInteractEvent.getPlayer().isSneaking();
+                boolean sneaking = player.isSneaking();
                 boolean rightClicked = playerInteractEvent.getAction().equals(Action.RIGHT_CLICK_BLOCK);
                 boolean usedFeather = playerInteractEvent.hasItem() && requireNonNull(playerInteractEvent.getItem()).getType().equals(Material.FEATHER);
                 if (rightClicked && usedFeather && sneaking) {
-                    var chest = (Chest) playerInteractEvent.getClickedBlock().getState();
-                    if (!chest.getInventory().isEmpty()) {
-                        var organisedMaterialGroups = getOrganisedGroups(chest);
-                        var inventory = chest.getInventory();
-                        var location = inventory.getLocation();
+                    Inventory inventory = translateInventoryFromBlockType(block, player);
+                    if (!inventory.isEmpty()) {
+                        var organisedMaterialGroups = getOrganisedGroups(inventory);
+                        var location = block.getLocation();
                         int colSize = inventory.getContents().length == SMALL_CHEST_SIZE ? SMALL_CHEST_COL_SIZE : LARGE_CHEST_COL_SIZE;
                         var newItemStacks = generateFinalSortedItemStacks(organisedMaterialGroups,
                                 colSize,
                                 location);
                         inventory.setContents(newItemStacks);
-                        playerInteractEvent.getPlayer().getWorld().playSound(requireNonNull(location),
+                        player.getWorld().playSound(requireNonNull(location),
                                 Sound.BLOCK_CONDUIT_ACTIVATE,
                                 0.7f,
                                 1);
@@ -66,10 +70,20 @@ public class InventorySorter {
         }
     }
 
+    private Inventory translateInventoryFromBlockType(Block block, Player player) {
+        Material type = block.getType();
+        switch (type) {
+            case CHEST:
+                return ((Chest) block.getState()).getInventory();
+            case ENDER_CHEST:
+                return player.getEnderChest();
+        }
+        throw new IllegalArgumentException("Unknown block type to translate to inventory %s".formatted(block.getType()));
+    }
+
 
     // Collates all unorganised items into groups
-    private List<MaterialItemStack> getOrganisedGroups(Chest chest) {
-        Inventory inventory = chest.getInventory();
+    private List<MaterialItemStack> getOrganisedGroups(Inventory inventory) {
         var itemsToStacks = Arrays.stream(inventory.getContents())
                 .filter(Objects::nonNull)
                 .collect(groupingBy(ItemStack::getType));

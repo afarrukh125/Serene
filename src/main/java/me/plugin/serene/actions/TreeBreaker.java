@@ -114,7 +114,7 @@ public class TreeBreaker {
             }
         }
         // Do not break random stack of logs with no leaves (might be a building with a stack of logs somewhere)
-        if (leaves.size() > 0) {
+        if (!leaves.isEmpty()) {
             breakWithDamageAwareness(blockBreakEvent, item, world, seenLogs, originalBlockLocation);
         }
     }

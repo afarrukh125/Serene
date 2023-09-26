@@ -12,7 +12,6 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,11 +23,10 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static java.lang.Runtime.getRuntime;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.synchronizedList;
 import static java.util.Objects.requireNonNull;
-import static java.util.concurrent.Executors.newFixedThreadPool;
+import static java.util.concurrent.Executors.newVirtualThreadPerTaskExecutor;
 import static java.util.stream.Collectors.groupingBy;
 
 public class InventorySorter {
@@ -87,46 +85,49 @@ public class InventorySorter {
         var itemsToStacks =
                 Arrays.stream(inventory.getContents()).filter(Objects::nonNull).collect(groupingBy(ItemStack::getType));
 
-        var executorService = newFixedThreadPool(getRuntime().availableProcessors() * 2);
-        List<MaterialItemStack> reorganisedStacks = synchronizedList(new ArrayList<>());
-        for (var material : itemsToStacks.keySet()) {
-            executorService.execute(() -> {
-                LinkedList<ItemStack> allStacks = new LinkedList<>();
-                var groupedByMeta = itemsToStacks.get(material).stream().collect(groupingBy(ItemStack::getItemMeta));
-                for (ItemMeta itemMeta : groupedByMeta.keySet()) {
-                    int currentCount = 0;
-                    int maxSize = material.getMaxStackSize();
-                    var itemStacks = new LinkedList<>(groupedByMeta.get(itemMeta));
-                    ItemStack next = null;
-                    while (!itemStacks.isEmpty()) {
-                        next = itemStacks.poll();
-                        if (next.getAmount() == maxSize) {
-                            allStacks.add(next);
-                        } else {
-                            currentCount += next.getAmount();
-                            if (currentCount >= maxSize) {
-                                next.setAmount(maxSize);
+        List<MaterialItemStack> reorganisedStacks;
+        try (var executorService = newVirtualThreadPerTaskExecutor()) {
+            reorganisedStacks = synchronizedList(new ArrayList<>());
+            for (var material : itemsToStacks.keySet()) {
+                executorService.execute(() -> {
+                    LinkedList<ItemStack> allStacks = new LinkedList<>();
+                    var groupedByMeta =
+                            itemsToStacks.get(material).stream().collect(groupingBy(ItemStack::getItemMeta));
+                    for (var itemMeta : groupedByMeta.keySet()) {
+                        int currentCount = 0;
+                        int maxSize = material.getMaxStackSize();
+                        var itemStacks = new LinkedList<>(groupedByMeta.get(itemMeta));
+                        ItemStack next = null;
+                        while (!itemStacks.isEmpty()) {
+                            next = itemStacks.poll();
+                            if (next.getAmount() == maxSize) {
                                 allStacks.add(next);
-                                currentCount = currentCount - maxSize;
+                            } else {
+                                currentCount += next.getAmount();
+                                if (currentCount >= maxSize) {
+                                    next.setAmount(maxSize);
+                                    allStacks.add(next);
+                                    currentCount = currentCount - maxSize;
+                                }
                             }
                         }
+                        if (currentCount > 0) {
+                            ItemStack finalStack = next.clone();
+                            finalStack.setAmount(currentCount);
+                            allStacks.add(finalStack);
+                        }
                     }
-                    if (currentCount > 0) {
-                        ItemStack finalStack = next.clone();
-                        finalStack.setAmount(currentCount);
-                        allStacks.add(finalStack);
-                    }
-                }
-                reorganisedStacks.add(new MaterialItemStack(material, allStacks));
-            });
-        }
+                    reorganisedStacks.add(new MaterialItemStack(material, allStacks));
+                });
+            }
 
-        executorService.shutdown();
-        try {
-            //noinspection ResultOfMethodCallIgnored
-            executorService.awaitTermination(1, TimeUnit.MINUTES);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            executorService.shutdown();
+            try {
+                //noinspection ResultOfMethodCallIgnored
+                executorService.awaitTermination(1, TimeUnit.MINUTES);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
         // Place the biggest stacks first
         reorganisedStacks.sort(

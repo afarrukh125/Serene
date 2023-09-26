@@ -19,12 +19,12 @@ public class SleepHandler {
     }
 
     public void handleEvent(PlayerBedEnterEvent playerBedEnterEvent) {
-        World world = playerBedEnterEvent.getPlayer().getWorld();
-        if (world.getPlayers().size() != 1
+        var targetWorld = playerBedEnterEvent.getPlayer().getWorld();
+        if (targetWorld.getPlayers().size() != 1
                 && playerBedEnterEvent.getBedEnterResult().equals(PlayerBedEnterEvent.BedEnterResult.OK)
-                && world.getEnvironment().equals(World.Environment.NORMAL)) {
+                && targetWorld.getEnvironment().equals(World.Environment.NORMAL)) {
             var sleepingPlayer = playerBedEnterEvent.getPlayer();
-            world.getPlayers().stream()
+            targetWorld.getPlayers().stream()
                     .filter(player -> !player.equals(sleepingPlayer))
                     .forEach(player -> player.setSleepingIgnored(false));
             atomicPlayerReference.set(sleepingPlayer);
@@ -58,5 +58,4 @@ public class SleepHandler {
             p.sendMessage(sleepingPlayerName + " has triggered sleep");
         }
     }
-
 }

@@ -1,5 +1,7 @@
 package me.plugin.serene.actions;
 
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
@@ -9,7 +11,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import static java.util.Objects.requireNonNull;
 
 public class SleepHandler {
-    private static final int FULL_DAY_TIME = 24000;
 
     private AtomicReference<Player> atomicPlayerReference;
 
@@ -18,12 +19,12 @@ public class SleepHandler {
     }
 
     public void handleEvent(PlayerBedEnterEvent playerBedEnterEvent) {
-        if (playerBedEnterEvent.getBedEnterResult().equals(PlayerBedEnterEvent.BedEnterResult.OK)) {
-            if (playerBedEnterEvent.getPlayer().getWorld().getPlayers().size() == 1) {
-                return;
-            }
+        World world = playerBedEnterEvent.getPlayer().getWorld();
+        if (world.getPlayers().size() != 1
+                && playerBedEnterEvent.getBedEnterResult().equals(PlayerBedEnterEvent.BedEnterResult.OK)
+                && world.getEnvironment().equals(World.Environment.NORMAL)) {
             var sleepingPlayer = playerBedEnterEvent.getPlayer();
-            playerBedEnterEvent.getBed().getWorld().getPlayers().stream()
+            world.getPlayers().stream()
                     .filter(player -> !player.equals(sleepingPlayer))
                     .forEach(player -> player.setSleepingIgnored(false));
             atomicPlayerReference.set(sleepingPlayer);
@@ -32,16 +33,19 @@ public class SleepHandler {
     }
 
     public void handleEvent(PlayerBedLeaveEvent playerBedLeaveEvent) {
-        if (playerBedLeaveEvent.getPlayer().getWorld().getPlayers().size() == 1) {
-            return;
-        }
-        var sleepingPlayer = playerBedLeaveEvent.getPlayer();
-        if (playerBedLeaveEvent.isCancelled() && atomicPlayerReference.get().equals(sleepingPlayer)) {
-            atomicPlayerReference = new AtomicReference<>();
-        }
-        var players = playerBedLeaveEvent.getBed().getWorld().getPlayers();
-        for (var player : players) {
-            player.setSleepingIgnored(false);
+        var targetWorld = playerBedLeaveEvent.getPlayer().getWorld();
+        if (targetWorld.getPlayers().size() != 1 && targetWorld.getEnvironment().equals(World.Environment.NORMAL)) {
+            var sleepingPlayer = playerBedLeaveEvent.getPlayer();
+            if (playerBedLeaveEvent.isCancelled() && atomicPlayerReference.get().equals(sleepingPlayer)) {
+                atomicPlayerReference = new AtomicReference<>();
+            }
+            var players = targetWorld.getPlayers();
+            for (var player : players) {
+                player.setSleepingIgnored(false);
+            }
+            Bukkit.getServer().getWorlds().stream()
+                    .filter(world -> !world.getEnvironment().equals(targetWorld.getEnvironment()))
+                    .forEach(world -> world.setFullTime(targetWorld.getFullTime()));
         }
     }
 
@@ -55,8 +59,4 @@ public class SleepHandler {
         }
     }
 
-    public static long nextDayFullTime(long currentTime) {
-        var daysElapsed = currentTime / FULL_DAY_TIME;
-        return (daysElapsed + 1) * FULL_DAY_TIME;
-    }
 }

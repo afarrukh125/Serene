@@ -21,10 +21,8 @@ public final class ExperienceData {
     public static synchronized ExperienceData withMinMaxExp(int minExp, int maxExp) {
         ExperienceData key = new ExperienceData(minExp, maxExp);
         ExperienceData existing = pool.get(key);
-        if (existing != null)
-            return existing;
-        else
-            pool.put(key, key);
+        if (existing != null) return existing;
+        else pool.put(key, key);
         return key;
     }
 
@@ -54,5 +52,4 @@ public final class ExperienceData {
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
     }
-
 }

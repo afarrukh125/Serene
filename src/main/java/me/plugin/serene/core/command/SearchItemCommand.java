@@ -6,21 +6,12 @@ import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import static java.lang.String.join;
 import static java.util.Objects.requireNonNull;
 
 public class SearchItemCommand implements CommandExecutor {
-
-
-    private final FileConfiguration configuration;
-
-
-    public SearchItemCommand(FileConfiguration configuration) {
-        this.configuration = configuration;
-    }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {

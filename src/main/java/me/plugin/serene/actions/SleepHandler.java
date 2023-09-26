@@ -18,43 +18,42 @@ public class SleepHandler {
     }
 
     public void handleEvent(PlayerBedEnterEvent playerBedEnterEvent) {
-
         if (playerBedEnterEvent.getBedEnterResult().equals(PlayerBedEnterEvent.BedEnterResult.OK)) {
-            if (playerBedEnterEvent.getPlayer().getWorld().getPlayers().size() == 1)
+            if (playerBedEnterEvent.getPlayer().getWorld().getPlayers().size() == 1) {
                 return;
-            var sleepingPlayer = playerBedEnterEvent.getPlayer();
-            var players = playerBedEnterEvent.getBed().getWorld().getPlayers();
-            for (var player : players) {
-                if (!player.equals(sleepingPlayer))
-                    player.setSleepingIgnored(true);
             }
+            var sleepingPlayer = playerBedEnterEvent.getPlayer();
+            playerBedEnterEvent.getBed().getWorld().getPlayers().stream()
+                    .filter(player -> !player.equals(sleepingPlayer))
+                    .forEach(player -> player.setSleepingIgnored(false));
             atomicPlayerReference.set(sleepingPlayer);
             notifyAllPlayersOfSleepEvent(playerBedEnterEvent);
         }
     }
 
     public void handleEvent(PlayerBedLeaveEvent playerBedLeaveEvent) {
-
-        if (playerBedLeaveEvent.getPlayer().getWorld().getPlayers().size() == 1)
+        if (playerBedLeaveEvent.getPlayer().getWorld().getPlayers().size() == 1) {
             return;
+        }
         var sleepingPlayer = playerBedLeaveEvent.getPlayer();
-        if (playerBedLeaveEvent.isCancelled() && atomicPlayerReference.get().equals(sleepingPlayer))
+        if (playerBedLeaveEvent.isCancelled() && atomicPlayerReference.get().equals(sleepingPlayer)) {
             atomicPlayerReference = new AtomicReference<>();
+        }
         var players = playerBedLeaveEvent.getBed().getWorld().getPlayers();
-        for (var player : players)
+        for (var player : players) {
             player.setSleepingIgnored(false);
+        }
     }
-
 
     private void notifyAllPlayersOfSleepEvent(PlayerBedEnterEvent playerBedEnterEvent) {
         var sleepingPlayer = playerBedEnterEvent.getPlayer();
         var sleepingPlayerName = sleepingPlayer.getName();
         var world = requireNonNull(sleepingPlayer.getWorld());
         var players = world.getPlayers();
-        for (var p : players)
+        for (var p : players) {
             p.sendMessage(sleepingPlayerName + " has triggered sleep");
+        }
     }
-
 
     public static long nextDayFullTime(long currentTime) {
         var daysElapsed = currentTime / FULL_DAY_TIME;

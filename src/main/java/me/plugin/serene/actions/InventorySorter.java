@@ -49,21 +49,21 @@ public class InventorySorter {
             if (wasChest) {
                 boolean sneaking = player.isSneaking();
                 boolean rightClicked = playerInteractEvent.getAction().equals(Action.RIGHT_CLICK_BLOCK);
-                boolean usedFeather = playerInteractEvent.hasItem() && requireNonNull(playerInteractEvent.getItem()).getType().equals(Material.FEATHER);
+                boolean usedFeather = playerInteractEvent.hasItem()
+                        && requireNonNull(playerInteractEvent.getItem())
+                                .getType()
+                                .equals(Material.FEATHER);
                 if (rightClicked && usedFeather && sneaking) {
                     Inventory inventory = translateInventoryFromBlockType(block, player);
                     if (!inventory.isEmpty()) {
                         var organisedMaterialGroups = getOrganisedGroups(inventory);
                         var location = block.getLocation();
-                        int colSize = inventory.getContents().length == SMALL_CHEST_SIZE ? SMALL_CHEST_COL_SIZE : LARGE_CHEST_COL_SIZE;
-                        var newItemStacks = generateFinalSortedItemStacks(organisedMaterialGroups,
-                                colSize,
-                                location);
+                        int colSize = inventory.getContents().length == SMALL_CHEST_SIZE
+                                ? SMALL_CHEST_COL_SIZE
+                                : LARGE_CHEST_COL_SIZE;
+                        var newItemStacks = generateFinalSortedItemStacks(organisedMaterialGroups, colSize, location);
                         inventory.setContents(newItemStacks);
-                        player.getWorld().playSound(requireNonNull(location),
-                                Sound.BLOCK_CONDUIT_ACTIVATE,
-                                0.7f,
-                                1);
+                        player.getWorld().playSound(requireNonNull(location), Sound.BLOCK_CONDUIT_ACTIVATE, 0.7f, 1);
                     }
                 }
             }
@@ -78,24 +78,21 @@ public class InventorySorter {
             case ENDER_CHEST:
                 return player.getEnderChest();
         }
-        throw new IllegalArgumentException("Unknown block type to translate to inventory %s".formatted(block.getType()));
+        throw new IllegalArgumentException(
+                "Unknown block type to translate to inventory %s".formatted(block.getType()));
     }
-
 
     // Collates all unorganised items into groups
     private List<MaterialItemStack> getOrganisedGroups(Inventory inventory) {
-        var itemsToStacks = Arrays.stream(inventory.getContents())
-                .filter(Objects::nonNull)
-                .collect(groupingBy(ItemStack::getType));
+        var itemsToStacks =
+                Arrays.stream(inventory.getContents()).filter(Objects::nonNull).collect(groupingBy(ItemStack::getType));
 
         var executorService = newFixedThreadPool(getRuntime().availableProcessors() * 2);
         List<MaterialItemStack> reorganisedStacks = synchronizedList(new ArrayList<>());
         for (var material : itemsToStacks.keySet()) {
             executorService.execute(() -> {
                 LinkedList<ItemStack> allStacks = new LinkedList<>();
-                var groupedByMeta = itemsToStacks.get(material)
-                        .stream()
-                        .collect(groupingBy(ItemStack::getItemMeta));
+                var groupedByMeta = itemsToStacks.get(material).stream().collect(groupingBy(ItemStack::getItemMeta));
                 for (ItemMeta itemMeta : groupedByMeta.keySet()) {
                     int currentCount = 0;
                     int maxSize = material.getMaxStackSize();
@@ -132,15 +129,14 @@ public class InventorySorter {
             throw new RuntimeException(e);
         }
         // Place the biggest stacks first
-        reorganisedStacks.sort((o1, o2) -> o2.itemStacks().size() - o1.itemStacks().size());
+        reorganisedStacks.sort(
+                (o1, o2) -> o2.itemStacks().size() - o1.itemStacks().size());
         return reorganisedStacks;
     }
 
     // Places organised groups into final sorted items
     private ItemStack[] generateFinalSortedItemStacks(
-            List<MaterialItemStack> materialItemStacks,
-            int colSize,
-            Location location) {
+            List<MaterialItemStack> materialItemStacks, int colSize, Location location) {
         var newStacks = new ItemStack[colSize][ROW_SIZE];
 
         List<MaterialItemStack> notPlaced = new ArrayList<>();
@@ -161,7 +157,8 @@ public class InventorySorter {
         return flatten(newStacks);
     }
 
-    private void alternatePrioritisingHorizontal(List<MaterialItemStack> materialItemStacks, ItemStack[][] newStacks, List<MaterialItemStack> notPlaced) {
+    private void alternatePrioritisingHorizontal(
+            List<MaterialItemStack> materialItemStacks, ItemStack[][] newStacks, List<MaterialItemStack> notPlaced) {
         int x = 0;
         for (var materialItemStack : materialItemStacks) {
             if (x % 2 == 0) {
@@ -173,7 +170,8 @@ public class InventorySorter {
         }
     }
 
-    private void alternatePrioritisingVertical(List<MaterialItemStack> materialItemStacks, ItemStack[][] newStacks, List<MaterialItemStack> notPlaced) {
+    private void alternatePrioritisingVertical(
+            List<MaterialItemStack> materialItemStacks, ItemStack[][] newStacks, List<MaterialItemStack> notPlaced) {
         int x;
         x = 0;
         for (var materialItemStack : materialItemStacks) {
@@ -186,17 +184,14 @@ public class InventorySorter {
         }
     }
 
-    private void populateHorizontally(MaterialItemStack materialItemStack,
-                                      ItemStack[][] newStacks,
-                                      List<MaterialItemStack> notPlaced) {
+    private void populateHorizontally(
+            MaterialItemStack materialItemStack, ItemStack[][] newStacks, List<MaterialItemStack> notPlaced) {
         var itemStacks = materialItemStack.itemStacks();
-        if (itemStacks.isEmpty())
-            return;
+        if (itemStacks.isEmpty()) return;
         boolean done = false;
         for (int x = newStacks[0].length - 1; x >= 0; x--) {
             for (int y = 0; y < newStacks.length; y++) {
-                if (newStacks[y][x] != null)
-                    continue;
+                if (newStacks[y][x] != null) continue;
                 var horizontalCoordinates = canFitHorizontally(itemStacks.size(), newStacks, x, y);
                 if (!horizontalCoordinates.isEmpty()) {
                     populate(itemStacks, newStacks, horizontalCoordinates);
@@ -213,17 +208,14 @@ public class InventorySorter {
         }
     }
 
-    private void populateVertically(MaterialItemStack materialItemStack,
-                                    ItemStack[][] newStacks,
-                                    List<MaterialItemStack> notPlaced) {
+    private void populateVertically(
+            MaterialItemStack materialItemStack, ItemStack[][] newStacks, List<MaterialItemStack> notPlaced) {
         var itemStacks = materialItemStack.itemStacks();
-        if (itemStacks.isEmpty())
-            return;
+        if (itemStacks.isEmpty()) return;
         boolean done = false;
         for (int x = 0; x < newStacks[0].length; x++) {
             for (int y = 0; y < newStacks.length; y++) {
-                if (newStacks[y][x] != null)
-                    continue;
+                if (newStacks[y][x] != null) continue;
                 var verticalCoordinates = canFitVertically(itemStacks.size(), newStacks, x, y);
                 if (!verticalCoordinates.isEmpty()) {
                     populate(itemStacks, newStacks, verticalCoordinates);
@@ -276,8 +268,7 @@ public class InventorySorter {
         }
     }
 
-    private void dumpRemaining(ItemStack[][] newStacks,
-                               List<MaterialItemStack> couldntBePlaced) {
+    private void dumpRemaining(ItemStack[][] newStacks, List<MaterialItemStack> couldntBePlaced) {
         for (var materialItemStack : couldntBePlaced) {
             var stacks = materialItemStack.itemStacks();
             for (int i = newStacks.length - 1; i >= 0; i--) {

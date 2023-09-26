@@ -1,6 +1,5 @@
 package me.plugin.serene.database;
 
-
 import org.bukkit.entity.Player;
 
 import java.util.HashMap;
@@ -22,8 +21,7 @@ public class SessionDatabaseClient implements SereneDatabaseClient {
     @Override
     public long getExperienceForPlayer(Player player) {
         Long currentExperience = experienceMap.get(player);
-        if (currentExperience == null)
-            return 0;
+        if (currentExperience == null) return 0;
         return currentExperience;
     }
 

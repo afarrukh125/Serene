@@ -24,13 +24,13 @@ public class SQLiteSereneClient implements SereneDatabaseClient {
     }
 
     private void tableCheck() throws SQLException {
-        if (!isUserTableCreated())
-            createUserTable();
+        if (!isUserTableCreated()) createUserTable();
     }
 
     private void createUserTable() {
         try {
-            List<String> queries = List.of("CREATE TABLE player(id VARCHAR(60), exp VARCHAR(60), seed VARCHAR(60), veinBreakerEnabled BOOLEAN)");
+            List<String> queries = List.of(
+                    "CREATE TABLE player(id VARCHAR(60), exp VARCHAR(60), seed VARCHAR(60), veinBreakerEnabled BOOLEAN)");
             for (var query : queries) {
                 connection.createStatement().execute(query);
             }
@@ -40,7 +40,9 @@ public class SQLiteSereneClient implements SereneDatabaseClient {
     }
 
     private boolean isUserTableCreated() throws SQLException {
-        var playerTable = connection.createStatement().executeQuery("SELECT name FROM sqlite_master WHERE type = 'table' AND name='player'");
+        var playerTable = connection
+                .createStatement()
+                .executeQuery("SELECT name FROM sqlite_master WHERE type = 'table' AND name='player'");
         return playerTable.next();
     }
 
@@ -55,7 +57,8 @@ public class SQLiteSereneClient implements SereneDatabaseClient {
     public long getExperienceForPlayer(Player player) {
         try {
             long seed = player.getWorld().getSeed();
-            String query = "SELECT exp FROM player WHERE id='%s' AND seed=%s".formatted(player.getUniqueId().toString(), seed);
+            String query = "SELECT exp FROM player WHERE id='%s' AND seed=%s"
+                    .formatted(player.getUniqueId().toString(), seed);
             var resultSet = connection.createStatement().executeQuery(query);
             if (!resultSet.next()) {
                 createEntryForPlayer(player, seed);
@@ -79,7 +82,6 @@ public class SQLiteSereneClient implements SereneDatabaseClient {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
     }
 
     @Override
@@ -97,17 +99,18 @@ public class SQLiteSereneClient implements SereneDatabaseClient {
     }
 
     private void createPlayerIfNotExisting(Player player, long seed) throws SQLException {
-        String query = "SELECT exp FROM player WHERE id='%s' AND seed=%s".formatted(player.getUniqueId().toString(), seed);
+        String query = "SELECT exp FROM player WHERE id='%s' AND seed=%s"
+                .formatted(player.getUniqueId().toString(), seed);
         var resultSet = connection.createStatement().executeQuery(query);
-        if (!resultSet.next())
-            createEntryForPlayer(player, seed);
+        if (!resultSet.next()) createEntryForPlayer(player, seed);
     }
 
     public void setVeinBreakerEnabled(Player player, boolean value) {
         long seed = player.getWorld().getSeed();
         try {
             createPlayerIfNotExisting(player, seed);
-            String query = "UPDATE player SET veinBreakerEnabled=? WHERE id='%s' AND seed=%d".formatted(player.getUniqueId(), seed);
+            String query = "UPDATE player SET veinBreakerEnabled=? WHERE id='%s' AND seed=%d"
+                    .formatted(player.getUniqueId(), seed);
             var preparedStatement = connection.prepareStatement(query);
             preparedStatement.setBoolean(1, value);
             preparedStatement.execute();
@@ -118,7 +121,8 @@ public class SQLiteSereneClient implements SereneDatabaseClient {
 
     public boolean isVeinBreakerEnabled(Player player) {
         long seed = player.getWorld().getSeed();
-        String query = "SELECT veinBreakerEnabled FROM player WHERE id='%s' AND seed=%s".formatted(player.getUniqueId().toString(), seed);
+        String query = "SELECT veinBreakerEnabled FROM player WHERE id='%s' AND seed=%s"
+                .formatted(player.getUniqueId().toString(), seed);
         try {
             createPlayerIfNotExisting(player, seed);
             ResultSet resultSet = connection.createStatement().executeQuery(query);

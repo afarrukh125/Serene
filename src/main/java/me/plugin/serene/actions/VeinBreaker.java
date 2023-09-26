@@ -54,34 +54,30 @@ import static org.bukkit.Material.WOODEN_PICKAXE;
 public class VeinBreaker {
 
     // Experience values taken from https://minecraft.fandom.com/wiki/Experience#Sources
-    private static final Map<Material, ExperienceData> ORE_TO_EXPERIENCE_DATA = ImmutableMap.<Material, ExperienceData>builder()
-            .put(COAL_ORE, ExperienceData.withMinMaxExp(0, 3))
-            .put(IRON_ORE, ExperienceData.noExp())
-            .put(COPPER_ORE, ExperienceData.noExp())
-            .put(DIAMOND_ORE, ExperienceData.withMinMaxExp(3, 8))
-            .put(GOLD_ORE, ExperienceData.noExp())
-            .put(EMERALD_ORE, ExperienceData.withMinMaxExp(3, 8))
-            .put(LAPIS_ORE, ExperienceData.withMinMaxExp(2, 6))
-            .put(REDSTONE_ORE, ExperienceData.withMinMaxExp(1, 6))
-            .put(NETHER_GOLD_ORE, ExperienceData.noExp())
-            .put(NETHER_QUARTZ_ORE, ExperienceData.withMinMaxExp(3, 8))
-            .put(DEEPSLATE_COAL_ORE, ExperienceData.withMinMaxExp(0, 3))
-            .put(DEEPSLATE_IRON_ORE, ExperienceData.noExp())
-            .put(DEEPSLATE_COPPER_ORE, ExperienceData.noExp())
-            .put(DEEPSLATE_DIAMOND_ORE, ExperienceData.withMinMaxExp(3, 8))
-            .put(DEEPSLATE_GOLD_ORE, ExperienceData.noExp())
-            .put(DEEPSLATE_EMERALD_ORE, ExperienceData.withMinMaxExp(3, 8))
-            .put(DEEPSLATE_LAPIS_ORE, ExperienceData.withMinMaxExp(2, 6))
-            .put(DEEPSLATE_REDSTONE_ORE, ExperienceData.withMinMaxExp(1, 6))
-            .build();
+    private static final Map<Material, ExperienceData> ORE_TO_EXPERIENCE_DATA =
+            ImmutableMap.<Material, ExperienceData>builder()
+                    .put(COAL_ORE, ExperienceData.withMinMaxExp(0, 3))
+                    .put(IRON_ORE, ExperienceData.noExp())
+                    .put(COPPER_ORE, ExperienceData.noExp())
+                    .put(DIAMOND_ORE, ExperienceData.withMinMaxExp(3, 8))
+                    .put(GOLD_ORE, ExperienceData.noExp())
+                    .put(EMERALD_ORE, ExperienceData.withMinMaxExp(3, 8))
+                    .put(LAPIS_ORE, ExperienceData.withMinMaxExp(2, 6))
+                    .put(REDSTONE_ORE, ExperienceData.withMinMaxExp(1, 6))
+                    .put(NETHER_GOLD_ORE, ExperienceData.noExp())
+                    .put(NETHER_QUARTZ_ORE, ExperienceData.withMinMaxExp(3, 8))
+                    .put(DEEPSLATE_COAL_ORE, ExperienceData.withMinMaxExp(0, 3))
+                    .put(DEEPSLATE_IRON_ORE, ExperienceData.noExp())
+                    .put(DEEPSLATE_COPPER_ORE, ExperienceData.noExp())
+                    .put(DEEPSLATE_DIAMOND_ORE, ExperienceData.withMinMaxExp(3, 8))
+                    .put(DEEPSLATE_GOLD_ORE, ExperienceData.noExp())
+                    .put(DEEPSLATE_EMERALD_ORE, ExperienceData.withMinMaxExp(3, 8))
+                    .put(DEEPSLATE_LAPIS_ORE, ExperienceData.withMinMaxExp(2, 6))
+                    .put(DEEPSLATE_REDSTONE_ORE, ExperienceData.withMinMaxExp(1, 6))
+                    .build();
 
-    private static final Set<Material> PICKAXES = Set.of(
-            WOODEN_PICKAXE,
-            STONE_PICKAXE,
-            IRON_PICKAXE,
-            GOLDEN_PICKAXE,
-            DIAMOND_PICKAXE,
-            NETHERITE_PICKAXE);
+    private static final Set<Material> PICKAXES =
+            Set.of(WOODEN_PICKAXE, STONE_PICKAXE, IRON_PICKAXE, GOLDEN_PICKAXE, DIAMOND_PICKAXE, NETHERITE_PICKAXE);
 
     private static final Random random = new Random();
     private final SereneDatabaseClient database;
@@ -104,7 +100,6 @@ public class VeinBreaker {
         }
     }
 
-
     private void handleBreaking(BlockBreakEvent blockBreakEvent, ItemStack item, Material originalMaterial) {
         var world = blockBreakEvent.getBlock().getWorld();
         Queue<Location> locationsToCheck = new LinkedList<>();
@@ -118,10 +113,13 @@ public class VeinBreaker {
             for (int x = -1; x <= 1; x++) {
                 for (int y = -1; y <= 1; y++) {
                     for (int z = -1; z <= 1; z++) {
-                        var locationToCheck = new Location(world, location.getX() + x, location.getY() + y, location.getZ() + z);
+                        var locationToCheck =
+                                new Location(world, location.getX() + x, location.getY() + y, location.getZ() + z);
                         var blockToCheck = world.getBlockAt(locationToCheck);
                         var material = blockToCheck.getType();
-                        if (ORE_TO_EXPERIENCE_DATA.containsKey(material) && material.equals(originalMaterial) && !seenOres.contains(blockToCheck)) {
+                        if (ORE_TO_EXPERIENCE_DATA.containsKey(material)
+                                && material.equals(originalMaterial)
+                                && !seenOres.contains(blockToCheck)) {
                             locationsToCheck.add(locationToCheck);
                             seenOres.add(blockToCheck);
                         }
@@ -136,30 +134,30 @@ public class VeinBreaker {
         breakOresWithDamageAwareness(blockBreakEvent, item, world, seenOres, originalBlockLocation);
     }
 
-    private static void breakOresWithDamageAwareness(BlockBreakEvent blockBreakEvent,
-                                                     ItemStack item,
-                                                     World world,
-                                                     Set<Block> seenBlocks,
-                                                     Location originalBlockLocation) {
+    private static void breakOresWithDamageAwareness(
+            BlockBreakEvent blockBreakEvent,
+            ItemStack item,
+            World world,
+            Set<Block> seenBlocks,
+            Location originalBlockLocation) {
         var damageable = requireNonNull((Damageable) item.getItemMeta());
         for (var block : seenBlocks) {
             int currentDamage = damageable.getDamage();
             int unbreakingLevel = damageable.getEnchantLevel(Enchantment.DURABILITY);
             boolean takeDamage = shouldTakeDamage(unbreakingLevel);
-            if (isToolBrokenAfterApplyingDamage(blockBreakEvent,
-                    item,
-                    world,
-                    originalBlockLocation,
-                    damageable,
-                    currentDamage,
-                    takeDamage))
-                break;
+            if (isToolBrokenAfterApplyingDamage(
+                    blockBreakEvent, item, world, originalBlockLocation, damageable, currentDamage, takeDamage)) break;
             block.breakNaturally(item);
         }
         item.setItemMeta(damageable);
     }
 
-    private void grantExperience(BlockBreakEvent blockBreakEvent, Material originalMaterial, World world, Location originalBlockLocation, Set<Block> seenOres) {
+    private void grantExperience(
+            BlockBreakEvent blockBreakEvent,
+            Material originalMaterial,
+            World world,
+            Location originalBlockLocation,
+            Set<Block> seenOres) {
         int exp = 0;
         var experienceRange = ORE_TO_EXPERIENCE_DATA.get(originalMaterial);
         for (int i = 0; i < seenOres.size(); i++) {
@@ -172,5 +170,4 @@ public class VeinBreaker {
             Bukkit.getPluginManager().callEvent(new PlayerExpChangeEvent(player, exp));
         }
     }
-
 }

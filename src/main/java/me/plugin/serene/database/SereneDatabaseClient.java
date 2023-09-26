@@ -11,7 +11,9 @@ public interface SereneDatabaseClient {
         try {
             return new SQLiteSereneClient();
         } catch (Exception e) {
-            logger.info("Could not create connected database client, using default session-based algorithm. {}", e.getMessage());
+            logger.info(
+                    "Could not create connected database client, using default session-based algorithm. {}",
+                    e.getMessage());
             return new SessionDatabaseClient();
         }
     }

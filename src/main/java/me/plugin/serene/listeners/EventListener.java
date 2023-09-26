@@ -6,7 +6,7 @@ import me.plugin.serene.actions.SleepHandler;
 import me.plugin.serene.actions.TreeBreaker;
 import me.plugin.serene.actions.VeinBreaker;
 import me.plugin.serene.database.SereneDatabaseClient;
-import org.bukkit.configuration.file.FileConfiguration;
+import me.plugin.serene.model.SereneConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -15,18 +15,16 @@ import org.bukkit.event.player.PlayerBedLeaveEvent;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 
-import static me.plugin.serene.util.Utils.isFeatureEnabledInConfig;
-
 public class EventListener implements Listener {
 
     private final ExperienceHandler experienceHandler;
     private final VeinBreaker veinBreaker;
-    private final FileConfiguration config;
+    private final SereneConfiguration config;
     private final TreeBreaker treeBreaker;
     private final SleepHandler sleepHandler;
     private final InventorySorter inventorySorter;
 
-    public EventListener(SereneDatabaseClient databaseClient, FileConfiguration config) {
+    public EventListener(SereneDatabaseClient databaseClient, SereneConfiguration config) {
         this.experienceHandler = new ExperienceHandler(databaseClient, config);
         this.veinBreaker = new VeinBreaker(databaseClient);
         this.treeBreaker = new TreeBreaker();
@@ -37,44 +35,43 @@ public class EventListener implements Listener {
 
     @EventHandler
     public void onExperienceChange(PlayerExpChangeEvent playerExpChangeEvent) {
-        if(isFeatureEnabledInConfig(config, "experience")) {
+        if (config.isBonusExperienceEnabled()) {
             experienceHandler.handleEvent(playerExpChangeEvent);
         }
     }
 
     @EventHandler
     public void onChestOpenEvent(PlayerInteractEvent playerInteractEvent) {
-        if(isFeatureEnabledInConfig(config, "inventorysort")) {
+        if (config.isInventorySortEnabled()) {
             inventorySorter.handleEvent(playerInteractEvent);
         }
     }
 
     @EventHandler
     public void onPlayerEnterBed(PlayerBedEnterEvent playerBedEnterEvent) {
-        if(isFeatureEnabledInConfig(config, "1psleep")) {
+        if (config.is1pSleepEnabled()) {
             sleepHandler.handleEvent(playerBedEnterEvent);
         }
     }
 
     @EventHandler
     public void onPlayerLeaveBed(PlayerBedLeaveEvent playerBedLeaveEvent) {
-        if(isFeatureEnabledInConfig(config, "1psleep")) {
+        if (config.is1pSleepEnabled()) {
             sleepHandler.handleEvent(playerBedLeaveEvent);
         }
     }
 
     @EventHandler
     public void onOreBreak(BlockBreakEvent blockBreakEvent) {
-        if(isFeatureEnabledInConfig(config, "veinbreaker")) {
+        if (config.isVeinBreakerEnabled()) {
             veinBreaker.handleEvent(blockBreakEvent);
         }
     }
 
     @EventHandler
     public void onTreeBreak(BlockBreakEvent blockBreakEvent) {
-        if(isFeatureEnabledInConfig(config, "treebreaker")) {
+        if (config.isTreeBreakerEnabled()) {
             treeBreaker.handleEvent(blockBreakEvent);
         }
     }
-
 }

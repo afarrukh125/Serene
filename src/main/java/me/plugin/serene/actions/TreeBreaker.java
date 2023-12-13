@@ -7,45 +7,18 @@ import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.Damageable;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
-import java.util.Queue;
 import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 import static me.plugin.serene.util.Utils.isToolBrokenAfterApplyingDamage;
 import static me.plugin.serene.util.Utils.shouldTakeDamage;
-import static org.bukkit.Material.ACACIA_LEAVES;
-import static org.bukkit.Material.ACACIA_LOG;
-import static org.bukkit.Material.BIRCH_LEAVES;
-import static org.bukkit.Material.BIRCH_LOG;
-import static org.bukkit.Material.CHERRY_LEAVES;
-import static org.bukkit.Material.CHERRY_LOG;
-import static org.bukkit.Material.COARSE_DIRT;
-import static org.bukkit.Material.DARK_OAK_LEAVES;
-import static org.bukkit.Material.DARK_OAK_LOG;
-import static org.bukkit.Material.DIAMOND_AXE;
-import static org.bukkit.Material.DIRT;
-import static org.bukkit.Material.DIRT_PATH;
-import static org.bukkit.Material.FARMLAND;
-import static org.bukkit.Material.GOLDEN_AXE;
-import static org.bukkit.Material.GRASS_BLOCK;
-import static org.bukkit.Material.IRON_AXE;
-import static org.bukkit.Material.JUNGLE_LEAVES;
-import static org.bukkit.Material.JUNGLE_LOG;
-import static org.bukkit.Material.MYCELIUM;
-import static org.bukkit.Material.NETHERITE_AXE;
-import static org.bukkit.Material.OAK_LEAVES;
-import static org.bukkit.Material.OAK_LOG;
-import static org.bukkit.Material.PODZOL;
-import static org.bukkit.Material.ROOTED_DIRT;
-import static org.bukkit.Material.SPRUCE_LEAVES;
-import static org.bukkit.Material.SPRUCE_LOG;
-import static org.bukkit.Material.STONE_AXE;
-import static org.bukkit.Material.WOODEN_AXE;
+import static org.bukkit.Material.*;
 
 public class TreeBreaker {
     private static final Set<Material> LOG_MATERIALS =
@@ -60,18 +33,20 @@ public class TreeBreaker {
             Set.of(WOODEN_AXE, STONE_AXE, IRON_AXE, GOLDEN_AXE, DIAMOND_AXE, NETHERITE_AXE);
 
     public void handleEvent(BlockBreakEvent blockBreakEvent) {
-        var itemInMainHand = blockBreakEvent.getPlayer().getInventory().getItemInMainHand();
+        var player = blockBreakEvent.getPlayer();
+        var inventory = player.getInventory();
+        var itemInMainHand = inventory.getItemInMainHand();
         var armedMaterial = itemInMainHand.getType();
         if (AXES.contains(armedMaterial)) {
-            var brokenBlock = blockBreakEvent.getBlock();
-            var type = brokenBlock.getType();
-            var location = brokenBlock.getLocation();
-            var world = blockBreakEvent.getPlayer().getWorld();
+            var block = blockBreakEvent.getBlock();
+            var type = block.getType();
+            var location = block.getLocation();
+            var world = player.getWorld();
             var locationBelowBlock = new Location(world, location.getX(), location.getY() - 1., location.getZ());
             if (LOG_MATERIALS.contains(type)
-                    && blockBreakEvent.getPlayer().isSneaking()
+                    && player.isSneaking()
                     && canTreeGrow(world, locationBelowBlock)) {
-                handleBreaking(blockBreakEvent, itemInMainHand);
+                handleBreaking(inventory, block, itemInMainHand);
             }
         }
     }
@@ -81,13 +56,13 @@ public class TreeBreaker {
                 world.getBlockAt(locationBelowBlock).getType());
     }
 
-    private void handleBreaking(BlockBreakEvent blockBreakEvent, ItemStack item) {
-        var world = blockBreakEvent.getBlock().getWorld();
-        Queue<Location> locationsToCheck = new LinkedList<>();
-        var blockState = blockBreakEvent.getBlock().getState();
-        Set<Block> seenLogs = new LinkedHashSet<>();
-        Set<Block> leaves = new HashSet<>();
-        var originalBlockLocation = blockBreakEvent.getBlock().getLocation();
+    private void handleBreaking(PlayerInventory inventory, Block block, ItemStack item) {
+        var world = block.getWorld();
+        var locationsToCheck = new LinkedList<Location>();
+        var blockState = block.getState();
+        var seenLogs = new LinkedHashSet<Block>();
+        var leaves = new HashSet<Block>();
+        var originalBlockLocation = block.getLocation();
         locationsToCheck.add(originalBlockLocation);
 
         while (!locationsToCheck.isEmpty()) {
@@ -115,23 +90,21 @@ public class TreeBreaker {
         }
         // Do not break random stack of logs with no leaves (might be a building with a stack of logs somewhere)
         if (!leaves.isEmpty()) {
-            breakWithDamageAwareness(blockBreakEvent, item, world, seenLogs, originalBlockLocation);
+            breakWithDamageAwareness(inventory, item, world, seenLogs, originalBlockLocation);
         }
     }
 
     public static void breakWithDamageAwareness(
-            BlockBreakEvent blockBreakEvent,
-            ItemStack item,
-            World world,
-            Set<Block> seenBlocks,
-            Location originalBlockLocation) {
+            PlayerInventory inventory, ItemStack item, World world, Set<Block> seenBlocks, Location originalBlockLocation) {
         var damageable = requireNonNull((Damageable) item.getItemMeta());
         for (var block : seenBlocks) {
-            int currentDamage = damageable.getDamage();
-            int unbreakingLevel = damageable.getEnchantLevel(Enchantment.DURABILITY);
-            boolean takeDamage = shouldTakeDamage(unbreakingLevel);
+            var currentDamage = damageable.getDamage();
+            var unbreakingLevel = damageable.getEnchantLevel(Enchantment.DURABILITY);
+            var takeDamage = shouldTakeDamage(unbreakingLevel);
             if (isToolBrokenAfterApplyingDamage(
-                    blockBreakEvent, item, world, originalBlockLocation, damageable, currentDamage, takeDamage)) break;
+                    inventory, item, world, originalBlockLocation, damageable, currentDamage, takeDamage)) {
+                break;
+            }
             block.breakNaturally();
         }
         item.setItemMeta(damageable);

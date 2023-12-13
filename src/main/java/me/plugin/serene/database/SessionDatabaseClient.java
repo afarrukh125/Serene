@@ -20,9 +20,7 @@ public class SessionDatabaseClient implements SereneDatabaseClient {
 
     @Override
     public long getExperienceForPlayer(Player player) {
-        Long currentExperience = experienceMap.get(player);
-        if (currentExperience == null) return 0;
-        return currentExperience;
+        return experienceMap.getOrDefault(player, 0L);
     }
 
     @Override

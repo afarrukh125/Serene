@@ -5,13 +5,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public interface SereneDatabaseClient {
+    Logger LOGGER = LoggerFactory.getLogger(SereneDatabaseClient.class);
 
     static SereneDatabaseClient create() {
-        Logger logger = LoggerFactory.getLogger(SereneDatabaseClient.class);
+
         try {
             return new SQLiteSereneClient();
         } catch (Exception e) {
-            logger.info(
+            LOGGER.info(
                     "Could not create connected database client, using default session-based algorithm. {}",
                     e.getMessage());
             return new SessionDatabaseClient();

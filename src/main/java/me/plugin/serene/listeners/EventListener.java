@@ -57,7 +57,7 @@ public class EventListener implements Listener {
     @EventHandler
     public void onPlayerLeaveBed(PlayerBedLeaveEvent playerBedLeaveEvent) {
         if (config.is1pSleepEnabled()) {
-            sleepHandler.handleEvent(playerBedLeaveEvent);
+            sleepHandler.handleEvent(playerBedLeaveEvent.getPlayer(), playerBedLeaveEvent.isCancelled());
         }
     }
 

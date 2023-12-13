@@ -4,8 +4,6 @@ import org.bukkit.entity.Player;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -29,7 +27,7 @@ public class SQLiteSereneClient implements SereneDatabaseClient {
 
     private void createUserTable() {
         try {
-            List<String> queries = List.of(
+            var queries = List.of(
                     "CREATE TABLE player(id VARCHAR(60), exp VARCHAR(60), seed VARCHAR(60), veinBreakerEnabled BOOLEAN)");
             for (var query : queries) {
                 connection.createStatement().execute(query);
@@ -48,16 +46,16 @@ public class SQLiteSereneClient implements SereneDatabaseClient {
 
     @Override
     public void addExperienceForPlayer(Player player, long amount) {
-        long currentAmount = getExperienceForPlayer(player);
-        long newAmount = currentAmount + amount;
+        var currentAmount = getExperienceForPlayer(player);
+        var newAmount = currentAmount + amount;
         setExperienceForPlayer(player, newAmount);
     }
 
     @Override
     public long getExperienceForPlayer(Player player) {
         try {
-            long seed = player.getWorld().getSeed();
-            String query = "SELECT exp FROM player WHERE id='%s' AND seed=%s"
+            var seed = player.getWorld().getSeed();
+            var query = "SELECT exp FROM player WHERE id='%s' AND seed=%s"
                     .formatted(player.getUniqueId().toString(), seed);
             var resultSet = connection.createStatement().executeQuery(query);
             if (!resultSet.next()) {
@@ -72,8 +70,8 @@ public class SQLiteSereneClient implements SereneDatabaseClient {
 
     private void createEntryForPlayer(Player player, long seed) {
         try {
-            String query = "INSERT INTO player VALUES (?, ?, ?, ?)";
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            var query = "INSERT INTO player VALUES (?, ?, ?, ?)";
+            var preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, player.getUniqueId().toString());
             preparedStatement.setLong(2, 0);
             preparedStatement.setLong(3, seed);
@@ -86,8 +84,8 @@ public class SQLiteSereneClient implements SereneDatabaseClient {
 
     @Override
     public void setExperienceForPlayer(Player player, long amount) {
-        long seed = player.getWorld().getSeed();
-        String query = "UPDATE player SET exp=? WHERE id='%s' AND seed=%d".formatted(player.getUniqueId(), seed);
+        var seed = player.getWorld().getSeed();
+        var query = "UPDATE player SET exp=? WHERE id='%s' AND seed=%d".formatted(player.getUniqueId(), seed);
         try {
             createPlayerIfNotExisting(player, seed);
             var preparedStatement = connection.prepareStatement(query);
@@ -99,17 +97,19 @@ public class SQLiteSereneClient implements SereneDatabaseClient {
     }
 
     private void createPlayerIfNotExisting(Player player, long seed) throws SQLException {
-        String query = "SELECT exp FROM player WHERE id='%s' AND seed=%s"
+        var query = "SELECT exp FROM player WHERE id='%s' AND seed=%s"
                 .formatted(player.getUniqueId().toString(), seed);
         var resultSet = connection.createStatement().executeQuery(query);
-        if (!resultSet.next()) createEntryForPlayer(player, seed);
+        if (!resultSet.next()) {
+            createEntryForPlayer(player, seed);
+        }
     }
 
     public void setVeinBreakerEnabled(Player player, boolean value) {
         long seed = player.getWorld().getSeed();
         try {
             createPlayerIfNotExisting(player, seed);
-            String query = "UPDATE player SET veinBreakerEnabled=? WHERE id='%s' AND seed=%d"
+            var query = "UPDATE player SET veinBreakerEnabled=? WHERE id='%s' AND seed=%d"
                     .formatted(player.getUniqueId(), seed);
             var preparedStatement = connection.prepareStatement(query);
             preparedStatement.setBoolean(1, value);
@@ -120,12 +120,12 @@ public class SQLiteSereneClient implements SereneDatabaseClient {
     }
 
     public boolean isVeinBreakerEnabled(Player player) {
-        long seed = player.getWorld().getSeed();
-        String query = "SELECT veinBreakerEnabled FROM player WHERE id='%s' AND seed=%s"
+        var seed = player.getWorld().getSeed();
+        var query = "SELECT veinBreakerEnabled FROM player WHERE id='%s' AND seed=%s"
                 .formatted(player.getUniqueId().toString(), seed);
         try {
             createPlayerIfNotExisting(player, seed);
-            ResultSet resultSet = connection.createStatement().executeQuery(query);
+            var resultSet = connection.createStatement().executeQuery(query);
             if (!resultSet.next()) {
                 createEntryForPlayer(player, seed);
                 return true;

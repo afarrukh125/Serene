@@ -19,37 +19,13 @@ import org.bukkit.inventory.meta.Damageable;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Random;
 import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 import static me.plugin.serene.util.Utils.isToolBrokenAfterApplyingDamage;
 import static me.plugin.serene.util.Utils.shouldTakeDamage;
-import static org.bukkit.Material.COAL_ORE;
-import static org.bukkit.Material.COPPER_ORE;
-import static org.bukkit.Material.DEEPSLATE_COAL_ORE;
-import static org.bukkit.Material.DEEPSLATE_COPPER_ORE;
-import static org.bukkit.Material.DEEPSLATE_DIAMOND_ORE;
-import static org.bukkit.Material.DEEPSLATE_EMERALD_ORE;
-import static org.bukkit.Material.DEEPSLATE_GOLD_ORE;
-import static org.bukkit.Material.DEEPSLATE_IRON_ORE;
-import static org.bukkit.Material.DEEPSLATE_LAPIS_ORE;
-import static org.bukkit.Material.DEEPSLATE_REDSTONE_ORE;
-import static org.bukkit.Material.DIAMOND_ORE;
-import static org.bukkit.Material.DIAMOND_PICKAXE;
-import static org.bukkit.Material.EMERALD_ORE;
-import static org.bukkit.Material.GOLDEN_PICKAXE;
-import static org.bukkit.Material.GOLD_ORE;
-import static org.bukkit.Material.IRON_ORE;
-import static org.bukkit.Material.IRON_PICKAXE;
-import static org.bukkit.Material.LAPIS_ORE;
-import static org.bukkit.Material.NETHERITE_PICKAXE;
-import static org.bukkit.Material.NETHER_GOLD_ORE;
-import static org.bukkit.Material.NETHER_QUARTZ_ORE;
-import static org.bukkit.Material.REDSTONE_ORE;
-import static org.bukkit.Material.STONE_PICKAXE;
-import static org.bukkit.Material.WOODEN_PICKAXE;
+import static org.bukkit.Material.*;
 
 public class VeinBreaker {
 
@@ -87,24 +63,24 @@ public class VeinBreaker {
     }
 
     public void handleEvent(BlockBreakEvent blockBreakEvent) {
-        Player player = blockBreakEvent.getPlayer();
+        var player = blockBreakEvent.getPlayer();
         if (database.isVeinBreakerEnabled(player)) {
             var itemInMainHand = player.getInventory().getItemInMainHand();
             var armedMaterial = itemInMainHand.getType();
             var brokenBlock = blockBreakEvent.getBlock();
-            Material blockType = brokenBlock.getType();
-            boolean sneaking = player.isSneaking();
+            var blockType = brokenBlock.getType();
+            var sneaking = player.isSneaking();
             if (PICKAXES.contains(armedMaterial) && ORE_TO_EXPERIENCE_DATA.containsKey(blockType) && sneaking) {
-                handleBreaking(blockBreakEvent, itemInMainHand, blockType);
+                handleBreaking(itemInMainHand, blockType, blockBreakEvent.getBlock(), blockBreakEvent.getPlayer());
             }
         }
     }
 
-    private void handleBreaking(BlockBreakEvent blockBreakEvent, ItemStack item, Material originalMaterial) {
-        var world = blockBreakEvent.getBlock().getWorld();
-        Queue<Location> locationsToCheck = new LinkedList<>();
-        var originalBlockLocation = blockBreakEvent.getBlock().getLocation();
-        Set<Block> seenOres = new HashSet<>();
+    private void handleBreaking(ItemStack item, Material originalMaterial, Block block, Player player) {
+        var world = block.getWorld();
+        var locationsToCheck = new LinkedList<Location>();
+        var originalBlockLocation = block.getLocation();
+        var seenOres = new HashSet<Block>();
         locationsToCheck.add(originalBlockLocation);
 
         while (!locationsToCheck.isEmpty()) {
@@ -129,43 +105,41 @@ public class VeinBreaker {
         }
 
         //noinspection ConstantConditions
-        if (item.hasItemMeta() && !item.getItemMeta().hasEnchant(Enchantment.SILK_TOUCH))
-            grantExperience(blockBreakEvent, originalMaterial, world, originalBlockLocation, seenOres);
-        breakOresWithDamageAwareness(blockBreakEvent, item, world, seenOres, originalBlockLocation);
+        if (item.hasItemMeta() && !item.getItemMeta().hasEnchant(Enchantment.SILK_TOUCH)) {
+            grantExperience(player, originalMaterial, world, originalBlockLocation, seenOres);
+        }
+        breakOresWithDamageAwareness(player, item, world, seenOres, originalBlockLocation);
     }
 
     private static void breakOresWithDamageAwareness(
-            BlockBreakEvent blockBreakEvent,
-            ItemStack item,
-            World world,
-            Set<Block> seenBlocks,
-            Location originalBlockLocation) {
+            Player player, ItemStack item, World world, Set<Block> seenBlocks, Location originalBlockLocation) {
         var damageable = requireNonNull((Damageable) item.getItemMeta());
         for (var block : seenBlocks) {
-            int currentDamage = damageable.getDamage();
-            int unbreakingLevel = damageable.getEnchantLevel(Enchantment.DURABILITY);
-            boolean takeDamage = shouldTakeDamage(unbreakingLevel);
+            var currentDamage = damageable.getDamage();
+            var unbreakingLevel = damageable.getEnchantLevel(Enchantment.DURABILITY);
+            var takeDamage = shouldTakeDamage(unbreakingLevel);
             if (isToolBrokenAfterApplyingDamage(
-                    blockBreakEvent, item, world, originalBlockLocation, damageable, currentDamage, takeDamage)) break;
+                    player.getInventory(), item, world, originalBlockLocation, damageable, currentDamage, takeDamage)) {
+                break;
+            }
             block.breakNaturally(item);
         }
         item.setItemMeta(damageable);
     }
 
     private void grantExperience(
-            BlockBreakEvent blockBreakEvent,
+            Player player,
             Material originalMaterial,
             World world,
             Location originalBlockLocation,
             Set<Block> seenOres) {
-        int exp = 0;
+        var exp = 0;
         var experienceRange = ORE_TO_EXPERIENCE_DATA.get(originalMaterial);
-        for (int i = 0; i < seenOres.size(); i++) {
+        for (var i = 0; i < seenOres.size(); i++) {
             exp += random.nextInt(experienceRange.minExp(), experienceRange.maxExp());
         }
         if (exp > 0) {
             world.playSound(originalBlockLocation, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1, 1.25f);
-            Player player = blockBreakEvent.getPlayer();
             player.giveExp(exp);
             Bukkit.getPluginManager().callEvent(new PlayerExpChangeEvent(player, exp));
         }

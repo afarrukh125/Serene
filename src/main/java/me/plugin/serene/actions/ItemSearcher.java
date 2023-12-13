@@ -5,16 +5,15 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 
@@ -22,27 +21,27 @@ public class ItemSearcher {
 
     private static final double MAX_DISTANCE_TO_SEARCH = 10;
 
-    private final String targetItemParam;
+    private final String targetItemName;
 
-    public ItemSearcher(String targetItemParam) {
-        this.targetItemParam = targetItemParam;
+    public ItemSearcher(String targetItemName) {
+        this.targetItemName = targetItemName;
     }
 
     public void searchItem(Player player, Location originalLocation, World world) {
-        parseTargetMaterialFromParam(targetItemParam)
+        parseTargetMaterialFromParam(targetItemName)
                 .ifPresentOrElse(
                         targetMaterial -> performSearch(player, originalLocation, world, targetMaterial),
                         () -> player.sendMessage(
                                 "Could not match %s to an item. Ensure you spelt the name of the item correctly."
-                                        .formatted(targetItemParam)));
+                                        .formatted(targetItemName)));
     }
 
     private static void performSearch(Player player, Location originalLocation, World world, Material targetMaterial) {
-        boolean enderChestHasItem = player.getEnderChest().contains(targetMaterial);
-        Queue<Location> locationsToSearch = new LinkedList<>();
-        Set<Location> foundChestLocations = new HashSet<>();
-        Set<Chest> seenChests = new HashSet<>();
-        Set<Location> seenLocations = new HashSet<>();
+        var enderChestHasItem = player.getEnderChest().contains(targetMaterial);
+        var locationsToSearch = new LinkedList<Location>();
+        var foundChestLocations = new HashSet<Location>();
+        var seenChests = new HashSet<Chest>();
+        var seenLocations = new HashSet<Location>();
         locationsToSearch.add(originalLocation);
 
         while (!locationsToSearch.isEmpty()) {
@@ -50,12 +49,12 @@ public class ItemSearcher {
             if (seenLocations.contains(nextLocation)) {
                 continue;
             }
-            Block block = nextLocation.getBlock();
-            Material blockType = requireNonNull(block.getType());
-            boolean wasChest = blockType.equals(Material.CHEST);
+            var block = nextLocation.getBlock();
+            var blockType = requireNonNull(block.getType());
+            var wasChest = blockType.equals(Material.CHEST);
             if (wasChest) {
                 var chest = (Chest) block.getState();
-                Inventory inventory = chest.getInventory();
+                var inventory = chest.getInventory();
                 if (!inventory.isEmpty() && inventory.contains(targetMaterial) && !seenChests.contains(chest)) {
                     foundChestLocations.add(chest.getLocation());
                     seenChests.add(chest);
@@ -73,24 +72,33 @@ public class ItemSearcher {
             }
         }
 
+        var sanitisedName = sanitiseName(targetMaterial);
+
         if (!foundChestLocations.isEmpty()) {
             if (foundChestLocations.stream()
                     .anyMatch(l -> (l.getY() > player.getLocation().getY())
                             || (l.getY() < player.getLocation().getY()))) {
                 player.sendMessage(
                         "Found chests with item %s (Marked with green particle effect, may be above/below you)"
-                                .formatted(targetMaterial));
+                                .formatted(sanitisedName));
             } else {
                 player.sendMessage(
-                        "Found chests with item %s (Marked with green particle effect)".formatted(targetMaterial));
+                        "Found chests with item %s (Marked with green particle effect)".formatted(sanitisedName));
             }
-            for (Location chestLocation : foundChestLocations) {
+            for (var chestLocation : foundChestLocations) {
                 playEffectsAtLocation(player, chestLocation);
             }
         } else {
 
-            player.sendMessage("Found no chests nearby with item %s".formatted(targetMaterial));
+            player.sendMessage("Found no chests nearby with item %s".formatted(sanitisedName));
         }
+    }
+
+    private static String sanitiseName(Material targetMaterial) {
+        return Arrays.stream(targetMaterial.name().split("_"))
+                .map(word -> Character.toUpperCase(word.charAt(0))
+                        + word.substring(1).toLowerCase())
+                .collect(Collectors.joining(" "));
     }
 
     private static boolean isInBoundsOfOriginalLocation(Location originalLocation, Location nextLocation) {
@@ -115,7 +123,7 @@ public class ItemSearcher {
     }
 
     private Optional<Material> parseTargetMaterialFromParam(String targetItemParam) {
-        Optional<Material> material = Optional.ofNullable(Material.matchMaterial(targetItemParam));
+        var material = Optional.ofNullable(Material.matchMaterial(targetItemParam));
         if (material.isEmpty()) {
             return Optional.ofNullable(Material.matchMaterial(targetItemParam, true));
         }

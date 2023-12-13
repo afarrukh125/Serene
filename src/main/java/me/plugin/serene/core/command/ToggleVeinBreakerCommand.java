@@ -27,10 +27,12 @@ public class ToggleVeinBreakerCommand implements CommandExecutor {
             sender.sendMessage("Veinbreaker is disabled on this server");
             return true;
         }
-        if (args.length == 0) sender.sendMessage("Usage: %s (on|off) ".formatted(NAME));
-        String param = args[0];
+        if (args.length == 0) {
+            sender.sendMessage("Usage: %s (on|off) ".formatted(NAME));
+        }
+        var param = args[0];
         try {
-            boolean enabled = parseParam(param);
+            var enabled = parseParam(param);
             var player = sender.getServer().getPlayer(sender.getName());
             database.setVeinBreakerEnabled(requireNonNull(player), enabled);
             player.sendMessage("Veinbreaker is now %s".formatted(enabled ? "enabled" : "disabled"));

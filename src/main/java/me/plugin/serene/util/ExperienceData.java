@@ -19,10 +19,13 @@ public final class ExperienceData {
     }
 
     public static synchronized ExperienceData withMinMaxExp(int minExp, int maxExp) {
-        ExperienceData key = new ExperienceData(minExp, maxExp);
-        ExperienceData existing = pool.get(key);
-        if (existing != null) return existing;
-        else pool.put(key, key);
+        var key = new ExperienceData(minExp, maxExp);
+        var existing = pool.get(key);
+        if (existing != null) {
+            return existing;
+        } else {
+            pool.put(key, key);
+        }
         return key;
     }
 

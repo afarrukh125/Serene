@@ -4,7 +4,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerBedEnterEvent;
-import org.bukkit.event.player.PlayerBedLeaveEvent;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -19,24 +18,23 @@ public class SleepHandler {
     }
 
     public void handleEvent(PlayerBedEnterEvent playerBedEnterEvent) {
-        var targetWorld = playerBedEnterEvent.getPlayer().getWorld();
+        var sleepingPlayer = playerBedEnterEvent.getPlayer();
+        var targetWorld = sleepingPlayer.getWorld();
         if (targetWorld.getPlayers().size() != 1
                 && playerBedEnterEvent.getBedEnterResult().equals(PlayerBedEnterEvent.BedEnterResult.OK)
                 && targetWorld.getEnvironment().equals(World.Environment.NORMAL)) {
-            var sleepingPlayer = playerBedEnterEvent.getPlayer();
             targetWorld.getPlayers().stream()
                     .filter(player -> !player.equals(sleepingPlayer))
                     .forEach(player -> player.setSleepingIgnored(false));
             atomicPlayerReference.set(sleepingPlayer);
-            notifyAllPlayersOfSleepEvent(playerBedEnterEvent);
+            notifyAllPlayersOfSleepEvent(sleepingPlayer);
         }
     }
 
-    public void handleEvent(PlayerBedLeaveEvent playerBedLeaveEvent) {
-        var targetWorld = playerBedLeaveEvent.getPlayer().getWorld();
+    public void handleEvent(Player sleepingPlayer, boolean cancelled) {
+        var targetWorld = sleepingPlayer.getWorld();
         if (targetWorld.getPlayers().size() != 1 && targetWorld.getEnvironment().equals(World.Environment.NORMAL)) {
-            var sleepingPlayer = playerBedLeaveEvent.getPlayer();
-            if (playerBedLeaveEvent.isCancelled() && atomicPlayerReference.get().equals(sleepingPlayer)) {
+            if (cancelled && atomicPlayerReference.get().equals(sleepingPlayer)) {
                 atomicPlayerReference = new AtomicReference<>();
             }
             var players = targetWorld.getPlayers();
@@ -49,8 +47,7 @@ public class SleepHandler {
         }
     }
 
-    private void notifyAllPlayersOfSleepEvent(PlayerBedEnterEvent playerBedEnterEvent) {
-        var sleepingPlayer = playerBedEnterEvent.getPlayer();
+    private void notifyAllPlayersOfSleepEvent(Player sleepingPlayer) {
         var sleepingPlayerName = sleepingPlayer.getName();
         var world = requireNonNull(sleepingPlayer.getWorld());
         var players = world.getPlayers();

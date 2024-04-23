@@ -1,5 +1,6 @@
 package me.plugin.serene.actions;
 
+import jakarta.inject.Inject;
 import me.plugin.serene.database.SereneDatabaseClient;
 import me.plugin.serene.model.SereneConfiguration;
 import org.bukkit.event.player.PlayerExpChangeEvent;
@@ -14,6 +15,7 @@ public class ExperienceHandler {
     private final SereneDatabaseClient databaseClient;
     private final SereneConfiguration config;
 
+    @Inject
     public ExperienceHandler(SereneDatabaseClient databaseClient, SereneConfiguration config) {
         this.databaseClient = databaseClient;
         this.config = config;

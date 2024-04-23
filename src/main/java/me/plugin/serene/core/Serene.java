@@ -1,6 +1,7 @@
 package me.plugin.serene.core;
 
 import com.google.inject.Guice;
+import com.google.inject.Injector;
 import me.plugin.serene.core.command.SearchItemCommand;
 import me.plugin.serene.core.command.ToggleVeinBreakerCommand;
 import me.plugin.serene.database.DatabaseModule;
@@ -27,14 +28,14 @@ public class Serene extends JavaPlugin {
         var config = injector.getInstance(SereneConfiguration.class);
         var eventListener = injector.getInstance(EventListener.class);
         pluginManager.registerEvents(eventListener, this);
-        setupCommands(databaseClient, config);
+        setupCommands(injector);
         LOG.info("Started Serene...");
     }
 
-    private void setupCommands(SereneDatabaseClient databaseClient, SereneConfiguration config) {
-        requireNonNull(this.getCommand("veinbreaker"))
-                .setExecutor(new ToggleVeinBreakerCommand(databaseClient, config));
-        requireNonNull(this.getCommand("vb")).setExecutor(new ToggleVeinBreakerCommand(databaseClient, config));
-        requireNonNull(this.getCommand("search")).setExecutor(new SearchItemCommand());
+    private void setupCommands(Injector injector) {
+        var veinBreakerCommand = injector.getInstance(ToggleVeinBreakerCommand.class);
+        requireNonNull(this.getCommand("veinbreaker")).setExecutor(veinBreakerCommand);
+        requireNonNull(this.getCommand("vb")).setExecutor(veinBreakerCommand);
+        requireNonNull(this.getCommand("search")).setExecutor(injector.getInstance(SearchItemCommand.class));
     }
 }

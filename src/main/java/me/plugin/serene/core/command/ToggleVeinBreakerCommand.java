@@ -1,5 +1,6 @@
 package me.plugin.serene.core.command;
 
+import jakarta.inject.Inject;
 import me.plugin.serene.database.SereneDatabaseClient;
 import me.plugin.serene.exceptions.SereneCommandException;
 import me.plugin.serene.model.SereneConfiguration;
@@ -16,6 +17,7 @@ public class ToggleVeinBreakerCommand implements CommandExecutor {
     private final SereneDatabaseClient database;
     private final SereneConfiguration config;
 
+    @Inject
     public ToggleVeinBreakerCommand(SereneDatabaseClient database, SereneConfiguration config) {
         this.database = database;
         this.config = config;

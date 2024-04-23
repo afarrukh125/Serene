@@ -1,6 +1,7 @@
 package me.plugin.serene.actions;
 
 import com.google.common.collect.ImmutableMap;
+import jakarta.inject.Inject;
 import me.plugin.serene.database.SereneDatabaseClient;
 import me.plugin.serene.util.ExperienceData;
 import org.bukkit.Bukkit;
@@ -58,6 +59,7 @@ public class VeinBreaker {
     private static final Random random = new Random();
     private final SereneDatabaseClient database;
 
+    @Inject
     public VeinBreaker(SereneDatabaseClient database) {
         this.database = database;
     }

@@ -1,11 +1,11 @@
 package me.plugin.serene.listeners;
 
+import jakarta.inject.Inject;
 import me.plugin.serene.actions.ExperienceHandler;
 import me.plugin.serene.actions.InventorySorter;
 import me.plugin.serene.actions.SleepHandler;
 import me.plugin.serene.actions.TreeBreaker;
 import me.plugin.serene.actions.VeinBreaker;
-import me.plugin.serene.database.SereneDatabaseClient;
 import me.plugin.serene.model.SereneConfiguration;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -24,13 +24,20 @@ public class EventListener implements Listener {
     private final SleepHandler sleepHandler;
     private final InventorySorter inventorySorter;
 
-    public EventListener(SereneDatabaseClient databaseClient, SereneConfiguration config) {
-        this.experienceHandler = new ExperienceHandler(databaseClient, config);
-        this.veinBreaker = new VeinBreaker(databaseClient);
-        this.treeBreaker = new TreeBreaker();
-        this.sleepHandler = new SleepHandler();
-        this.inventorySorter = new InventorySorter();
+    @Inject
+    public EventListener(
+            SereneConfiguration config,
+            ExperienceHandler experienceHandler,
+            VeinBreaker veinBreaker,
+            TreeBreaker treeBreaker,
+            SleepHandler sleepHandler,
+            InventorySorter inventorySorter) {
+        this.experienceHandler = experienceHandler;
+        this.veinBreaker = veinBreaker;
         this.config = config;
+        this.treeBreaker = treeBreaker;
+        this.sleepHandler = sleepHandler;
+        this.inventorySorter = inventorySorter;
     }
 
     @EventHandler

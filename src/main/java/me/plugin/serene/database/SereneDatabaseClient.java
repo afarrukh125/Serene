@@ -1,23 +1,8 @@
 package me.plugin.serene.database;
 
 import org.bukkit.entity.Player;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public interface SereneDatabaseClient {
-    Logger LOGGER = LoggerFactory.getLogger(SereneDatabaseClient.class);
-
-    static SereneDatabaseClient create() {
-
-        try {
-            return new SQLiteSereneClient();
-        } catch (Exception e) {
-            LOGGER.info(
-                    "Could not create connected database client, using default session-based algorithm. {}",
-                    e.getMessage());
-            return new SessionDatabaseClient();
-        }
-    }
 
     void addExperienceForPlayer(Player player, long amount);
 

@@ -99,7 +99,7 @@ public class TreeBreaker {
         var damageable = requireNonNull((Damageable) item.getItemMeta());
         for (var block : seenBlocks) {
             var currentDamage = damageable.getDamage();
-            var unbreakingLevel = damageable.getEnchantLevel(Enchantment.DURABILITY);
+            var unbreakingLevel = damageable.getEnchantLevel(Enchantment.UNBREAKING);
             var takeDamage = shouldTakeDamage(unbreakingLevel);
             if (isToolBrokenAfterApplyingDamage(
                     inventory, item, world, originalBlockLocation, damageable, currentDamage, takeDamage)) {

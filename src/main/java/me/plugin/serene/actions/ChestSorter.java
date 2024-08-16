@@ -30,7 +30,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static java.util.stream.Collectors.groupingBy;
 
-public class InventorySorter {
+public class ChestSorter {
 
     public static final int ROW_SIZE = 9;
     public static final int LARGE_CHEST_COL_SIZE = 6;
@@ -71,14 +71,12 @@ public class InventorySorter {
 
     private Inventory translateInventoryFromBlockType(Block block, Player player) {
         var type = block.getType();
-        switch (type) {
-            case CHEST:
-                return ((Chest) block.getState()).getInventory();
-            case ENDER_CHEST:
-                return player.getEnderChest();
-        }
-        throw new IllegalArgumentException(
-                "Unknown block type to translate to inventory %s".formatted(block.getType()));
+        return switch (type) {
+            case CHEST -> ((Chest) block.getState()).getInventory();
+            case ENDER_CHEST -> player.getEnderChest();
+            default -> throw new IllegalArgumentException(
+                    "Unknown block type to translate to inventory %s".formatted(block.getType()));
+        };
     }
 
     // Collates all unorganised items into groups

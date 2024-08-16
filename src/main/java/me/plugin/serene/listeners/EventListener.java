@@ -2,7 +2,7 @@ package me.plugin.serene.listeners;
 
 import jakarta.inject.Inject;
 import me.plugin.serene.actions.ExperienceHandler;
-import me.plugin.serene.actions.InventorySorter;
+import me.plugin.serene.actions.ChestSorter;
 import me.plugin.serene.actions.SleepHandler;
 import me.plugin.serene.actions.TreeBreaker;
 import me.plugin.serene.actions.VeinBreaker;
@@ -22,7 +22,7 @@ public class EventListener implements Listener {
     private final SereneConfiguration config;
     private final TreeBreaker treeBreaker;
     private final SleepHandler sleepHandler;
-    private final InventorySorter inventorySorter;
+    private final ChestSorter chestSorter;
 
     @Inject
     public EventListener(
@@ -31,13 +31,13 @@ public class EventListener implements Listener {
             VeinBreaker veinBreaker,
             TreeBreaker treeBreaker,
             SleepHandler sleepHandler,
-            InventorySorter inventorySorter) {
+            ChestSorter chestSorter) {
         this.experienceHandler = experienceHandler;
         this.veinBreaker = veinBreaker;
         this.config = config;
         this.treeBreaker = treeBreaker;
         this.sleepHandler = sleepHandler;
-        this.inventorySorter = inventorySorter;
+        this.chestSorter = chestSorter;
     }
 
     @EventHandler
@@ -50,7 +50,7 @@ public class EventListener implements Listener {
     @EventHandler
     public void onChestOpenEvent(PlayerInteractEvent playerInteractEvent) {
         if (config.isInventorySortEnabled()) {
-            inventorySorter.handleEvent(playerInteractEvent);
+            chestSorter.handleEvent(playerInteractEvent);
         }
     }
 

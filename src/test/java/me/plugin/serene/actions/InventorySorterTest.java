@@ -12,12 +12,13 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ChestSorterTest {
+class InventorySorterTest {
     private PlayerMock player;
 
     @BeforeEach
@@ -34,7 +35,7 @@ class ChestSorterTest {
     @Test
     void testSimpleOrganisedGroupGeneration() {
         // given
-        var chestSorter = new ChestSorter();
+        var chestSorter = new InventorySorter();
 
         // then
         assertThat(chestSorter.getOrganisedGroups(player.getInventory())).isEmpty();
@@ -73,7 +74,7 @@ class ChestSorterTest {
     @Test
     void testComplexScenarioWithMultipleStacks() {
         // given
-        var chestSorter = new ChestSorter();
+        var chestSorter = new InventorySorter();
         player.getInventory()
                 .addItem(
                         ItemStack.of(Material.ACACIA_LEAVES, 23),
@@ -105,10 +106,11 @@ class ChestSorterTest {
 
         assertThat(itemStacksAgainAtSameLocation.get(8)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 64));
         assertThat(itemStacksAgainAtSameLocation.get(7)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 5));
+        assertThat(itemStacksAgainAtSameLocation).filteredOn(Objects::isNull).hasSize(24);
     }
 
-    private List<ItemStack> getItemStacks(ChestSorter chestSorter, List<MaterialItemStack> groups) {
-        return Arrays.asList(chestSorter.generateFinalSortedItemStacks(groups, 3, player.getLocation()));
+    private List<ItemStack> getItemStacks(InventorySorter inventorySorter, List<MaterialItemStack> groups) {
+        return Arrays.asList(inventorySorter.generateFinalSortedItemStacks(groups, 3, player.getLocation()));
     }
 
     private static MaterialItemStack materialItemStacks(Material material, int... amounts) {

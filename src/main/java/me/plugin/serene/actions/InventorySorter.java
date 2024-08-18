@@ -27,13 +27,13 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.groupingBy;
 
-public class ChestSorter {
+public class InventorySorter {
 
     public static final int ROW_SIZE = 9;
     public static final int LARGE_CHEST_NUM_ROWS = 6;
     public static final int SMALL_CHEST_NUM_ROW = 3;
     public static final int SMALL_CHEST_SIZE = 27;
-    private final Set<Location> seenChestLocations = new HashSet<>();
+    private final Set<Location> seenLocations = new HashSet<>();
     private static final Set<Material> CHEST_MATERIALS = Set.of(Material.CHEST, Material.ENDER_CHEST);
 
     public void handleEvent(PlayerInteractEvent playerInteractEvent) {
@@ -128,15 +128,15 @@ public class ChestSorter {
 
         List<MaterialItemStack> notPlaced = new ArrayList<>();
 
-        if (seenChestLocations.contains(location)) {
+        if (seenLocations.contains(location)) {
             alternatePrioritisingHorizontal(materialItemStacks, newStacks, notPlaced);
             alternatePrioritisingVertical(materialItemStacks, newStacks, notPlaced);
-            seenChestLocations.remove(location);
+            seenLocations.remove(location);
         } else {
             materialItemStacks.addAll(notPlaced);
             alternatePrioritisingVertical(materialItemStacks, newStacks, notPlaced);
             alternatePrioritisingHorizontal(materialItemStacks, newStacks, notPlaced);
-            seenChestLocations.add(location);
+            seenLocations.add(location);
         }
         if (!notPlaced.isEmpty()) {
             dumpRemaining(newStacks, notPlaced);

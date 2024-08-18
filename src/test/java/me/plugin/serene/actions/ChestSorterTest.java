@@ -57,6 +57,19 @@ class ChestSorterTest {
         assertThat(updatedGroups).doesNotContain(materialItemStacks(Material.COBBLESTONE, 62));
     }
 
+    /**
+     * The grid for a chest, assuming 3 columns of 9 (27 slots total) looks something like
+     * <p>
+     * |  0   |  1   |  2   |   3  |   4  |  5  |  6  |  7  |  8  |
+     * <p>
+     * |  9   |  10  |  11  |  12  |  13  | 14  | 15  | 16  | 17  |
+     * <p>
+     * |  18  |  19  |  20  |  21  |  22  | 23  | 24  | 25  | 26  |
+     * <p>
+     * We assume an empty chest has all nulls and when the 2D array representing the chest contents is compressed,
+     * we just get them all as if they were in one line
+     *
+     */
     @Test
     void testComplexScenarioWithMultipleStacks() {
         // given

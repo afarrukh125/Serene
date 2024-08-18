@@ -5,7 +5,6 @@ import be.seeseemelk.mockbukkit.entity.PlayerMock;
 import me.plugin.serene.model.MaterialItemStack;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,8 +68,6 @@ class ChestSorterTest {
                         ItemStack.of(Material.ACACIA_LEAVES, 23),
                         ItemStack.of(Material.COBBLESTONE, 42));
         Supplier<List<MaterialItemStack>> groupSupplier = () -> chestSorter.getOrganisedGroups(player.getInventory());
-
-        // when
 
         // then
         assertThat(groupSupplier.get())

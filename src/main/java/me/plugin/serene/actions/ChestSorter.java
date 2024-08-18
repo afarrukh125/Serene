@@ -14,7 +14,14 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.Runtime.getRuntime;
@@ -27,8 +34,8 @@ import static java.util.stream.Collectors.groupingBy;
 public class ChestSorter {
 
     public static final int ROW_SIZE = 9;
-    public static final int LARGE_CHEST_COL_SIZE = 6;
-    public static final int SMALL_CHEST_COL_SIZE = 3;
+    public static final int LARGE_CHEST_NUM_ROWS = 6;
+    public static final int SMALL_CHEST_NUM_ROW = 3;
     public static final int SMALL_CHEST_SIZE = 27;
     private final Set<Location> seenChestLocations = new HashSet<>();
     private static final Set<Material> CHEST_MATERIALS = Set.of(Material.CHEST, Material.ENDER_CHEST);
@@ -51,10 +58,10 @@ public class ChestSorter {
                     if (!inventory.isEmpty()) {
                         var organisedMaterialGroups = getOrganisedGroups(inventory);
                         var location = block.getLocation();
-                        var colSize = inventory.getContents().length == SMALL_CHEST_SIZE
-                                ? SMALL_CHEST_COL_SIZE
-                                : LARGE_CHEST_COL_SIZE;
-                        var newItemStacks = generateFinalSortedItemStacks(organisedMaterialGroups, colSize, location);
+                        var numRows = inventory.getContents().length == SMALL_CHEST_SIZE
+                                ? SMALL_CHEST_NUM_ROW
+                                : LARGE_CHEST_NUM_ROWS;
+                        var newItemStacks = generateFinalSortedItemStacks(organisedMaterialGroups, numRows, location);
                         inventory.setContents(newItemStacks);
                         player.getWorld().playSound(requireNonNull(location), Sound.BLOCK_CONDUIT_ACTIVATE, 0.7f, 1);
                     }
@@ -132,8 +139,8 @@ public class ChestSorter {
     // Places organised groups into final sorted items
     @VisibleForTesting
     ItemStack[] generateFinalSortedItemStacks(
-            List<MaterialItemStack> materialItemStacks, int colSize, Location location) {
-        var newStacks = new ItemStack[colSize][ROW_SIZE];
+            List<MaterialItemStack> materialItemStacks, int numRows, Location location) {
+        var newStacks = new ItemStack[numRows][ROW_SIZE];
 
         List<MaterialItemStack> notPlaced = new ArrayList<>();
 

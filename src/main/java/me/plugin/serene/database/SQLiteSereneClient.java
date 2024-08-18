@@ -15,13 +15,13 @@ public class SQLiteSereneClient implements SereneDatabaseClient {
     SQLiteSereneClient() {
         try {
             connection = DriverManager.getConnection("jdbc:sqlite:%s".formatted(RELATIVE_PATH));
-            tableCheck();
+            createUserTableIfNotPresent();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void tableCheck() throws SQLException {
+    private void createUserTableIfNotPresent() throws SQLException {
         if (!isUserTableCreated()) createUserTable();
     }
 

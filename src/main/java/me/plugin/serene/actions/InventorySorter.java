@@ -47,8 +47,8 @@ public class InventorySorter {
                 var rightClicked = playerInteractEvent.getAction().equals(Action.RIGHT_CLICK_BLOCK);
                 var usedFeather = playerInteractEvent.hasItem()
                         && requireNonNull(playerInteractEvent.getItem())
-                        .getType()
-                        .equals(Material.FEATHER);
+                                .getType()
+                                .equals(Material.FEATHER);
                 if (rightClicked && usedFeather && sneaking) {
                     var inventory = translateInventoryFromBlockType(block, player);
                     if (!inventory.isEmpty()) {
@@ -85,8 +85,7 @@ public class InventorySorter {
         var reorganisedStacks = new ArrayList<MaterialItemStack>();
         for (var material : itemsToStacks.keySet()) {
             var allStacks = new LinkedList<ItemStack>();
-            var groupedByMeta =
-                    itemsToStacks.get(material).stream().collect(groupingBy(ItemStack::getItemMeta));
+            var groupedByMeta = itemsToStacks.get(material).stream().collect(groupingBy(ItemStack::getItemMeta));
             for (var itemMeta : groupedByMeta.keySet()) {
                 var currentCount = 0;
                 var maxSize = material.getMaxStackSize();

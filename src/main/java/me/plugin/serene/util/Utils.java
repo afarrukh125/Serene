@@ -20,7 +20,8 @@ public class Utils {
     }
 
     public static boolean isToolBrokenAfterApplyingDamage(
-            PlayerInventory inventory, ItemStack item,
+            PlayerInventory inventory,
+            ItemStack item,
             World world,
             Location originalBlockLocation,
             Damageable damageable,

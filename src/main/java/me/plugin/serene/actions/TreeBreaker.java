@@ -18,7 +18,34 @@ import java.util.Set;
 import static java.util.Objects.requireNonNull;
 import static me.plugin.serene.util.Utils.isToolBrokenAfterApplyingDamage;
 import static me.plugin.serene.util.Utils.shouldTakeDamage;
-import static org.bukkit.Material.*;
+import static org.bukkit.Material.ACACIA_LEAVES;
+import static org.bukkit.Material.ACACIA_LOG;
+import static org.bukkit.Material.BIRCH_LEAVES;
+import static org.bukkit.Material.BIRCH_LOG;
+import static org.bukkit.Material.CHERRY_LEAVES;
+import static org.bukkit.Material.CHERRY_LOG;
+import static org.bukkit.Material.COARSE_DIRT;
+import static org.bukkit.Material.DARK_OAK_LEAVES;
+import static org.bukkit.Material.DARK_OAK_LOG;
+import static org.bukkit.Material.DIAMOND_AXE;
+import static org.bukkit.Material.DIRT;
+import static org.bukkit.Material.DIRT_PATH;
+import static org.bukkit.Material.FARMLAND;
+import static org.bukkit.Material.GOLDEN_AXE;
+import static org.bukkit.Material.GRASS_BLOCK;
+import static org.bukkit.Material.IRON_AXE;
+import static org.bukkit.Material.JUNGLE_LEAVES;
+import static org.bukkit.Material.JUNGLE_LOG;
+import static org.bukkit.Material.MYCELIUM;
+import static org.bukkit.Material.NETHERITE_AXE;
+import static org.bukkit.Material.OAK_LEAVES;
+import static org.bukkit.Material.OAK_LOG;
+import static org.bukkit.Material.PODZOL;
+import static org.bukkit.Material.ROOTED_DIRT;
+import static org.bukkit.Material.SPRUCE_LEAVES;
+import static org.bukkit.Material.SPRUCE_LOG;
+import static org.bukkit.Material.STONE_AXE;
+import static org.bukkit.Material.WOODEN_AXE;
 
 public class TreeBreaker {
     private static final Set<Material> LOG_MATERIALS =
@@ -43,9 +70,7 @@ public class TreeBreaker {
             var location = block.getLocation();
             var world = player.getWorld();
             var locationBelowBlock = new Location(world, location.getX(), location.getY() - 1., location.getZ());
-            if (LOG_MATERIALS.contains(type)
-                    && player.isSneaking()
-                    && canTreeGrow(world, locationBelowBlock)) {
+            if (LOG_MATERIALS.contains(type) && player.isSneaking() && canTreeGrow(world, locationBelowBlock)) {
                 handleBreaking(inventory, block, itemInMainHand);
             }
         }
@@ -95,7 +120,11 @@ public class TreeBreaker {
     }
 
     public static void breakWithDamageAwareness(
-            PlayerInventory inventory, ItemStack item, World world, Set<Block> seenBlocks, Location originalBlockLocation) {
+            PlayerInventory inventory,
+            ItemStack item,
+            World world,
+            Set<Block> seenBlocks,
+            Location originalBlockLocation) {
         var damageable = requireNonNull((Damageable) item.getItemMeta());
         for (var block : seenBlocks) {
             var currentDamage = damageable.getDamage();

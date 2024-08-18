@@ -5,12 +5,15 @@ import be.seeseemelk.mockbukkit.entity.PlayerMock;
 import me.plugin.serene.model.MaterialItemStack;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,7 +59,7 @@ class ChestSorterTest {
     }
 
     @Test
-    void testMoreComplexGroupGeneration() {
+    void testComplexScenarioWithMultipleStacks() {
         // given
         var chestSorter = new ChestSorter();
         player.getInventory()
@@ -65,15 +68,35 @@ class ChestSorterTest {
                         ItemStack.of(Material.ACACIA_LEAVES, 23),
                         ItemStack.of(Material.ACACIA_LEAVES, 23),
                         ItemStack.of(Material.COBBLESTONE, 42));
+        Supplier<List<MaterialItemStack>> groupSupplier = () -> chestSorter.getOrganisedGroups(player.getInventory());
 
         // when
-        var groups = chestSorter.getOrganisedGroups(player.getInventory());
 
         // then
-        assertThat(groups)
+        assertThat(groupSupplier.get())
                 .containsExactlyInAnyOrder(
                         materialItemStacks(Material.ACACIA_LEAVES, 64, 5),
                         materialItemStacks(Material.COBBLESTONE, 42));
+
+        // when
+        var itemStacks = getItemStacks(chestSorter, groupSupplier.get());
+
+        // then
+        assertThat(itemStacks.get(0)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 64));
+        assertThat(itemStacks.get(9)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 5));
+        assertThat(itemStacks.get(8)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
+
+        // when
+        var itemStacksAgainAtSameLocation = getItemStacks(chestSorter, groupSupplier.get());
+
+        // then
+        assertThat(itemStacksAgainAtSameLocation.get(0)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
+        assertThat(itemStacksAgainAtSameLocation.get(8)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 64));
+        assertThat(itemStacksAgainAtSameLocation.get(7)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 5));
+    }
+
+    private List<ItemStack> getItemStacks(ChestSorter chestSorter, List<MaterialItemStack> groups) {
+        return Arrays.asList(chestSorter.generateFinalSortedItemStacks(groups, 3, player.getLocation()));
     }
 
     private static MaterialItemStack materialItemStacks(Material material, int... amounts) {

@@ -130,7 +130,8 @@ public class ChestSorter {
     }
 
     // Places organised groups into final sorted items
-    private ItemStack[] generateFinalSortedItemStacks(
+    @VisibleForTesting
+    ItemStack[] generateFinalSortedItemStacks(
             List<MaterialItemStack> materialItemStacks, int colSize, Location location) {
         var newStacks = new ItemStack[colSize][ROW_SIZE];
 

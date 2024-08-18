@@ -26,7 +26,30 @@ import java.util.Set;
 import static java.util.Objects.requireNonNull;
 import static me.plugin.serene.util.Utils.isToolBrokenAfterApplyingDamage;
 import static me.plugin.serene.util.Utils.shouldTakeDamage;
-import static org.bukkit.Material.*;
+import static org.bukkit.Material.COAL_ORE;
+import static org.bukkit.Material.COPPER_ORE;
+import static org.bukkit.Material.DEEPSLATE_COAL_ORE;
+import static org.bukkit.Material.DEEPSLATE_COPPER_ORE;
+import static org.bukkit.Material.DEEPSLATE_DIAMOND_ORE;
+import static org.bukkit.Material.DEEPSLATE_EMERALD_ORE;
+import static org.bukkit.Material.DEEPSLATE_GOLD_ORE;
+import static org.bukkit.Material.DEEPSLATE_IRON_ORE;
+import static org.bukkit.Material.DEEPSLATE_LAPIS_ORE;
+import static org.bukkit.Material.DEEPSLATE_REDSTONE_ORE;
+import static org.bukkit.Material.DIAMOND_ORE;
+import static org.bukkit.Material.DIAMOND_PICKAXE;
+import static org.bukkit.Material.EMERALD_ORE;
+import static org.bukkit.Material.GOLDEN_PICKAXE;
+import static org.bukkit.Material.GOLD_ORE;
+import static org.bukkit.Material.IRON_ORE;
+import static org.bukkit.Material.IRON_PICKAXE;
+import static org.bukkit.Material.LAPIS_ORE;
+import static org.bukkit.Material.NETHERITE_PICKAXE;
+import static org.bukkit.Material.NETHER_GOLD_ORE;
+import static org.bukkit.Material.NETHER_QUARTZ_ORE;
+import static org.bukkit.Material.REDSTONE_ORE;
+import static org.bukkit.Material.STONE_PICKAXE;
+import static org.bukkit.Material.WOODEN_PICKAXE;
 
 public class VeinBreaker {
 

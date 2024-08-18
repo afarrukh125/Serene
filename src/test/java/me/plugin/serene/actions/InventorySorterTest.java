@@ -4,11 +4,15 @@ import be.seeseemelk.mockbukkit.MockBukkit;
 import be.seeseemelk.mockbukkit.entity.PlayerMock;
 import me.plugin.serene.model.MaterialItemStack;
 import org.bukkit.Material;
+import org.bukkit.block.Chest;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.stubbing.Answer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,6 +21,9 @@ import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 class InventorySorterTest {
     private PlayerMock player;
@@ -27,8 +34,7 @@ class InventorySorterTest {
     }
 
     @AfterEach
-    public void tearDown()
-    {
+    public void tearDown() {
         MockBukkit.unmock();
     }
 
@@ -69,19 +75,19 @@ class InventorySorterTest {
      * <p>
      * We assume an empty chest has all nulls and when the 2D array representing the chest contents is compressed,
      * we just get them all as if they were in one line
-     *
      */
     @Test
     void testComplexScenarioWithMultipleStacks() {
         // given
-        var chestSorter = new InventorySorter();
+        var inventorySorter = new InventorySorter();
         player.getInventory()
                 .addItem(
                         ItemStack.of(Material.ACACIA_LEAVES, 23),
                         ItemStack.of(Material.ACACIA_LEAVES, 23),
                         ItemStack.of(Material.ACACIA_LEAVES, 23),
                         ItemStack.of(Material.COBBLESTONE, 42));
-        Supplier<List<MaterialItemStack>> groupSupplier = () -> chestSorter.getOrganisedGroups(player.getInventory());
+        Supplier<List<MaterialItemStack>> groupSupplier =
+                () -> inventorySorter.getOrganisedGroups(player.getInventory());
 
         // then
         assertThat(groupSupplier.get())
@@ -90,7 +96,7 @@ class InventorySorterTest {
                         materialItemStacks(Material.COBBLESTONE, 42));
 
         // when
-        var itemStacks = getItemStacks(chestSorter, groupSupplier.get());
+        var itemStacks = getItemStacks(inventorySorter, groupSupplier.get());
 
         // then
         assertThat(itemStacks.get(0)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 64));
@@ -99,7 +105,7 @@ class InventorySorterTest {
         assertThat(itemStacks.get(8)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
 
         // when
-        var itemStacksAgainAtSameLocation = getItemStacks(chestSorter, groupSupplier.get());
+        var itemStacksAgainAtSameLocation = getItemStacks(inventorySorter, groupSupplier.get());
 
         // then
         assertThat(itemStacksAgainAtSameLocation.get(0)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
@@ -109,8 +115,62 @@ class InventorySorterTest {
         assertThat(itemStacksAgainAtSameLocation).filteredOn(Objects::isNull).hasSize(24);
     }
 
+    @Test
+    public void testComplexScenarioInLargeInventory() {
+        // given
+        var inventorySorter = new InventorySorter();
+
+        var chest = spy(Chest.class);
+        var inventory = spy(Inventory.class);
+
+        var backingList = new ArrayList<ItemStack>();
+        when(chest.getInventory()).thenReturn(inventory);
+        when(inventory.addItem(any())).thenAnswer((Answer<Void>) invocation -> {
+            backingList.addAll(Arrays.stream(invocation.getArguments())
+                    .map(object -> ((ItemStack) object))
+                    .toList());
+            return null;
+        });
+
+        chest.getInventory()
+                .addItem(
+                        ItemStack.of(Material.ACACIA_LEAVES, 23),
+                        ItemStack.of(Material.ACACIA_LEAVES, 23),
+                        ItemStack.of(Material.ACACIA_LEAVES, 23),
+                        ItemStack.of(Material.GRAVEL, 64),
+                        ItemStack.of(Material.GRAVEL, 64),
+                        ItemStack.of(Material.GRAVEL, 64),
+                        ItemStack.of(Material.GRAVEL, 64),
+                        ItemStack.of(Material.GRAVEL, 64),
+                        ItemStack.of(Material.GRAVEL, 64),
+                        ItemStack.of(Material.GRAVEL, 64),
+                        ItemStack.of(Material.GRAVEL, 64),
+                        ItemStack.of(Material.GRAVEL, 64),
+                        ItemStack.of(Material.GRAVEL, 64),
+                        ItemStack.of(Material.COBBLESTONE, 42));
+
+        when(inventory.getContents()).thenReturn(backingList.toArray(new ItemStack[54]));
+
+        Supplier<List<MaterialItemStack>> groupSupplier =
+                () -> inventorySorter.getOrganisedGroups(chest.getInventory());
+
+        // when
+        var itemStacks = getItemStacks(inventorySorter, groupSupplier.get(), InventorySorter.LARGE_CHEST_NUM_ROWS);
+
+        // then
+        assertThat(itemStacks.get(0)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 64));
+        assertThat(itemStacks.get(9)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 5));
+
+        assertThat(itemStacks.get(8)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
+    }
+
     private List<ItemStack> getItemStacks(InventorySorter inventorySorter, List<MaterialItemStack> groups) {
-        return Arrays.asList(inventorySorter.generateFinalSortedItemStacks(groups, 3, player.getLocation()));
+        return getItemStacks(inventorySorter, groups, 3);
+    }
+
+    private List<ItemStack> getItemStacks(
+            InventorySorter inventorySorter, List<MaterialItemStack> groups, int numRows) {
+        return Arrays.asList(inventorySorter.generateFinalSortedItemStacks(groups, numRows, player.getLocation()));
     }
 
     private static MaterialItemStack materialItemStacks(Material material, int... amounts) {

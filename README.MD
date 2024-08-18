@@ -13,4 +13,5 @@ Place into your plugins folder in your bukkit/spigot/paper server and you're goo
 # Developing
 
 This project currently uses Java 22
+
 Import the pom.xml into IntelliJ, and it should do everything for you

@@ -1,5 +1,6 @@
 package me.plugin.serene.actions;
 
+import com.google.common.annotations.VisibleForTesting;
 import me.plugin.serene.model.Coordinate;
 import me.plugin.serene.model.MaterialItemStack;
 import org.bukkit.Location;
@@ -13,14 +14,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.Runtime.getRuntime;
@@ -80,7 +74,8 @@ public class ChestSorter {
     }
 
     // Collates all unorganised items into groups
-    private List<MaterialItemStack> getOrganisedGroups(Inventory inventory) {
+    @VisibleForTesting
+    List<MaterialItemStack> getOrganisedGroups(Inventory inventory) {
         var itemsToStacks =
                 Arrays.stream(inventory.getContents()).filter(Objects::nonNull).collect(groupingBy(ItemStack::getType));
 

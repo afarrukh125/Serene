@@ -13,8 +13,18 @@
             <id>spigot-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
         </repository>
+        <repository>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
     </repositories>
     <dependencies>
+        <dependency>
+            <groupId>com.github.seeseemelk</groupId>
+            <artifactId>MockBukkit-v1.21</artifactId>
+            <version>3.107.0</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>

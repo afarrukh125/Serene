@@ -94,6 +94,7 @@ class ChestSorterTest {
         // then
         assertThat(itemStacks.get(0)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 64));
         assertThat(itemStacks.get(9)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 5));
+
         assertThat(itemStacks.get(8)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
 
         // when
@@ -101,6 +102,7 @@ class ChestSorterTest {
 
         // then
         assertThat(itemStacksAgainAtSameLocation.get(0)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
+
         assertThat(itemStacksAgainAtSameLocation.get(8)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 64));
         assertThat(itemStacksAgainAtSameLocation.get(7)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 5));
     }

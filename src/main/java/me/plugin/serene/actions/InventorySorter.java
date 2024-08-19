@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
@@ -146,7 +147,7 @@ public class InventorySorter {
     private void alternatePrioritisingHorizontal(
             List<MaterialItemStack> materialItemStacks, ItemStack[][] newStacks, List<MaterialItemStack> notPlaced) {
         int x = 0;
-        for (var materialItemStack : materialItemStacks) {
+        for (var materialItemStack : filterStacks(materialItemStacks, itemStacksFitInRow())) {
             if (x % 2 == 0) {
                 populateHorizontally(materialItemStack, newStacks, notPlaced);
             } else {
@@ -154,13 +155,13 @@ public class InventorySorter {
             }
             x++;
         }
+        notPlaced.addAll(filterStacks(materialItemStacks, itemStacksExceedRowSize()));
     }
 
     private void alternatePrioritisingVertical(
             List<MaterialItemStack> materialItemStacks, ItemStack[][] newStacks, List<MaterialItemStack> notPlaced) {
-        int x;
-        x = 0;
-        for (var materialItemStack : materialItemStacks) {
+        int x = 0;
+        for (var materialItemStack : filterStacks(materialItemStacks, itemStacksFitInRow())) {
             if (x % 2 == 0) {
                 populateVertically(materialItemStack, newStacks, notPlaced);
             } else {
@@ -168,6 +169,19 @@ public class InventorySorter {
             }
             x++;
         }
+        notPlaced.addAll(materialItemStacks.stream().filter(itemStacksExceedRowSize()).toList());
+    }
+
+    private static Predicate<MaterialItemStack> itemStacksFitInRow() {
+        return materialItemStack -> materialItemStack.itemStacks().size() <= ROW_SIZE;
+    }
+
+    private static Predicate<MaterialItemStack> itemStacksExceedRowSize() {
+        return materialItemStack -> materialItemStack.itemStacks().size() > ROW_SIZE;
+    }
+
+    private static List<MaterialItemStack> filterStacks(List<MaterialItemStack> materialItemStacks, Predicate<MaterialItemStack> materialItemStackPredicate) {
+        return materialItemStacks.stream().filter(materialItemStackPredicate).toList();
     }
 
     private void populateHorizontally(

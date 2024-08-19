@@ -16,6 +16,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -115,8 +116,9 @@ public class InventorySorter {
         }
 
         // Place the biggest stacks first
-        reorganisedStacks.sort(
-                (o1, o2) -> o2.itemStacks().size() - o1.itemStacks().size());
+        reorganisedStacks.sort(Comparator.<MaterialItemStack, Integer>
+                comparing(materialItemStack -> materialItemStack.itemStacks().size()).reversed()
+                .thenComparing(materialItemStack -> materialItemStack.material().name()));
         return reorganisedStacks;
     }
 

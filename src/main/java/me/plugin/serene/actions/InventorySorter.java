@@ -131,13 +131,13 @@ public class InventorySorter {
         List<MaterialItemStack> notPlaced = new ArrayList<>();
 
         if (seenLocations.contains(location)) {
-            alternatePrioritisingHorizontal(materialItemStacks, newStacks, notPlaced);
             alternatePrioritisingVertical(materialItemStacks, newStacks, notPlaced);
+            alternatePrioritisingHorizontal(materialItemStacks, newStacks, notPlaced);
             seenLocations.remove(location);
         } else {
             materialItemStacks.addAll(notPlaced);
-            alternatePrioritisingVertical(materialItemStacks, newStacks, notPlaced);
             alternatePrioritisingHorizontal(materialItemStacks, newStacks, notPlaced);
+            alternatePrioritisingVertical(materialItemStacks, newStacks, notPlaced);
             seenLocations.add(location);
         }
         if (!notPlaced.isEmpty()) {
@@ -223,7 +223,9 @@ public class InventorySorter {
         var done = false;
         for (var x = 0; x < newStacks[0].length; x++) {
             for (var y = 0; y < newStacks.length; y++) {
-                if (newStacks[y][x] != null) continue;
+                if (newStacks[y][x] != null) {
+                    continue;
+                }
                 var verticalCoordinates = canFitVertically(itemStacks.size(), newStacks, x, y);
                 if (!verticalCoordinates.isEmpty()) {
                     populate(itemStacks, newStacks, verticalCoordinates);

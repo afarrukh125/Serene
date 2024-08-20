@@ -39,7 +39,6 @@ public class InventorySorter {
     private static final Set<Material> CHEST_MATERIALS = Set.of(Material.CHEST, Material.ENDER_CHEST);
 
     public void handleEvent(PlayerInteractEvent playerInteractEvent) {
-
         if (playerInteractEvent.getClickedBlock() != null) {
             var block = requireNonNull(playerInteractEvent.getClickedBlock());
             var player = playerInteractEvent.getPlayer();
@@ -49,8 +48,8 @@ public class InventorySorter {
                 var rightClicked = playerInteractEvent.getAction().equals(Action.RIGHT_CLICK_BLOCK);
                 var usedFeather = playerInteractEvent.hasItem()
                         && requireNonNull(playerInteractEvent.getItem())
-                                .getType()
-                                .equals(Material.FEATHER);
+                        .getType()
+                        .equals(Material.FEATHER);
                 if (rightClicked && usedFeather && sneaking) {
                     var inventory = translateInventoryFromBlockType(block, player);
                     if (!inventory.isEmpty()) {
@@ -117,7 +116,7 @@ public class InventorySorter {
 
         // Place the biggest stacks first
         reorganisedStacks.sort(Comparator.<MaterialItemStack, Integer>
-                comparing(materialItemStack -> materialItemStack.itemStacks().size()).reversed()
+                        comparing(materialItemStack -> materialItemStack.itemStacks().size()).reversed()
                 .thenComparing(materialItemStack -> materialItemStack.material().name()));
         return reorganisedStacks;
     }
@@ -148,6 +147,11 @@ public class InventorySorter {
 
     private void alternatePrioritisingHorizontal(
             List<MaterialItemStack> materialItemStacks, ItemStack[][] newStacks, List<MaterialItemStack> notPlaced) {
+        var placeFirst = filterStacks(materialItemStacks, fitsPerfectlyInLine(newStacks[0].length));
+        for (var materialItemStack : placeFirst) {
+            populateHorizontally(materialItemStack, newStacks, notPlaced);
+        }
+
         int x = 0;
         for (var materialItemStack : filterStacks(materialItemStacks, itemStacksFitInRow())) {
             if (x % 2 == 0) {
@@ -157,13 +161,19 @@ public class InventorySorter {
             }
             x++;
         }
-        notPlaced.addAll(filterStacks(materialItemStacks, itemStacksExceedRowSize()));
+        notPlaced.addAll(filterStacks(materialItemStacks, itemStacksFitInRow().negate()));
     }
 
     private void alternatePrioritisingVertical(
             List<MaterialItemStack> materialItemStacks, ItemStack[][] newStacks, List<MaterialItemStack> notPlaced) {
+        var placeFirst = filterStacks(materialItemStacks, fitsPerfectlyInLine(newStacks.length));
+
+        for (var materialItemStack : placeFirst) {
+            populateVertically(materialItemStack, newStacks, notPlaced);
+        }
+
         int x = 0;
-        for (var materialItemStack : filterStacks(materialItemStacks, itemStacksFitInRow())) {
+        for (var materialItemStack : filterStacks(materialItemStacks, itemStacksFitInColumn(newStacks.length))) {
             if (x % 2 == 0) {
                 populateVertically(materialItemStack, newStacks, notPlaced);
             } else {
@@ -171,15 +181,19 @@ public class InventorySorter {
             }
             x++;
         }
-        notPlaced.addAll(materialItemStacks.stream().filter(itemStacksExceedRowSize()).toList());
+        notPlaced.addAll(materialItemStacks.stream().filter(itemStacksFitInColumn(newStacks.length).negate()).toList());
+    }
+
+    private static Predicate<MaterialItemStack> fitsPerfectlyInLine(int length) {
+        return materialItemStack -> materialItemStack.itemStacks().size() == length;
+    }
+
+    private Predicate<MaterialItemStack> itemStacksFitInColumn(int length) {
+        return materialItemStack -> materialItemStack.itemStacks().size() <= length;
     }
 
     private static Predicate<MaterialItemStack> itemStacksFitInRow() {
         return materialItemStack -> materialItemStack.itemStacks().size() <= ROW_SIZE;
-    }
-
-    private static Predicate<MaterialItemStack> itemStacksExceedRowSize() {
-        return materialItemStack -> materialItemStack.itemStacks().size() > ROW_SIZE;
     }
 
     private static List<MaterialItemStack> filterStacks(List<MaterialItemStack> materialItemStacks, Predicate<MaterialItemStack> materialItemStackPredicate) {

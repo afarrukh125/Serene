@@ -1,14 +1,10 @@
 package me.plugin.serene.actions;
 
-import be.seeseemelk.mockbukkit.MockBukkit;
-import be.seeseemelk.mockbukkit.entity.PlayerMock;
 import me.plugin.serene.model.MaterialItemStack;
 import org.bukkit.Material;
 import org.bukkit.block.Chest;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.stubbing.Answer;
 
@@ -25,18 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
-class InventorySorterTest {
-    private PlayerMock player;
-
-    @BeforeEach
-    public void setUp() {
-        player = new PlayerMock(MockBukkit.mock(), "player1");
-    }
-
-    @AfterEach
-    public void tearDown() {
-        MockBukkit.unmock();
-    }
+class InventorySorterTest extends PlayerTest {
 
     @Test
     void testSimpleOrganisedGroupGeneration() {

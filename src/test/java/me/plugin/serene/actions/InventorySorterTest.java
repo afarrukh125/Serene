@@ -165,7 +165,7 @@ class InventorySorterTest {
 
         var backingList = new ArrayList<ItemStack>();
         when(chest.getInventory()).thenReturn(inventory);
-        when(inventory.addItem(any())).thenAnswer((Answer<Void>) invocation -> {
+        when(inventory.addItem(any(ItemStack.class))).thenAnswer((Answer<Void>) invocation -> {
             backingList.addAll(Arrays.stream(invocation.getArguments())
                     .map(object -> ((ItemStack) object))
                     .toList());

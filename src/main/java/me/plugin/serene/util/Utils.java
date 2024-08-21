@@ -1,5 +1,6 @@
 package me.plugin.serene.util;
 
+import com.google.common.collect.Lists;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -9,6 +10,8 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.Damageable;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static java.util.stream.Collectors.joining;
@@ -47,7 +50,22 @@ public class Utils {
     public static String getGridString(ItemStack[][] newStacks) {
         return Arrays.stream(newStacks)
                 .map(a -> Arrays.stream(a)
-                        .map(itemStack -> itemStack == null ? "null " : itemStack.getType().name() + ":" + itemStack.getAmount())
+                        .map(itemStack -> itemStack == null
+                                ? "null "
+                                : itemStack.getType().name() + ":" + itemStack.getAmount())
+                        .collect(joining(" | ")))
+                .collect(joining("\n"));
+    }
+
+    public static String getGridString(List<ItemStack> materialItemStacks) {
+        int longestName = materialItemStacks.stream().filter(Objects::nonNull).map(ItemStack::getType).map(Material::name).map(String::length).max(Integer::compare).orElseThrow() + 2;
+        var partitioned = Lists.partition(materialItemStacks, 9);
+        return partitioned.stream()
+                .map(a -> a.stream()
+                        .map(itemStack -> itemStack == null
+                                ? "null "
+                                : itemStack.getType().name() + ":" + itemStack.getAmount())
+                        .map(name -> name.length() < longestName ? name + " ".repeat(longestName - name.length()) : name.substring(0, longestName))
                         .collect(joining(" | ")))
                 .collect(joining("\n"));
     }

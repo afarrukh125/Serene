@@ -16,15 +16,7 @@ import org.bukkit.inventory.ItemStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
 import static java.util.Collections.emptyList;
@@ -50,8 +42,8 @@ public class InventorySorter {
                 var rightClicked = playerInteractEvent.getAction().equals(Action.RIGHT_CLICK_BLOCK);
                 var usedFeather = playerInteractEvent.hasItem()
                         && requireNonNull(playerInteractEvent.getItem())
-                        .getType()
-                        .equals(Material.FEATHER);
+                                .getType()
+                                .equals(Material.FEATHER);
                 if (rightClicked && usedFeather && sneaking) {
                     var inventory = translateInventoryFromBlockType(block, player);
                     if (!inventory.isEmpty()) {
@@ -130,11 +122,13 @@ public class InventorySorter {
         List<MaterialItemStack> notPlaced = new ArrayList<>();
 
         if (seenLocations.contains(location)) {
+            location.getWorld().getPlayers().forEach(player -> player.sendMessage("Sorting vertically"));
             alternatePrioritisingVertical(materialItemStacks, newStacks, notPlaced);
             alternatePrioritisingHorizontal(materialItemStacks, newStacks, notPlaced);
             seenLocations.remove(location);
         } else {
             materialItemStacks.addAll(notPlaced);
+            location.getWorld().getPlayers().forEach(player -> player.sendMessage("Sorting horizontally"));
             alternatePrioritisingHorizontal(materialItemStacks, newStacks, notPlaced);
             alternatePrioritisingVertical(materialItemStacks, newStacks, notPlaced);
             seenLocations.add(location);
@@ -170,7 +164,9 @@ public class InventorySorter {
             }
             x++;
         }
-        notPlaced.addAll(materialItemStacks.stream().filter(itemStacksFitInColumn(newStacks.length)).toList());
+        notPlaced.addAll(materialItemStacks.stream()
+                .filter(itemStacksFitInColumn(newStacks.length))
+                .toList());
     }
 
     private Predicate<MaterialItemStack> itemStacksFitInColumn(int length) {
@@ -282,7 +278,9 @@ public class InventorySorter {
     }
 
     private void dumpRemaining(ItemStack[][] newStacks, List<MaterialItemStack> couldntBePlaced) {
-        for (var materialItemStack : couldntBePlaced) {
+        for (var materialItemStack : couldntBePlaced.stream()
+                .filter(materialItemStack -> !materialItemStack.itemStacks().isEmpty())
+                .toList()) {
             if (materialItemStack.itemStacks().isEmpty()) {
                 continue;
             }
@@ -325,17 +323,17 @@ public class InventorySorter {
                 if (newStacks[i][j] != null) {
                     var coordinates = new ArrayList<Coordinate>();
                     var canPlace = true;
-                    for (int widthPointer = i; widthPointer < newStacks[i].length && widthPointer < i + targetLineSize; widthPointer++) {
-                        for (int heightPointer = j; heightPointer < newStacks.length && heightPointer < j + numRows; heightPointer++) {
+                    for (int widthPointer = i;
+                            widthPointer < newStacks[i].length && widthPointer < i + targetLineSize;
+                            widthPointer++) {
+                        for (int heightPointer = j;
+                                heightPointer < newStacks.length && heightPointer < j + numRows;
+                                heightPointer++) {
                             coordinates.add(new Coordinate(widthPointer, heightPointer));
-                            try {
                                 if (newStacks[heightPointer][widthPointer] != null) {
                                     canPlace = false;
                                     break;
                                 }
-                            } catch (Exception e) {
-                                LOG.error("Ran into {}", e.getMessage());
-                            }
                             if (!canPlace) {
                                 break;
                             }

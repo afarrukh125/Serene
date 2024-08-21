@@ -13,6 +13,8 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -145,8 +147,6 @@ public class InventorySorter {
 
     private void alternatePrioritisingHorizontal(
             List<MaterialItemStack> materialItemStacks, ItemStack[][] newStacks, List<MaterialItemStack> notPlaced) {
-        materialItemStacks.addAll(notPlaced);
-        sortBySizeThenName(materialItemStacks);
 
         int perfectLength = newStacks[0].length;
         var fitInLine = filterStacks(materialItemStacks, fitsPerfectlyInLine(perfectLength));
@@ -165,9 +165,6 @@ public class InventorySorter {
 
     private void alternatePrioritisingVertical(
             List<MaterialItemStack> materialItemStacks, ItemStack[][] newStacks, List<MaterialItemStack> notPlaced) {
-        materialItemStacks.addAll(notPlaced);
-        sortBySizeThenName(materialItemStacks);
-
         int perfectLength = newStacks.length;
         var fitInLine = filterStacks(materialItemStacks, fitsPerfectlyInLine(perfectLength));
         if (!fitInLine.isEmpty()) {
@@ -180,7 +177,8 @@ public class InventorySorter {
         for (var materialItemStack : filterStacks(materialItemStacks, itemStacksFitInColumn(newStacks.length))) {
             populateVertically(materialItemStack, newStacks, notPlaced);
         }
-        notPlaced.addAll(materialItemStacks.stream().filter(itemStacksFitInColumn(newStacks.length).negate()).toList());
+        notPlaced.addAll(filterStacks(
+                materialItemStacks, itemStacksFitInColumn(newStacks.length).negate()));
     }
 
     private List<MaterialItemStack> sanitiseStacks(List<MaterialItemStack> materialItemStacks, double targetLength) {
@@ -199,7 +197,8 @@ public class InventorySorter {
     }
 
     private static Predicate<MaterialItemStack> fitsPerfectlyInLine(int length) {
-        return materialItemStack -> !materialItemStack.itemStacks().isEmpty() && materialItemStack.itemStacks().size() % length == 0;
+        return materialItemStack -> !materialItemStack.itemStacks().isEmpty()
+                && materialItemStack.itemStacks().size() % length == 0;
     }
 
     private Predicate<MaterialItemStack> itemStacksFitInColumn(int length) {
@@ -210,8 +209,12 @@ public class InventorySorter {
         return materialItemStack -> materialItemStack.itemStacks().size() <= ROW_SIZE;
     }
 
-    private static List<MaterialItemStack> filterStacks(List<MaterialItemStack> materialItemStacks, Predicate<MaterialItemStack> materialItemStackPredicate) {
-        return materialItemStacks.stream().filter(materialItemStackPredicate).toList();
+    private static List<MaterialItemStack> filterStacks(
+            List<MaterialItemStack> materialItemStacks, Predicate<MaterialItemStack> materialItemStackPredicate) {
+        return materialItemStacks.stream()
+                .filter(materialItemStack -> !materialItemStack.itemStacks().isEmpty())
+                .filter(materialItemStackPredicate)
+                .toList();
     }
 
     private void populateHorizontally(
@@ -237,7 +240,7 @@ public class InventorySorter {
                 break;
             }
         }
-        if (!done) {
+        if (!done && !materialItemStack.itemStacks().isEmpty()) {
             notPlaced.add(materialItemStack);
         }
     }
@@ -265,7 +268,7 @@ public class InventorySorter {
                 break;
             }
         }
-        if (!done) {
+        if (!done && !materialItemStack.itemStacks().isEmpty()) {
             notPlaced.add(materialItemStack);
         }
     }
@@ -308,15 +311,71 @@ public class InventorySorter {
 
     private void dumpRemaining(ItemStack[][] newStacks, List<MaterialItemStack> couldntBePlaced) {
         for (var materialItemStack : couldntBePlaced) {
+            if (materialItemStack.itemStacks().isEmpty()) {
+                continue;
+            }
             var stacks = materialItemStack.itemStacks();
-            for (var i = newStacks.length - 1; i >= 0; i--) {
-                for (var j = newStacks[i].length - 1; j >= 0 && !stacks.isEmpty(); j--) {
-                    if (newStacks[i][j] == null) {
-                        newStacks[i][j] = stacks.poll();
+            var placed = false;
+            for (int i = 2; i < 9; i++) {
+                var totalItems = stacks.size();
+                var lineSize = totalItems / i;
+                var lineSizeDouble = (double) totalItems / i;
+                if (lineSizeDouble == lineSize) {
+                    var coordinates = tryToPlaceInGrid(newStacks, lineSize, i);
+                    if (!coordinates.isEmpty()) {
+                        for (var coordinate : coordinates) {
+                            newStacks[coordinate.y()][coordinate.x()] = stacks.poll();
+                        }
+                        placed = true;
+                    }
+                }
+                if (placed) {
+                    break;
+                }
+            }
+            if (!placed) {
+                for (var i = newStacks.length - 1; i >= 0; i--) {
+                    for (var j = newStacks[i].length - 1; j >= 0 && !stacks.isEmpty(); j--) {
+                        if (newStacks[i][j] == null) {
+                            newStacks[i][j] = stacks.poll();
+                        }
                     }
                 }
             }
         }
+    }
+
+    private static final Logger LOG = LoggerFactory.getLogger(InventorySorter.class);
+
+    private List<Coordinate> tryToPlaceInGrid(ItemStack[][] newStacks, int targetLineSize, int numRows) {
+        for (int i = 0; i < newStacks.length; i++) {
+            for (int j = 0; j < newStacks[i].length; j++) {
+                if (newStacks[i][j] != null) {
+                    var coordinates = new ArrayList<Coordinate>();
+                    var canPlace = true;
+                    for (int widthPointer = i; widthPointer < newStacks.length && widthPointer < i + targetLineSize; widthPointer++) {
+                        for (int heightPointer = j; heightPointer < newStacks[i].length && heightPointer < j + numRows; heightPointer++) {
+                            coordinates.add(new Coordinate(widthPointer, heightPointer));
+                            try {
+                                if (newStacks[heightPointer][widthPointer] != null) {
+                                    canPlace = false;
+                                    break;
+                                }
+                            } catch (Exception e) {
+                                LOG.error("Ran into {}", e.getMessage());
+                            }
+                            if (!canPlace) {
+                                break;
+                            }
+                        }
+                    }
+                    if (canPlace) {
+                        return coordinates;
+                    }
+                }
+            }
+        }
+        return emptyList();
     }
 
     private ItemStack[] flatten(ItemStack[][] newStacks) {
@@ -328,8 +387,9 @@ public class InventorySorter {
     }
 
     private static void sortBySizeThenName(List<MaterialItemStack> reorganisedStacks) {
-        reorganisedStacks.sort(Comparator.<MaterialItemStack, Integer>
-                        comparing(materialItemStack -> materialItemStack.itemStacks().size()).reversed()
+        reorganisedStacks.sort(Comparator.<MaterialItemStack, Integer>comparing(
+                        materialItemStack -> materialItemStack.itemStacks().size())
+                .reversed()
                 .thenComparing(materialItemStack -> materialItemStack.material().name()));
     }
 }

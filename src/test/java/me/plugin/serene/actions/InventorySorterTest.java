@@ -84,23 +84,23 @@ class InventorySorterTest extends PlayerTest {
         var itemStacks = getItemStacks(inventorySorter, groupSupplier.get());
 
         // then
-        assertThat(itemStacks.get(0)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
-
         assertThat(itemStacks.get(8)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 64));
         assertThat(itemStacks.get(7)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 5));
 
+        assertThat(itemStacks.get(17)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
+
 
         // when
-        var itemStacksAgainAtSameLocation = getItemStacks(inventorySorter, groupSupplier.get());
+        var verticallySortedItemStacks = getItemStacks(inventorySorter, groupSupplier.get());
 
         // then
-        assertThat(itemStacksAgainAtSameLocation.get(0)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 64));
-        assertThat(itemStacksAgainAtSameLocation.get(9)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 5));
+        assertThat(verticallySortedItemStacks.get(0)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 64));
+        assertThat(verticallySortedItemStacks.get(9)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 5));
 
-        assertThat(itemStacksAgainAtSameLocation.get(8)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
+        assertThat(verticallySortedItemStacks.get(18)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
 
 
-        assertThat(itemStacksAgainAtSameLocation).filteredOn(Objects::isNull).hasSize(24);
+        assertThat(verticallySortedItemStacks).filteredOn(Objects::isNull).hasSize(24);
     }
 
     @Test
@@ -134,12 +134,12 @@ class InventorySorterTest extends PlayerTest {
         // then
         assertThat(itemStacks.subList(0, 9)).containsOnly(ItemStack.of(Material.EGG, 16));
 
-        assertThat(itemStacks.get(9)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 64));
-        assertThat(itemStacks.get(18)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 5));
+        assertThat(itemStacks.get(17)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 64));
+        assertThat(itemStacks.get(16)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 5));
 
-        assertThat(itemStacks.get(17)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
+        assertThat(itemStacks.get(26)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
 
-        assertThat(itemStacks.subList(45, 54)).containsOnly(ItemStack.of(Material.GRAVEL, 64));
+        assertThat(itemStacks.subList(44, 53)).containsOnly(ItemStack.of(Material.GRAVEL, 64));
     }
 
     private List<ItemStack> setupFinalOrganisedInventory(ItemStack... itemStacks) {

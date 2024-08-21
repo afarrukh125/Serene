@@ -31,14 +31,12 @@ class InventorySorterTest extends PlayerTest {
         // then
         assertThat(chestSorter.getOrganisedGroups(player.getInventory())).isEmpty();
 
-        // given
+        // when
         player.getInventory()
                 .addItem(
                         ItemStack.of(Material.ACACIA_LEAVES, 23),
                         ItemStack.of(Material.ACACIA_LEAVES, 23),
                         ItemStack.of(Material.COBBLESTONE, 42));
-
-        // when
         var updatedGroups = chestSorter.getOrganisedGroups(player.getInventory());
 
         // then
@@ -99,7 +97,6 @@ class InventorySorterTest extends PlayerTest {
 
         assertThat(verticallySortedItemStacks.get(18)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
 
-
         assertThat(verticallySortedItemStacks).filteredOn(Objects::isNull).hasSize(24);
     }
 
@@ -139,11 +136,60 @@ class InventorySorterTest extends PlayerTest {
 
         assertThat(itemStacks.get(26)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
 
-        assertThat(itemStacks.subList(44, 53)).containsOnly(ItemStack.of(Material.GRAVEL, 64));
+        assertThat(itemStacks.subList(9, 14)).containsOnly(ItemStack.of(Material.GRAVEL, 64));
+        assertThat(itemStacks.subList(18, 23)).containsOnly(ItemStack.of(Material.GRAVEL, 64));
+    }
+ @Test
+    public void testReallyComplexScenarioInLargeInventory() {
+        // given
+     var inventorySorter = new InventorySorter();
+        // when
+     ItemStack[] items = {ItemStack.of(Material.CRIMSON_ROOTS, 8),
+             ItemStack.of(Material.LANTERN, 2),
+             ItemStack.of(Material.NETHERRACK, 33),
+             ItemStack.of(Material.NETHERRACK, 64),
+             ItemStack.of(Material.NETHERRACK, 64),
+             ItemStack.of(Material.NETHERRACK, 64),
+             ItemStack.of(Material.NETHERRACK, 64),
+             ItemStack.of(Material.NETHERRACK, 64),
+             ItemStack.of(Material.NETHERRACK, 64),
+             ItemStack.of(Material.CRIMSON_STEM, 45),
+             ItemStack.of(Material.MAGMA_BLOCK, 10),
+             ItemStack.of(Material.NETHER_GOLD_ORE, 7),
+             ItemStack.of(Material.SHROOMLIGHT, 7),
+             ItemStack.of(Material.CRIMSON_NYLIUM, 8),
+             ItemStack.of(Material.CRIMSON_NYLIUM, 64),
+             ItemStack.of(Material.CRIMSON_NYLIUM, 64),
+             ItemStack.of(Material.CRYING_OBSIDIAN, 10),
+             ItemStack.of(Material.MOSS_CARPET, 12),
+             ItemStack.of(Material.NETHER_QUARTZ_ORE, 12),
+             ItemStack.of(Material.SOUL_SOIL, 3),
+             ItemStack.of(Material.SOUL_SAND, 49),
+             ItemStack.of(Material.SOUL_SAND, 64),
+             ItemStack.of(Material.GHAST_TEAR, 2),
+             ItemStack.of(Material.NETHER_BRICK, 11),
+             ItemStack.of(Material.NETHER_WART_BLOCK, 38),
+             ItemStack.of(Material.WARPED_ROOTS, 1),
+             ItemStack.of(Material.BLACKSTONE, 1),
+             ItemStack.of(Material.GILDED_BLACKSTONE, 9),
+             ItemStack.of(Material.NETHER_BRICK_FENCE, 1),
+             ItemStack.of(Material.OAK_PLANKS, 2),
+             ItemStack.of(Material.WARPED_STEM, 11),
+             ItemStack.of(Material.CRACKED_POLISHED_BLACKSTONE_BRICKS, 8),
+             ItemStack.of(Material.GLOW_INK_SAC, 8),
+             ItemStack.of(Material.NETHER_BRICK_STAIRS, 34),
+             ItemStack.of(Material.POLISHED_BLACKSTONE_BRICKS, 62),
+             ItemStack.of(Material.WEEPING_VINES, 3),
+             ItemStack.of(Material.CRIMSON_FUNGUS, 13)};
+     var itemStacksHorizontal = setupFinalOrganisedInventory(inventorySorter, items);
+     var itemStacksVertical = setupFinalOrganisedInventory(inventorySorter, items);
     }
 
     private List<ItemStack> setupFinalOrganisedInventory(ItemStack... itemStacks) {
-        var inventorySorter = new InventorySorter();
+        return setupFinalOrganisedInventory(new InventorySorter(), itemStacks);
+    }
+
+    private List<ItemStack> setupFinalOrganisedInventory(InventorySorter inventorySorter, ItemStack... itemStacks) {
 
         var chest = spy(Chest.class);
         var inventory = spy(Inventory.class);

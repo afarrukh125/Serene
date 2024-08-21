@@ -8,7 +8,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.Damageable;
 
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
+
+import static java.util.stream.Collectors.joining;
 
 public class Utils {
     public static boolean shouldTakeDamage(int unbreakingLevel) {
@@ -39,5 +42,13 @@ public class Utils {
             return true;
         }
         return false;
+    }
+
+    public static String getGridString(ItemStack[][] newStacks) {
+        return Arrays.stream(newStacks)
+                .map(a -> Arrays.stream(a)
+                        .map(itemStack -> itemStack == null ? "null " : itemStack.getType().name() + ":" + itemStack.getAmount())
+                        .collect(joining(" | ")))
+                .collect(joining("\n"));
     }
 }

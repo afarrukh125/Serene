@@ -115,9 +115,7 @@ public class InventorySorter {
         }
 
         // Place the biggest stacks first
-        reorganisedStacks.sort(Comparator.<MaterialItemStack, Integer>
-                        comparing(materialItemStack -> materialItemStack.itemStacks().size()).reversed()
-                .thenComparing(materialItemStack -> materialItemStack.material().name()));
+        sortBySizeThenName(reorganisedStacks);
         return reorganisedStacks;
     }
 
@@ -147,45 +145,61 @@ public class InventorySorter {
 
     private void alternatePrioritisingHorizontal(
             List<MaterialItemStack> materialItemStacks, ItemStack[][] newStacks, List<MaterialItemStack> notPlaced) {
-        var placeFirst = filterStacks(materialItemStacks, fitsPerfectlyInLine(newStacks[0].length));
-        for (var materialItemStack : placeFirst) {
-            populateHorizontally(materialItemStack, newStacks, notPlaced);
+        materialItemStacks.addAll(notPlaced);
+        sortBySizeThenName(materialItemStacks);
+
+        int perfectLength = newStacks[0].length;
+        var fitInLine = filterStacks(materialItemStacks, fitsPerfectlyInLine(perfectLength));
+        if (!fitInLine.isEmpty()) {
+            var placeFirst = sanitiseStacks(fitInLine, perfectLength);
+            for (var materialItemStack : placeFirst) {
+                populateHorizontally(materialItemStack, newStacks, notPlaced);
+            }
         }
 
-        int x = 0;
         for (var materialItemStack : filterStacks(materialItemStacks, itemStacksFitInRow())) {
-            if (x % 2 == 0) {
-                populateHorizontally(materialItemStack, newStacks, notPlaced);
-            } else {
-                populateVertically(materialItemStack, newStacks, notPlaced);
-            }
-            x++;
+            populateHorizontally(materialItemStack, newStacks, notPlaced);
         }
         notPlaced.addAll(filterStacks(materialItemStacks, itemStacksFitInRow().negate()));
     }
 
     private void alternatePrioritisingVertical(
             List<MaterialItemStack> materialItemStacks, ItemStack[][] newStacks, List<MaterialItemStack> notPlaced) {
-        var placeFirst = filterStacks(materialItemStacks, fitsPerfectlyInLine(newStacks.length));
+        materialItemStacks.addAll(notPlaced);
+        sortBySizeThenName(materialItemStacks);
 
-        for (var materialItemStack : placeFirst) {
-            populateVertically(materialItemStack, newStacks, notPlaced);
+        int perfectLength = newStacks.length;
+        var fitInLine = filterStacks(materialItemStacks, fitsPerfectlyInLine(perfectLength));
+        if (!fitInLine.isEmpty()) {
+            var placeFirst = sanitiseStacks(fitInLine, perfectLength);
+            for (var materialItemStack : placeFirst) {
+                populateVertically(materialItemStack, newStacks, notPlaced);
+            }
         }
 
-        int x = 0;
         for (var materialItemStack : filterStacks(materialItemStacks, itemStacksFitInColumn(newStacks.length))) {
-            if (x % 2 == 0) {
-                populateVertically(materialItemStack, newStacks, notPlaced);
-            } else {
-                populateHorizontally(materialItemStack, newStacks, notPlaced);
-            }
-            x++;
+            populateVertically(materialItemStack, newStacks, notPlaced);
         }
         notPlaced.addAll(materialItemStacks.stream().filter(itemStacksFitInColumn(newStacks.length).negate()).toList());
     }
 
+    private List<MaterialItemStack> sanitiseStacks(List<MaterialItemStack> materialItemStacks, double targetLength) {
+        materialItemStacks = new ArrayList<>(materialItemStacks);
+        for (int i = 0; i < materialItemStacks.size(); i++) {
+            var current = materialItemStacks.get(i);
+            var removedItems = new LinkedList<ItemStack>();
+            while (current.itemStacks().size() != targetLength) {
+                removedItems.add(current.itemStacks().poll());
+            }
+            if (!removedItems.isEmpty()) {
+                materialItemStacks.add(i + 1, new MaterialItemStack(current.material(), removedItems));
+            }
+        }
+        return materialItemStacks;
+    }
+
     private static Predicate<MaterialItemStack> fitsPerfectlyInLine(int length) {
-        return materialItemStack -> materialItemStack.itemStacks().size() == length;
+        return materialItemStack -> !materialItemStack.itemStacks().isEmpty() && materialItemStack.itemStacks().size() % length == 0;
     }
 
     private Predicate<MaterialItemStack> itemStacksFitInColumn(int length) {
@@ -311,5 +325,11 @@ public class InventorySorter {
             allStacks.addAll(Arrays.asList(newStack).subList(0, newStacks[0].length));
         }
         return allStacks.toArray(ItemStack[]::new);
+    }
+
+    private static void sortBySizeThenName(List<MaterialItemStack> reorganisedStacks) {
+        reorganisedStacks.sort(Comparator.<MaterialItemStack, Integer>
+                        comparing(materialItemStack -> materialItemStack.itemStacks().size()).reversed()
+                .thenComparing(materialItemStack -> materialItemStack.material().name()));
     }
 }

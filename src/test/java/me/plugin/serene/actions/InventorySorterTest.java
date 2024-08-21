@@ -8,11 +8,7 @@ import org.bukkit.inventory.ItemStack;
 import org.junit.jupiter.api.Test;
 import org.mockito.stubbing.Answer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.toList;
@@ -88,7 +84,6 @@ class InventorySorterTest extends PlayerTest {
         assertThat(itemStacks.get(7)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 5));
 
 
-
         // when
         var verticallySortedItemStacks = getItemStacks(inventorySorter, groupSupplier.get());
 
@@ -140,51 +135,100 @@ class InventorySorterTest extends PlayerTest {
         assertThat(itemStacks.subList(27, 32)).containsOnly(ItemStack.of(Material.GRAVEL, 64));
         assertThat(itemStacks.subList(36, 41)).containsOnly(ItemStack.of(Material.GRAVEL, 64));
     }
- @Test
+
+    @Test
     public void testReallyComplexScenarioInLargeInventory() {
         // given
-     var inventorySorter = new InventorySorter();
+        var inventorySorter = new InventorySorter();
         // when
-     ItemStack[] items = {ItemStack.of(Material.CRIMSON_ROOTS, 8),
-             ItemStack.of(Material.LANTERN, 2),
-             ItemStack.of(Material.NETHERRACK, 33),
-             ItemStack.of(Material.NETHERRACK, 64),
-             ItemStack.of(Material.NETHERRACK, 64),
-             ItemStack.of(Material.NETHERRACK, 64),
-             ItemStack.of(Material.NETHERRACK, 64),
-             ItemStack.of(Material.NETHERRACK, 64),
-             ItemStack.of(Material.NETHERRACK, 64),
-             ItemStack.of(Material.CRIMSON_STEM, 45),
-             ItemStack.of(Material.MAGMA_BLOCK, 10),
-             ItemStack.of(Material.NETHER_GOLD_ORE, 7),
-             ItemStack.of(Material.SHROOMLIGHT, 7),
-             ItemStack.of(Material.CRIMSON_NYLIUM, 8),
-             ItemStack.of(Material.CRIMSON_NYLIUM, 64),
-             ItemStack.of(Material.CRIMSON_NYLIUM, 64),
-             ItemStack.of(Material.CRYING_OBSIDIAN, 10),
-             ItemStack.of(Material.MOSS_CARPET, 12),
-             ItemStack.of(Material.NETHER_QUARTZ_ORE, 12),
-             ItemStack.of(Material.SOUL_SOIL, 3),
-             ItemStack.of(Material.SOUL_SAND, 49),
-             ItemStack.of(Material.SOUL_SAND, 64),
-             ItemStack.of(Material.GHAST_TEAR, 2),
-             ItemStack.of(Material.NETHER_BRICK, 11),
-             ItemStack.of(Material.NETHER_WART_BLOCK, 38),
-             ItemStack.of(Material.WARPED_ROOTS, 1),
-             ItemStack.of(Material.BLACKSTONE, 1),
-             ItemStack.of(Material.GILDED_BLACKSTONE, 9),
-             ItemStack.of(Material.NETHER_BRICK_FENCE, 1),
-             ItemStack.of(Material.OAK_PLANKS, 2),
-             ItemStack.of(Material.WARPED_STEM, 11),
-             ItemStack.of(Material.CRACKED_POLISHED_BLACKSTONE_BRICKS, 8),
-             ItemStack.of(Material.GLOW_INK_SAC, 8),
-             ItemStack.of(Material.NETHER_BRICK_STAIRS, 34),
-             ItemStack.of(Material.POLISHED_BLACKSTONE_BRICKS, 62),
-             ItemStack.of(Material.WEEPING_VINES, 3),
-             ItemStack.of(Material.CRIMSON_FUNGUS, 13)};
-     var itemStacksHorizontal = setupFinalOrganisedInventory(inventorySorter, items);
-     var itemStacksVertical = setupFinalOrganisedInventory(inventorySorter, items);
+        ItemStack[] items = {ItemStack.of(Material.CRIMSON_ROOTS, 8),
+                ItemStack.of(Material.LANTERN, 2),
+                ItemStack.of(Material.NETHERRACK, 33),
+                ItemStack.of(Material.NETHERRACK, 64),
+                ItemStack.of(Material.NETHERRACK, 64),
+                ItemStack.of(Material.NETHERRACK, 64),
+                ItemStack.of(Material.NETHERRACK, 64),
+                ItemStack.of(Material.NETHERRACK, 64),
+                ItemStack.of(Material.NETHERRACK, 64),
+                ItemStack.of(Material.CRIMSON_STEM, 45),
+                ItemStack.of(Material.MAGMA_BLOCK, 10),
+                ItemStack.of(Material.NETHER_GOLD_ORE, 7),
+                ItemStack.of(Material.SHROOMLIGHT, 7),
+                ItemStack.of(Material.CRIMSON_NYLIUM, 8),
+                ItemStack.of(Material.CRIMSON_NYLIUM, 64),
+                ItemStack.of(Material.CRIMSON_NYLIUM, 64),
+                ItemStack.of(Material.CRYING_OBSIDIAN, 10),
+                ItemStack.of(Material.MOSS_CARPET, 12),
+                ItemStack.of(Material.NETHER_QUARTZ_ORE, 12),
+                ItemStack.of(Material.SOUL_SOIL, 3),
+                ItemStack.of(Material.SOUL_SAND, 49),
+                ItemStack.of(Material.SOUL_SAND, 64),
+                ItemStack.of(Material.GHAST_TEAR, 2),
+                ItemStack.of(Material.NETHER_BRICK, 11),
+                ItemStack.of(Material.NETHER_WART_BLOCK, 38),
+                ItemStack.of(Material.WARPED_ROOTS, 1),
+                ItemStack.of(Material.BLACKSTONE, 1),
+                ItemStack.of(Material.GILDED_BLACKSTONE, 9),
+                ItemStack.of(Material.NETHER_BRICK_FENCE, 1),
+                ItemStack.of(Material.OAK_PLANKS, 2),
+                ItemStack.of(Material.WARPED_STEM, 11),
+                ItemStack.of(Material.CRACKED_POLISHED_BLACKSTONE_BRICKS, 8),
+                ItemStack.of(Material.GLOW_INK_SAC, 8),
+                ItemStack.of(Material.NETHER_BRICK_STAIRS, 34),
+                ItemStack.of(Material.POLISHED_BLACKSTONE_BRICKS, 62),
+                ItemStack.of(Material.WEEPING_VINES, 3),
+                ItemStack.of(Material.CRIMSON_FUNGUS, 13)};
+        var itemStacksHorizontal = setupFinalOrganisedInventory(inventorySorter, items);
+        var itemStacksVertical = setupFinalOrganisedInventory(inventorySorter, items);
 
+        System.out.println("Hi");
+    }
+    @Test
+    public void testReallyComplexScenarioInLargeInventory2() {
+        // given
+        var inventorySorter = new InventorySorter();
+        // when
+        ItemStack[] items = {
+                ItemStack.of(Material.STONE_SLAB, 64),
+                ItemStack.of(Material.CHISELED_STONE_BRICKS, 64),
+                ItemStack.of(Material.SMOOTH_STONE, 34),
+                ItemStack.of(Material.SMOOTH_STONE, 64),
+                ItemStack.of(Material.SMOOTH_STONE, 64),
+                ItemStack.of(Material.SMOOTH_STONE, 64),
+                ItemStack.of(Material.SMOOTH_STONE, 64),
+                ItemStack.of(Material.STONE_SLAB, 64),
+                ItemStack.of(Material.CHISELED_STONE_BRICKS, 24),
+                ItemStack.of(Material.STONE_BRICKS, 64),
+                ItemStack.of(Material.STONE_BRICKS, 64),
+                ItemStack.of(Material.STONE_SLAB, 64),
+                ItemStack.of(Material.MOSSY_COBBLESTONE, 8),
+                ItemStack.of(Material.MOSSY_STONE_BRICKS, 4),
+                ItemStack.of(Material.STONE_SLAB, 64),
+                ItemStack.of(Material.STONE_BRICK_SLAB, 64),
+                ItemStack.of(Material.STONE_BRICK_WALL, 5),
+                ItemStack.of(Material.STONE_SLAB, 64),
+                ItemStack.of(Material.STONE_STAIRS, 9),
+                ItemStack.of(Material.STONE, 44),
+                ItemStack.of(Material.STONE, 64),
+                ItemStack.of(Material.STONE, 64),
+                ItemStack.of(Material.STONE, 64),
+                ItemStack.of(Material.STONE, 64),
+                ItemStack.of(Material.STONE, 64),
+                ItemStack.of(Material.STONE_SLAB, 16),
+                ItemStack.of(Material.STONE, 64),
+                ItemStack.of(Material.STONE, 64),
+                ItemStack.of(Material.STONE, 64),
+                ItemStack.of(Material.STONE, 64),
+                ItemStack.of(Material.STONE, 64),
+                ItemStack.of(Material.STONE, 64),
+                ItemStack.of(Material.STONE, 64),
+                ItemStack.of(Material.STONE, 64)
+        };
+        var itemStacksHorizontal = setupFinalOrganisedInventory(inventorySorter, items);
+        var itemStacksVertical = setupFinalOrganisedInventory(inventorySorter, items);
+
+
+        System.out.println("Hi");
     }
 
     private List<ItemStack> setupFinalOrganisedInventory(ItemStack... itemStacks) {

@@ -353,8 +353,8 @@ public class InventorySorter {
                 if (newStacks[i][j] != null) {
                     var coordinates = new ArrayList<Coordinate>();
                     var canPlace = true;
-                    for (int widthPointer = i; widthPointer < newStacks.length && widthPointer < i + targetLineSize; widthPointer++) {
-                        for (int heightPointer = j; heightPointer < newStacks[i].length && heightPointer < j + numRows; heightPointer++) {
+                    for (int widthPointer = i; widthPointer < newStacks[i].length && widthPointer < i + targetLineSize; widthPointer++) {
+                        for (int heightPointer = j; heightPointer < newStacks.length && heightPointer < j + numRows; heightPointer++) {
                             coordinates.add(new Coordinate(widthPointer, heightPointer));
                             try {
                                 if (newStacks[heightPointer][widthPointer] != null) {

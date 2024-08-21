@@ -183,6 +183,8 @@ class InventorySorterTest extends PlayerTest {
              ItemStack.of(Material.CRIMSON_FUNGUS, 13)};
      var itemStacksHorizontal = setupFinalOrganisedInventory(inventorySorter, items);
      var itemStacksVertical = setupFinalOrganisedInventory(inventorySorter, items);
+
+     System.out.println("hi");
     }
 
     private List<ItemStack> setupFinalOrganisedInventory(ItemStack... itemStacks) {

@@ -82,10 +82,11 @@ class InventorySorterTest extends PlayerTest {
         var itemStacks = getItemStacks(inventorySorter, groupSupplier.get());
 
         // then
+        assertThat(itemStacks.get(0)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
+
         assertThat(itemStacks.get(8)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 64));
         assertThat(itemStacks.get(7)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 5));
 
-        assertThat(itemStacks.get(17)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
 
 
         // when
@@ -95,7 +96,7 @@ class InventorySorterTest extends PlayerTest {
         assertThat(verticallySortedItemStacks.get(0)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 64));
         assertThat(verticallySortedItemStacks.get(9)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 5));
 
-        assertThat(verticallySortedItemStacks.get(18)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
+        assertThat(verticallySortedItemStacks.get(8)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
 
         assertThat(verticallySortedItemStacks).filteredOn(Objects::isNull).hasSize(24);
     }
@@ -131,13 +132,13 @@ class InventorySorterTest extends PlayerTest {
         // then
         assertThat(itemStacks.subList(0, 9)).containsOnly(ItemStack.of(Material.EGG, 16));
 
-        assertThat(itemStacks.get(17)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 64));
-        assertThat(itemStacks.get(16)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 5));
+        assertThat(itemStacks.get(9)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 64));
+        assertThat(itemStacks.get(18)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 5));
 
-        assertThat(itemStacks.get(26)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
+        assertThat(itemStacks.get(17)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
 
-        assertThat(itemStacks.subList(9, 14)).containsOnly(ItemStack.of(Material.GRAVEL, 64));
-        assertThat(itemStacks.subList(18, 23)).containsOnly(ItemStack.of(Material.GRAVEL, 64));
+        assertThat(itemStacks.subList(27, 32)).containsOnly(ItemStack.of(Material.GRAVEL, 64));
+        assertThat(itemStacks.subList(36, 41)).containsOnly(ItemStack.of(Material.GRAVEL, 64));
     }
  @Test
     public void testReallyComplexScenarioInLargeInventory() {
@@ -184,7 +185,6 @@ class InventorySorterTest extends PlayerTest {
      var itemStacksHorizontal = setupFinalOrganisedInventory(inventorySorter, items);
      var itemStacksVertical = setupFinalOrganisedInventory(inventorySorter, items);
 
-     System.out.println("hi");
     }
 
     private List<ItemStack> setupFinalOrganisedInventory(ItemStack... itemStacks) {

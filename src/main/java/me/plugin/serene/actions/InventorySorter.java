@@ -286,12 +286,13 @@ public class InventorySorter {
             }
             var stacks = materialItemStack.itemStacks();
             var placed = false;
-            for (int i = 2; i < 9; i++) {
+            int maxLineLength = newStacks[0].length;
+            for (int i = 2; i < maxLineLength; i++) {
                 var totalItems = stacks.size();
                 var lineSize = totalItems / i;
                 var lineSizeDouble = (double) totalItems / i;
-                if (lineSizeDouble == lineSize) {
-                    var coordinates = tryToPlaceInGrid(newStacks, lineSize, i);
+                if (lineSizeDouble == lineSize && lineSize > 1 && lineSize <= maxLineLength) {
+                    var coordinates = tryToPlaceInGridHorizontally(newStacks, lineSize, i);
                     if (!coordinates.isEmpty()) {
                         for (var coordinate : coordinates) {
                             newStacks[coordinate.y()][coordinate.x()] = stacks.poll();
@@ -304,31 +305,55 @@ public class InventorySorter {
                 }
             }
             if (!placed) {
-                for (var i = newStacks.length - 1; i >= 0; i--) {
-                    for (var j = newStacks[i].length - 1; j >= 0 && !stacks.isEmpty(); j--) {
-                        if (newStacks[i][j] == null) {
-                            newStacks[i][j] = stacks.poll();
-                        }
-                    }
-                }
+                dumpNormally(newStacks, stacks);
             }
         }
     }
 
     private void dumpRemainingVertically(ItemStack[][] newStacks, List<MaterialItemStack> couldntBePlaced) {
-            for (var materialItemStack : couldntBePlaced) {
-                var stacks = materialItemStack.itemStacks();
-                for (var i = newStacks.length - 1; i >= 0; i--) {
-                    for (var j = newStacks[i].length - 1; j >= 0 && !stacks.isEmpty(); j--) {
-                        if (newStacks[i][j] == null) {
-                            newStacks[i][j] = stacks.poll();
+        for (var materialItemStack : couldntBePlaced.stream()
+                .filter(materialItemStack -> !materialItemStack.itemStacks().isEmpty())
+                .toList()) {
+            if (materialItemStack.itemStacks().isEmpty()) {
+                continue;
+            }
+            var stacks = materialItemStack.itemStacks();
+            var placed = false;
+            int maxNumRows = newStacks.length;
+            for (int i = 2; i < maxNumRows; i++) {
+                var totalItems = stacks.size();
+                var lineSize = totalItems / i;
+                var lineSizeDouble = (double) totalItems / i;
+                if (lineSizeDouble == lineSize && lineSize > 1 && lineSize <= maxNumRows) {
+                    var coordinates = tryToPlaceInGridVertically(newStacks, lineSize, i);
+                    if (!coordinates.isEmpty()) {
+                        for (var coordinate : coordinates) {
+                            newStacks[coordinate.y()][coordinate.x()] = stacks.poll();
                         }
+                        placed = true;
                     }
                 }
+                if (placed) {
+                    break;
+                }
             }
+            if (!placed) {
+                dumpNormally(newStacks, stacks);
+            }
+        }
     }
 
-    private List<Coordinate> tryToPlaceInGrid(ItemStack[][] newStacks, int targetLineSize, int numRows) {
+    private static void dumpNormally(ItemStack[][] newStacks, Queue<ItemStack> stacks) {
+        for (var i = newStacks.length - 1; i >= 0; i--) {
+            for (var j = newStacks[i].length - 1; j >= 0 && !stacks.isEmpty(); j--) {
+                if (newStacks[i][j] == null) {
+                    newStacks[i][j] = stacks.poll();
+                }
+            }
+        }
+    }
+
+    private List<Coordinate> tryToPlaceInGridHorizontally(ItemStack[][] newStacks, int targetLineSize, int numRows) {
         for (int y = 0; y < newStacks.length; y++) {
             for (int x = 0; x < newStacks[y].length; x++) {
                 if (newStacks[y][x] == null) {
@@ -345,6 +370,37 @@ public class InventorySorter {
                                     canPlace = false;
                                     break;
                                 }
+                        }
+                        if (!canPlace) {
+                            break;
+                        }
+                    }
+                    if (canPlace) {
+                        return coordinates;
+                    }
+                }
+            }
+        }
+        return emptyList();
+    }
+
+    private List<Coordinate> tryToPlaceInGridVertically(ItemStack[][] newStacks, int targetLineSize, int numRows) {
+        for (int y = 0; y < newStacks.length; y++) {
+            for (int x = 0; x < newStacks[y].length; x++) {
+                if (newStacks[y][x] == null) {
+                    var coordinates = new ArrayList<Coordinate>();
+                    var canPlace = true;
+                    for (int widthPointer = x;
+                         widthPointer < newStacks[y].length && widthPointer < x + numRows;
+                         widthPointer++) {
+                        for (int heightPointer = y;
+                             heightPointer < newStacks.length && heightPointer < y + targetLineSize;
+                             heightPointer++) {
+                            coordinates.add(new Coordinate(widthPointer, heightPointer));
+                            if (newStacks[heightPointer][widthPointer] != null) {
+                                canPlace = false;
+                                break;
+                            }
                         }
                         if (!canPlace) {
                             break;

@@ -1,5 +1,6 @@
-package me.plugin.serene.actions;
+package me.plugin.serene.actions.inventory;
 
+import me.plugin.serene.actions.PlayerTest;
 import me.plugin.serene.model.MaterialItemStack;
 import org.bukkit.Material;
 import org.bukkit.block.Chest;

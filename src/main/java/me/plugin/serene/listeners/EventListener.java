@@ -2,7 +2,7 @@ package me.plugin.serene.listeners;
 
 import jakarta.inject.Inject;
 import me.plugin.serene.actions.ExperienceHandler;
-import me.plugin.serene.actions.InventorySorter;
+import me.plugin.serene.actions.inventory.InventorySorter;
 import me.plugin.serene.actions.SleepHandler;
 import me.plugin.serene.actions.TreeBreaker;
 import me.plugin.serene.actions.VeinBreaker;

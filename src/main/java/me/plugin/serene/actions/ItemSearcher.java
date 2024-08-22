@@ -21,13 +21,7 @@ public class ItemSearcher {
 
     private static final double MAX_DISTANCE_TO_SEARCH = 10;
 
-    private final String targetItemName;
-
-    public ItemSearcher(String targetItemName) {
-        this.targetItemName = targetItemName;
-    }
-
-    public void searchItem(Player player, Location originalLocation, World world) {
+    public void searchItem(Player player, Location originalLocation, World world, String targetItemName) {
         parseTargetMaterialFromParam(targetItemName)
                 .ifPresentOrElse(
                         targetMaterial -> performSearch(player, originalLocation, world, targetMaterial),
@@ -89,7 +83,6 @@ public class ItemSearcher {
                 playEffectsAtLocation(player, chestLocation);
             }
         } else {
-
             player.sendMessage("Found no chests nearby with item %s".formatted(sanitisedName));
         }
     }

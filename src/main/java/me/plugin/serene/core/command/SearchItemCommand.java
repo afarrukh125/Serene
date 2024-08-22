@@ -19,8 +19,8 @@ public class SearchItemCommand implements CommandExecutor {
         var originalLocation = player.getLocation();
         var world = player.getWorld();
         var targetItemParam = join(" ", args);
-        var itemSearcher = new ItemSearcher(targetItemParam);
-        itemSearcher.searchItem(player, originalLocation, world);
+        var itemSearcher = new ItemSearcher();
+        itemSearcher.searchItem(player, originalLocation, world, targetItemParam);
         return true;
     }
 }

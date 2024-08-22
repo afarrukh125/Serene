@@ -132,12 +132,12 @@ class InventorySorterTest extends PlayerTest {
 
         assertThat(itemStacks.get(17)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
 
-        assertThat(itemStacks.subList(27, 32)).containsOnly(ItemStack.of(Material.GRAVEL, 64));
-        assertThat(itemStacks.subList(36, 41)).containsOnly(ItemStack.of(Material.GRAVEL, 64));
+        assertThat(itemStacks.subList(10, 15)).containsOnly(ItemStack.of(Material.GRAVEL, 64));
+        assertThat(itemStacks.subList(19, 24)).containsOnly(ItemStack.of(Material.GRAVEL, 64));
     }
 
     @Test
-    public void testReallyComplexScenarioInLargeInventory() {
+    public void testReallyComplexScenarioInLargeInventoryWithMoreTypesOfItems() {
         // given
         var inventorySorter = new InventorySorter();
         // when
@@ -184,7 +184,7 @@ class InventorySorterTest extends PlayerTest {
         System.out.println("Hi");
     }
     @Test
-    public void testReallyComplexScenarioInLargeInventory2() {
+    public void testReallyComplexScenarioInLargeInventoryWithLessTypesOfItems() {
         // given
         var inventorySorter = new InventorySorter();
         // when

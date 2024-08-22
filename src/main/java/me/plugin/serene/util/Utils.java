@@ -9,10 +9,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.Damageable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.IntFunction;
 
 import static java.util.stream.Collectors.joining;
 
@@ -48,25 +50,58 @@ public class Utils {
     }
 
     public static String getGridString(ItemStack[][] newStacks) {
+        int longestName = Math.min(
+                Arrays.stream(newStacks)
+                                .flatMap(Arrays::stream)
+                                .filter(Objects::nonNull)
+                                .map(ItemStack::getType)
+                                .map(Material::name)
+                                .map(String::length)
+                                .max(Integer::compare)
+                                .orElseThrow()
+                        + 2,
+                20);
         return Arrays.stream(newStacks)
                 .map(a -> Arrays.stream(a)
                         .map(itemStack -> itemStack == null
                                 ? "null "
                                 : itemStack.getType().name() + ":" + itemStack.getAmount())
+                        .map(name -> name.length() < longestName
+                                ? name + " ".repeat(longestName - name.length())
+                                : name.substring(0, longestName))
                         .collect(joining(" | ")))
                 .collect(joining("\n"));
     }
 
     public static String getGridString(List<ItemStack> materialItemStacks) {
-        int longestName = materialItemStacks.stream().filter(Objects::nonNull).map(ItemStack::getType).map(Material::name).map(String::length).max(Integer::compare).orElseThrow() + 2;
+        int longestName = Math.min(
+                materialItemStacks.stream()
+                                .filter(Objects::nonNull)
+                                .map(ItemStack::getType)
+                                .map(Material::name)
+                                .map(String::length)
+                                .max(Integer::compare)
+                                .orElseThrow()
+                        + 2,
+                20);
         var partitioned = Lists.partition(materialItemStacks, 9);
         return partitioned.stream()
                 .map(a -> a.stream()
                         .map(itemStack -> itemStack == null
                                 ? "null "
                                 : itemStack.getType().name() + ":" + itemStack.getAmount())
-                        .map(name -> name.length() < longestName ? name + " ".repeat(longestName - name.length()) : name.substring(0, longestName))
+                        .map(name -> name.length() < longestName
+                                ? name + " ".repeat(longestName - name.length())
+                                : name.substring(0, longestName))
                         .collect(joining(" | ")))
                 .collect(joining("\n"));
+    }
+
+    public static <T> T[] flatten(T[][] items, IntFunction<T[]> arrayGenerator) {
+        var allStacks = new ArrayList<T>();
+        for (var newStack : items) {
+            allStacks.addAll(Arrays.asList(newStack).subList(0, items[0].length));
+        }
+        return allStacks.toArray(arrayGenerator);
     }
 }

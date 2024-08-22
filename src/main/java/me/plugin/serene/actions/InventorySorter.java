@@ -3,6 +3,7 @@ package me.plugin.serene.actions;
 import com.google.common.annotations.VisibleForTesting;
 import me.plugin.serene.model.Coordinate;
 import me.plugin.serene.model.MaterialItemStack;
+import me.plugin.serene.util.Utils;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -13,8 +14,6 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -122,13 +121,11 @@ public class InventorySorter {
         List<MaterialItemStack> notPlaced = new ArrayList<>();
 
         if (seenLocations.contains(location)) {
-            location.getWorld().getPlayers().forEach(player -> player.sendMessage("Sorting vertically"));
             alternatePrioritisingVertical(materialItemStacks, newStacks, notPlaced);
             alternatePrioritisingHorizontal(materialItemStacks, newStacks, notPlaced);
             seenLocations.remove(location);
         } else {
             materialItemStacks.addAll(notPlaced);
-            location.getWorld().getPlayers().forEach(player -> player.sendMessage("Sorting horizontally"));
             alternatePrioritisingHorizontal(materialItemStacks, newStacks, notPlaced);
             alternatePrioritisingVertical(materialItemStacks, newStacks, notPlaced);
             seenLocations.add(location);
@@ -315,28 +312,26 @@ public class InventorySorter {
         }
     }
 
-    private static final Logger LOG = LoggerFactory.getLogger(InventorySorter.class);
-
     private List<Coordinate> tryToPlaceInGrid(ItemStack[][] newStacks, int targetLineSize, int numRows) {
-        for (int i = 0; i < newStacks.length; i++) {
-            for (int j = 0; j < newStacks[i].length; j++) {
-                if (newStacks[i][j] != null) {
+        for (int y = 0; y < newStacks.length; y++) {
+            for (int x = 0; x < newStacks[y].length; x++) {
+                if (newStacks[y][x] == null) {
                     var coordinates = new ArrayList<Coordinate>();
                     var canPlace = true;
-                    for (int widthPointer = i;
-                            widthPointer < newStacks[i].length && widthPointer < i + targetLineSize;
+                    for (int widthPointer = x;
+                            widthPointer < newStacks[y].length && widthPointer < x + targetLineSize;
                             widthPointer++) {
-                        for (int heightPointer = j;
-                                heightPointer < newStacks.length && heightPointer < j + numRows;
+                        for (int heightPointer = y;
+                                heightPointer < newStacks.length && heightPointer < y + numRows;
                                 heightPointer++) {
                             coordinates.add(new Coordinate(widthPointer, heightPointer));
                                 if (newStacks[heightPointer][widthPointer] != null) {
                                     canPlace = false;
                                     break;
                                 }
-                            if (!canPlace) {
-                                break;
-                            }
+                        }
+                        if (!canPlace) {
+                            break;
                         }
                     }
                     if (canPlace) {
@@ -348,12 +343,8 @@ public class InventorySorter {
         return emptyList();
     }
 
-    private ItemStack[] flatten(ItemStack[][] newStacks) {
-        var allStacks = new ArrayList<ItemStack>();
-        for (var newStack : newStacks) {
-            allStacks.addAll(Arrays.asList(newStack).subList(0, newStacks[0].length));
-        }
-        return allStacks.toArray(ItemStack[]::new);
+    private ItemStack[] flatten(ItemStack[][] itemStacks) {
+        return Utils.flatten(itemStacks, ItemStack[]::new);
     }
 
     private static void sortBySizeThenName(List<MaterialItemStack> reorganisedStacks) {

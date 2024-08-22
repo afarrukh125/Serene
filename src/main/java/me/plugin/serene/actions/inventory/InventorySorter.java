@@ -14,7 +14,14 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.groupingBy;
@@ -49,6 +56,9 @@ public class InventorySorter {
                                 ? SMALL_CHEST_NUM_ROW
                                 : LARGE_CHEST_NUM_ROWS;
                         var newItemStacks = generateFinalSortedItemStacks(organisedMaterialGroups, numRows, location);
+                        if(newItemStacks.length != organisedMaterialGroups.size()) {
+                            throw new RuntimeException("Found an error when comparing sizes of organised stacks and placed stacks");
+                        }
                         inventory.setContents(newItemStacks);
                         player.getWorld().playSound(requireNonNull(location), Sound.BLOCK_CONDUIT_ACTIVATE, 0.7f, 1);
                     }

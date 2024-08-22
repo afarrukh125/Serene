@@ -124,14 +124,17 @@ public class InventorySorter {
             alternatePrioritisingVertical(materialItemStacks, newStacks, notPlaced);
             alternatePrioritisingHorizontal(materialItemStacks, newStacks, notPlaced);
             seenLocations.remove(location);
+            if (!notPlaced.isEmpty()) {
+                dumpRemainingVertically(newStacks, notPlaced);
+            }
         } else {
             materialItemStacks.addAll(notPlaced);
             alternatePrioritisingHorizontal(materialItemStacks, newStacks, notPlaced);
             alternatePrioritisingVertical(materialItemStacks, newStacks, notPlaced);
             seenLocations.add(location);
-        }
-        if (!notPlaced.isEmpty()) {
-            dumpRemaining(newStacks, notPlaced);
+            if (!notPlaced.isEmpty()) {
+                dumpRemainingHorizontally(newStacks, notPlaced);
+            }
         }
         return flatten(newStacks);
     }
@@ -274,7 +277,7 @@ public class InventorySorter {
         }
     }
 
-    private void dumpRemaining(ItemStack[][] newStacks, List<MaterialItemStack> couldntBePlaced) {
+    private void dumpRemainingHorizontally(ItemStack[][] newStacks, List<MaterialItemStack> couldntBePlaced) {
         for (var materialItemStack : couldntBePlaced.stream()
                 .filter(materialItemStack -> !materialItemStack.itemStacks().isEmpty())
                 .toList()) {
@@ -310,6 +313,19 @@ public class InventorySorter {
                 }
             }
         }
+    }
+
+    private void dumpRemainingVertically(ItemStack[][] newStacks, List<MaterialItemStack> couldntBePlaced) {
+            for (var materialItemStack : couldntBePlaced) {
+                var stacks = materialItemStack.itemStacks();
+                for (var i = newStacks.length - 1; i >= 0; i--) {
+                    for (var j = newStacks[i].length - 1; j >= 0 && !stacks.isEmpty(); j--) {
+                        if (newStacks[i][j] == null) {
+                            newStacks[i][j] = stacks.poll();
+                        }
+                    }
+                }
+            }
     }
 
     private List<Coordinate> tryToPlaceInGrid(ItemStack[][] newStacks, int targetLineSize, int numRows) {

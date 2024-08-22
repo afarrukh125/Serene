@@ -141,7 +141,7 @@ class InventorySorterTest extends PlayerTest {
         // given
         var inventorySorter = new InventorySorter();
         // when
-        ItemStack[] items = {ItemStack.of(Material.CRIMSON_ROOTS, 8),
+        var items = new ItemStack[]{ItemStack.of(Material.CRIMSON_ROOTS, 8),
                 ItemStack.of(Material.LANTERN, 2),
                 ItemStack.of(Material.NETHERRACK, 33),
                 ItemStack.of(Material.NETHERRACK, 64),
@@ -178,17 +178,22 @@ class InventorySorterTest extends PlayerTest {
                 ItemStack.of(Material.POLISHED_BLACKSTONE_BRICKS, 62),
                 ItemStack.of(Material.WEEPING_VINES, 3),
                 ItemStack.of(Material.CRIMSON_FUNGUS, 13)};
-        var itemStacksHorizontal = setupFinalOrganisedInventory(inventorySorter, items);
-        var itemStacksVertical = setupFinalOrganisedInventory(inventorySorter, items);
 
-        System.out.println("Hi");
+        var inventoryToSortHorizontally = spy(Inventory.class);
+        var itemStacksHorizontal = setupFinalOrganisedInventory(inventorySorter, inventoryToSortHorizontally, items);
+        assertSameContents(itemStacksHorizontal, inventorySorter, inventoryToSortHorizontally);
+
+        var inventoryToSortVertically = spy(Inventory.class);
+        var itemStacksVertical = setupFinalOrganisedInventory(inventorySorter, inventoryToSortVertically, items);
+        assertSameContents(itemStacksVertical, inventorySorter, inventoryToSortVertically);
     }
+
     @Test
     public void testReallyComplexScenarioInLargeInventoryWithLessTypesOfItems() {
         // given
         var inventorySorter = new InventorySorter();
         // when
-        ItemStack[] items = {
+        var items = new ItemStack[]{
                 ItemStack.of(Material.STONE_SLAB, 64),
                 ItemStack.of(Material.CHISELED_STONE_BRICKS, 64),
                 ItemStack.of(Material.SMOOTH_STONE, 34),
@@ -224,11 +229,23 @@ class InventorySorterTest extends PlayerTest {
                 ItemStack.of(Material.STONE, 64),
                 ItemStack.of(Material.STONE, 64)
         };
-        var itemStacksHorizontal = setupFinalOrganisedInventory(inventorySorter, items);
-        var itemStacksVertical = setupFinalOrganisedInventory(inventorySorter, items);
 
+        var inventoryToSortHorizontally = spy(Inventory.class);
+        var itemStacksHorizontal = setupFinalOrganisedInventory(inventorySorter, inventoryToSortHorizontally, items);
+        assertSameContents(itemStacksHorizontal, inventorySorter, inventoryToSortHorizontally);
 
-        System.out.println("Hi");
+        var inventoryToSortVertically = spy(Inventory.class);
+        var itemStacksVertical = setupFinalOrganisedInventory(inventorySorter, inventoryToSortVertically, items);
+        assertSameContents(itemStacksVertical, inventorySorter, inventoryToSortVertically);
+    }
+
+    private static void assertSameContents(List<ItemStack> stacks, InventorySorter inventorySorter, Inventory inventory) {
+        assertThat(stacks.stream()
+                .filter(Objects::nonNull))
+                .containsAll(inventorySorter.getOrganisedGroups(inventory)
+                        .stream().map(MaterialItemStack::itemStacks)
+                        .flatMap(Collection::stream)
+                        .toList());
     }
 
     private List<ItemStack> setupFinalOrganisedInventory(ItemStack... itemStacks) {
@@ -236,9 +253,12 @@ class InventorySorterTest extends PlayerTest {
     }
 
     private List<ItemStack> setupFinalOrganisedInventory(InventorySorter inventorySorter, ItemStack... itemStacks) {
+        return setupFinalOrganisedInventory(inventorySorter, spy(Inventory.class), itemStacks);
+    }
+
+    private List<ItemStack> setupFinalOrganisedInventory(InventorySorter inventorySorter, Inventory inventory, ItemStack... itemStacks) {
 
         var chest = spy(Chest.class);
-        var inventory = spy(Inventory.class);
 
         var backingList = new ArrayList<ItemStack>();
         when(chest.getInventory()).thenReturn(inventory);

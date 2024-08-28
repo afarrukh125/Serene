@@ -36,22 +36,14 @@ public class InventorySorter {
             if (wasChest) {
                 var sneaking = player.isSneaking();
                 var rightClicked = playerInteractEvent.getAction().equals(Action.RIGHT_CLICK_BLOCK);
-                var usedFeather = playerInteractEvent.hasItem()
-                        && requireNonNull(playerInteractEvent.getItem())
-                                .getType()
-                                .equals(Material.FEATHER);
+                var usedFeather = didPlayerUseFeather(playerInteractEvent);
                 if (rightClicked && usedFeather && sneaking) {
                     var inventory = translateInventoryFromBlockType(block, player);
                     if (!inventory.isEmpty()) {
                         var organisedMaterialGroups = getOrganisedGroups(inventory);
-                        var numElementsInOrganisedGroups = organisedMaterialGroups.stream()
-                                .map(MaterialItemStack::itemStacks)
-                                .mapToLong(Collection::size)
-                                .sum();
+                        var numElementsInOrganisedGroups = getTotalNumberOfElementsInOrganisedGroups(organisedMaterialGroups);
                         var location = block.getLocation();
-                        var numRows = inventory.getContents().length == SMALL_CHEST_SIZE
-                                ? SMALL_CHEST_NUM_ROW
-                                : LARGE_CHEST_NUM_ROWS;
+                        var numRows = getNumberOfRowsFromInventory(inventory);
                         var newItemStacks = generateFinalSortedItemStacks(organisedMaterialGroups, numRows, location);
                         if (Arrays.stream(newItemStacks)
                                         .filter(Objects::nonNull)
@@ -66,6 +58,26 @@ public class InventorySorter {
                 }
             }
         }
+    }
+
+    private static long getTotalNumberOfElementsInOrganisedGroups(List<MaterialItemStack> organisedMaterialGroups) {
+        return organisedMaterialGroups.stream()
+                .map(MaterialItemStack::itemStacks)
+                .mapToLong(Collection::size)
+                .sum();
+    }
+
+    private static int getNumberOfRowsFromInventory(Inventory inventory) {
+        return inventory.getContents().length == SMALL_CHEST_SIZE
+                ? SMALL_CHEST_NUM_ROW
+                : LARGE_CHEST_NUM_ROWS;
+    }
+
+    private static boolean didPlayerUseFeather(PlayerInteractEvent playerInteractEvent) {
+        return playerInteractEvent.hasItem()
+                && requireNonNull(playerInteractEvent.getItem())
+                .getType()
+                .equals(Material.FEATHER);
     }
 
     private Inventory translateInventoryFromBlockType(Block block, Player player) {

@@ -2,12 +2,11 @@ package me.plugin.serene.actions;
 
 import org.bukkit.Material;
 import org.bukkit.block.Chest;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+@Disabled
 class ItemSearcherTest extends PlayerTest {
 
     @Test

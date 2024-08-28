@@ -44,14 +44,21 @@ public class InventorySorter {
                     var inventory = translateInventoryFromBlockType(block, player);
                     if (!inventory.isEmpty()) {
                         var organisedMaterialGroups = getOrganisedGroups(inventory);
-                        var numElementsInOrganisedGroups = organisedMaterialGroups.stream().map(MaterialItemStack::itemStacks).mapToLong(Collection::size).sum();
+                        var numElementsInOrganisedGroups = organisedMaterialGroups.stream()
+                                .map(MaterialItemStack::itemStacks)
+                                .mapToLong(Collection::size)
+                                .sum();
                         var location = block.getLocation();
                         var numRows = inventory.getContents().length == SMALL_CHEST_SIZE
                                 ? SMALL_CHEST_NUM_ROW
                                 : LARGE_CHEST_NUM_ROWS;
                         var newItemStacks = generateFinalSortedItemStacks(organisedMaterialGroups, numRows, location);
-                        if(Arrays.stream(newItemStacks).filter(Objects::nonNull).count() != numElementsInOrganisedGroups) {
-                            throw new RuntimeException("Found an error when comparing sizes of organised stacks and placed stacks");
+                        if (Arrays.stream(newItemStacks)
+                                        .filter(Objects::nonNull)
+                                        .count()
+                                != numElementsInOrganisedGroups) {
+                            throw new RuntimeException(
+                                    "Found an error when comparing sizes of organised stacks and placed stacks");
                         }
                         inventory.setContents(newItemStacks);
                         player.getWorld().playSound(requireNonNull(location), Sound.BLOCK_CONDUIT_ACTIVATE, 0.7f, 1);

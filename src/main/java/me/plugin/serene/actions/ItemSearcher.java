@@ -13,6 +13,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
@@ -20,6 +22,7 @@ import static java.util.Objects.requireNonNull;
 public class ItemSearcher {
 
     private static final double MAX_DISTANCE_TO_SEARCH = 10;
+    public static final int EFFECT_DELAY_MILLIS = 250;
 
     public void searchItem(Player player, Location originalLocation, World world, String targetItemName) {
         parseTargetMaterialFromParam(targetItemName)
@@ -73,11 +76,11 @@ public class ItemSearcher {
                     .anyMatch(l -> (l.getY() > player.getLocation().getY())
                             || (l.getY() < player.getLocation().getY()))) {
                 player.sendMessage(
-                        "Found chests with item %s (Marked with green particle effect, may be above/below you)"
+                        "Found chests with item %s (Marked with particle effects, may be above/below you)"
                                 .formatted(sanitisedName));
             } else {
                 player.sendMessage(
-                        "Found chests with item %s (Marked with green particle effect)".formatted(sanitisedName));
+                        "Found chests with item %s (Marked with particle effects)".formatted(sanitisedName));
             }
             for (var chestLocation : foundChestLocations) {
                 playEffectsAtLocation(player, chestLocation);
@@ -111,8 +114,9 @@ public class ItemSearcher {
     }
 
     private static void playEffectsAtLocation(Player player, Location location) {
-        player.playEffect(location, Effect.BONE_MEAL_USE, 35);
         player.playSound(location, Sound.ITEM_BUNDLE_DROP_CONTENTS, 0.45f, 0.25f);
+        var timer = new Timer();
+        timer.schedule(new EffectTimer(Effect.ELECTRIC_SPARK, player, location, timer), 0, EFFECT_DELAY_MILLIS);
     }
 
     private Optional<Material> parseTargetMaterialFromParam(String targetItemParam) {
@@ -121,5 +125,30 @@ public class ItemSearcher {
             return Optional.ofNullable(Material.matchMaterial(targetItemParam, true));
         }
         return material;
+    }
+
+    private static class EffectTimer extends TimerTask {
+        private final Player player;
+        private final Location location;
+        private final Timer timer;
+        private int repeats;
+        private static final int MAX_REPEATS = 8;
+        private final Effect effect;
+
+        public EffectTimer(Effect effect, Player player, Location location, Timer timer) {
+            this.player = player;
+            this.location = location;
+            this.timer = timer;
+            this.effect = effect;
+        }
+
+        @Override
+        public void run() {
+            player.playEffect(location, effect, null);
+            repeats++;
+            if (repeats >= MAX_REPEATS) {
+                timer.cancel();
+            }
+        }
     }
 }

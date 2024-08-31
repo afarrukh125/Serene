@@ -23,7 +23,7 @@ public class SleepHandler {
     public void handleEnterEvent(PlayerBedEnterEvent playerBedEnterEvent) {
         var sleepingPlayer = playerBedEnterEvent.getPlayer();
         var targetWorld = sleepingPlayer.getWorld();
-        if (Boolean.TRUE.equals(targetWorld.getGameRuleValue(GameRule.DO_DAYLIGHT_CYCLE))) {
+        if (Boolean.FALSE.equals(targetWorld.getGameRuleValue(GameRule.DO_DAYLIGHT_CYCLE))) {
             LOG.info("Game rule doDayLightCycle is set to false, which means sleep will have no effect");
         }
         if (targetWorld.getPlayers().size() > 1

@@ -18,6 +18,7 @@ import java.util.TimerTask;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.joining;
 
 public class ItemSearcher {
 
@@ -94,7 +95,7 @@ public class ItemSearcher {
         return Arrays.stream(targetMaterial.name().split("_"))
                 .map(word -> Character.toUpperCase(word.charAt(0))
                         + word.substring(1).toLowerCase())
-                .collect(Collectors.joining(" "));
+                .collect(joining(" "));
     }
 
     private static boolean isInBoundsOfOriginalLocation(Location originalLocation, Location nextLocation) {
@@ -120,11 +121,7 @@ public class ItemSearcher {
     }
 
     private Optional<Material> parseTargetMaterialFromParam(String targetItemParam) {
-        var material = Optional.ofNullable(Material.matchMaterial(targetItemParam));
-        if (material.isEmpty()) {
-            return Optional.ofNullable(Material.matchMaterial(targetItemParam, true));
-        }
-        return material;
+        return Optional.ofNullable(Material.matchMaterial(targetItemParam));
     }
 
     private static class EffectTimer extends TimerTask {

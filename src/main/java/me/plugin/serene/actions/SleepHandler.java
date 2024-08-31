@@ -20,7 +20,7 @@ public class SleepHandler {
     public void handleEnterEvent(PlayerBedEnterEvent playerBedEnterEvent) {
         var sleepingPlayer = playerBedEnterEvent.getPlayer();
         var targetWorld = sleepingPlayer.getWorld();
-        if (targetWorld.getPlayers().size() != 1
+        if (targetWorld.getPlayers().size() > 1
                 && playerBedEnterEvent.getBedEnterResult().equals(PlayerBedEnterEvent.BedEnterResult.OK)
                 && targetWorld.getEnvironment().equals(World.Environment.NORMAL)) {
             targetWorld.getPlayers().stream()
@@ -33,7 +33,7 @@ public class SleepHandler {
 
     public void handleLeaveEvent(Player sleepingPlayer, boolean cancelled) {
         var targetWorld = sleepingPlayer.getWorld();
-        if (targetWorld.getPlayers().size() != 1 && targetWorld.getEnvironment().equals(World.Environment.NORMAL)) {
+        if (targetWorld.getPlayers().size() > 1 && targetWorld.getEnvironment().equals(World.Environment.NORMAL)) {
             if (cancelled && atomicPlayerReference.get().equals(sleepingPlayer)) {
                 atomicPlayerReference = new AtomicReference<>();
             }

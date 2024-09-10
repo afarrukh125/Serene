@@ -240,6 +240,74 @@ class InventorySorterTest extends PlayerTest {
         assertSameContents(itemStacksVertical, inventorySorter, inventoryToSortVertically);
     }
 
+    @Test
+    public void testMostlySingleItemStacks() {
+        // given
+        var inventorySorter = new InventorySorter();
+        // when
+        var items = new ItemStack[]{
+                ItemStack.of(Material.DIAMOND_BOOTS, 1),
+                ItemStack.of(Material.DIAMOND_BOOTS, 1),
+                ItemStack.of(Material.DIAMOND_BOOTS, 1),
+                ItemStack.of(Material.DIAMOND_BOOTS, 1),
+                ItemStack.of(Material.DIAMOND_BOOTS, 1),
+                ItemStack.of(Material.DIAMOND_BOOTS, 1),
+                ItemStack.of(Material.DIAMOND_BOOTS, 1),
+                ItemStack.of(Material.DIAMOND_BOOTS, 1),
+                ItemStack.of(Material.DIAMOND_BOOTS, 1),
+                ItemStack.of(Material.IRON_HELMET, 1),
+                ItemStack.of(Material.IRON_HELMET, 1),
+                ItemStack.of(Material.IRON_HELMET, 1),
+                ItemStack.of(Material.IRON_HELMET, 1),
+                ItemStack.of(Material.IRON_HELMET, 1),
+                ItemStack.of(Material.IRON_HELMET, 1),
+                ItemStack.of(Material.IRON_HELMET, 1),
+                ItemStack.of(Material.IRON_HELMET, 1),
+                ItemStack.of(Material.IRON_HELMET, 1),
+                ItemStack.of(Material.BOW, 1),
+                ItemStack.of(Material.IRON_AXE, 1),
+                ItemStack.of(Material.SHIELD, 1),
+                ItemStack.of(Material.SHIELD, 1),
+                ItemStack.of(Material.SHIELD, 1),
+                ItemStack.of(Material.SHIELD, 1),
+                ItemStack.of(Material.SHIELD, 1),
+                ItemStack.of(Material.SHIELD, 1),
+                ItemStack.of(Material.BOW, 1),
+                ItemStack.of(Material.IRON_AXE, 1),
+                ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
+                ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
+                ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
+                ItemStack.of(Material.DIAMOND_HELMET, 1),
+                ItemStack.of(Material.DIAMOND_HELMET, 1),
+                ItemStack.of(Material.DIAMOND_HELMET, 1),
+                ItemStack.of(Material.DIAMOND_HELMET, 1),
+                ItemStack.of(Material.BOW, 1),
+                ItemStack.of(Material.IRON_AXE, 1),
+                ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
+                ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
+                ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
+                ItemStack.of(Material.DIAMOND_LEGGINGS, 1),
+                ItemStack.of(Material.DIAMOND_LEGGINGS, 1),
+                ItemStack.of(Material.BOW, 1),
+                ItemStack.of(Material.DIAMOND_LEGGINGS, 1),
+                ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
+                ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
+                ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
+                ItemStack.of(Material.DIAMOND_LEGGINGS, 1),
+                ItemStack.of(Material.DIAMOND_LEGGINGS, 1),
+                ItemStack.of(Material.DIAMOND_LEGGINGS, 1),
+                ItemStack.of(Material.DIAMOND_LEGGINGS, 1)
+        };
+
+        var inventoryToSortHorizontally = spy(Inventory.class);
+        var itemStacksHorizontal = setupFinalOrganisedInventory(inventorySorter, inventoryToSortHorizontally, items);
+        assertSameContents(itemStacksHorizontal, inventorySorter, inventoryToSortHorizontally);
+
+        var inventoryToSortVertically = spy(Inventory.class);
+        var itemStacksVertical = setupFinalOrganisedInventory(inventorySorter, inventoryToSortVertically, items);
+        assertSameContents(itemStacksVertical, inventorySorter, inventoryToSortVertically);
+    }
+
     private static void assertSameContents(List<ItemStack> stacks, InventorySorter inventorySorter, Inventory inventory) {
         assertThat(stacks.stream()
                 .filter(Objects::nonNull))

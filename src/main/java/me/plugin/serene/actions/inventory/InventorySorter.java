@@ -82,8 +82,9 @@ public class InventorySorter {
 
     private void generateErrorFileForInventory(Inventory originalInventory) {
         var result = Arrays.stream(originalInventory.getContents())
-                .map(itemStack -> "(" + itemStack.getType().name() + ", " + itemStack.getAmount() + ")")
-                .collect(joining("\n"));
+                .filter(Objects::nonNull)
+                .map(itemStack -> "ItemStack.of(Material." + itemStack.getType().name() + ", " + itemStack.getAmount() + ")")
+                .collect(joining(",\n"));
 
         var file = new File("erroneous_inventory_" + System.currentTimeMillis() + ".txt");
 

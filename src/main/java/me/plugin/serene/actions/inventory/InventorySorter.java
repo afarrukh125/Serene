@@ -13,14 +13,18 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.joining;
 
 public class InventorySorter {
 
+    private static final Logger LOG = LoggerFactory.getLogger(InventorySorter.class);
     public static final int ROW_SIZE = 9;
     public static final int LARGE_CHEST_NUM_ROWS = 6;
     public static final int SMALL_CHEST_NUM_ROW = 3;
@@ -41,7 +45,8 @@ public class InventorySorter {
                     var inventory = translateInventoryFromBlockType(block, player);
                     if (!inventory.isEmpty()) {
                         var organisedMaterialGroups = getOrganisedGroups(inventory);
-                        var numElementsInOrganisedGroups = getTotalNumberOfElementsInOrganisedGroups(organisedMaterialGroups);
+                        var numElementsInOrganisedGroups =
+                                getTotalNumberOfElementsInOrganisedGroups(organisedMaterialGroups);
                         var location = block.getLocation();
                         var numRows = getNumberOfRowsFromInventory(inventory);
                         var newItemStacks = generateFinalSortedItemStacks(organisedMaterialGroups, numRows, location);
@@ -49,8 +54,10 @@ public class InventorySorter {
                                         .filter(Objects::nonNull)
                                         .count()
                                 != numElementsInOrganisedGroups) {
-                            throw new RuntimeException(
-                                    "Found an error when comparing sizes of organised stacks and placed stacks");
+                            LOG.error(
+                                    "Found an error when comparing sizes of organised stacks and placed stacks. See below and generate a test for this scenario.");
+                            LOG.error("Could not sort inventory: \n{}", generateFaultyInventoryString(inventory));
+                            return;
                         }
                         inventory.setContents(newItemStacks);
                         player.getWorld().playSound(requireNonNull(location), Sound.BLOCK_CONDUIT_ACTIVATE, 0.7f, 1);
@@ -58,6 +65,13 @@ public class InventorySorter {
                 }
             }
         }
+    }
+
+    private String generateFaultyInventoryString(Inventory originalInventory) {
+        return Arrays.stream(originalInventory.getContents())
+                .filter(Objects::nonNull)
+                .map(itemStack -> "ItemStack.of(Material." + itemStack.getType().name() + ", " + itemStack.getAmount() + ")")
+                .collect(joining(",\n"));
     }
 
     private static long getTotalNumberOfElementsInOrganisedGroups(List<MaterialItemStack> organisedMaterialGroups) {
@@ -68,16 +82,12 @@ public class InventorySorter {
     }
 
     private static int getNumberOfRowsFromInventory(Inventory inventory) {
-        return inventory.getContents().length == SMALL_CHEST_SIZE
-                ? SMALL_CHEST_NUM_ROW
-                : LARGE_CHEST_NUM_ROWS;
+        return inventory.getContents().length == SMALL_CHEST_SIZE ? SMALL_CHEST_NUM_ROW : LARGE_CHEST_NUM_ROWS;
     }
 
     private static boolean didPlayerUseFeather(PlayerInteractEvent playerInteractEvent) {
         return playerInteractEvent.hasItem()
-                && requireNonNull(playerInteractEvent.getItem())
-                .getType()
-                .equals(Material.FEATHER);
+                && requireNonNull(playerInteractEvent.getItem()).getType().equals(Material.FEATHER);
     }
 
     private Inventory translateInventoryFromBlockType(Block block, Player player) {

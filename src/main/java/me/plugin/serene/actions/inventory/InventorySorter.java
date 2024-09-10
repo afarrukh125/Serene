@@ -16,20 +16,7 @@ import org.bukkit.inventory.ItemStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Supplier;
+import java.util.*;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.groupingBy;
@@ -68,8 +55,8 @@ public class InventorySorter {
                                         .count()
                                 != numElementsInOrganisedGroups) {
                             LOG.error(
-                                    "Found an error when comparing sizes of organised stacks and placed stacks, created error file");
-                            generateErrorFileForInventory(inventory);
+                                    "Found an error when comparing sizes of organised stacks and placed stacks. See below and generate a test for this scenario.");
+                            LOG.error("Could not sort inventory: \n{}", generateFaultyInventoryString(inventory));
                             return;
                         }
                         inventory.setContents(newItemStacks);
@@ -80,22 +67,11 @@ public class InventorySorter {
         }
     }
 
-    private void generateErrorFileForInventory(Inventory originalInventory) {
-        var result = Arrays.stream(originalInventory.getContents())
+    private String generateFaultyInventoryString(Inventory originalInventory) {
+        return Arrays.stream(originalInventory.getContents())
                 .filter(Objects::nonNull)
                 .map(itemStack -> "ItemStack.of(Material." + itemStack.getType().name() + ", " + itemStack.getAmount() + ")")
                 .collect(joining(",\n"));
-
-        var file = new File("erroneous_inventory_" + System.currentTimeMillis() + ".txt");
-
-        try {
-            var pw = new PrintWriter(new FileWriter(file));
-            pw.print(result);
-            pw.flush();
-            pw.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private static long getTotalNumberOfElementsInOrganisedGroups(List<MaterialItemStack> organisedMaterialGroups) {

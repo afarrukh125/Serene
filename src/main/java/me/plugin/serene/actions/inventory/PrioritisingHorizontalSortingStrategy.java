@@ -77,7 +77,7 @@ public class PrioritisingHorizontalSortingStrategy extends BidirectionalSortingS
                             break;
                         }
                     }
-                    if (canPlace) {
+                    if (canPlace && coordinates.size() == (targetLineSize*numRows)) {
                         return coordinates;
                     }
                 }

@@ -311,10 +311,10 @@ class InventorySorterTest extends PlayerTest {
     private static void assertSameContents(List<ItemStack> stacks, InventorySorter inventorySorter, Inventory inventory) {
         assertThat(stacks.stream()
                 .filter(Objects::nonNull))
-                .containsAll(inventorySorter.getOrganisedGroups(inventory)
+                .containsExactlyInAnyOrder(inventorySorter.getOrganisedGroups(inventory)
                         .stream().map(MaterialItemStack::itemStacks)
                         .flatMap(Collection::stream)
-                        .toList());
+                        .toArray(ItemStack[]::new));
     }
 
     private List<ItemStack> setupFinalOrganisedInventory(ItemStack... itemStacks) {

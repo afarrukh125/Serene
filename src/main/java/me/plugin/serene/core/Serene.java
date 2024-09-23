@@ -1,5 +1,7 @@
 package me.plugin.serene.core;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import me.plugin.serene.core.command.SearchItemCommand;
@@ -11,8 +13,6 @@ import me.plugin.serene.model.SereneConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static java.util.Objects.requireNonNull;
 
 @SuppressWarnings("unused")
 public class Serene extends JavaPlugin {

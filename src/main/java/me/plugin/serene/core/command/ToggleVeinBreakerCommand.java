@@ -1,5 +1,7 @@
 package me.plugin.serene.core.command;
 
+import static java.util.Objects.requireNonNull;
+
 import jakarta.inject.Inject;
 import me.plugin.serene.database.SereneDatabaseClient;
 import me.plugin.serene.exceptions.SereneCommandException;
@@ -7,8 +9,6 @@ import me.plugin.serene.model.SereneConfiguration;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-
-import static java.util.Objects.requireNonNull;
 
 public class ToggleVeinBreakerCommand implements CommandExecutor {
 

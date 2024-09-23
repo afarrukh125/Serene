@@ -1,9 +1,8 @@
 package me.plugin.serene.database;
 
-import org.bukkit.entity.Player;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.bukkit.entity.Player;
 
 /**
  * Stores data for this session only using Java objects

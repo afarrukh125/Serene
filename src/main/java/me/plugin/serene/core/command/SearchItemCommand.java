@@ -1,12 +1,12 @@
 package me.plugin.serene.core.command;
 
+import static java.lang.String.join;
+import static java.util.Objects.requireNonNull;
+
 import me.plugin.serene.actions.ItemSearcher;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-
-import static java.lang.String.join;
-import static java.util.Objects.requireNonNull;
 
 public class SearchItemCommand implements CommandExecutor {
 

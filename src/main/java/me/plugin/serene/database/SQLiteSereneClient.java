@@ -1,11 +1,10 @@
 package me.plugin.serene.database;
 
-import org.bukkit.entity.Player;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
+import org.bukkit.entity.Player;
 
 public class SQLiteSereneClient implements SereneDatabaseClient {
 

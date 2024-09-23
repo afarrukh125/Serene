@@ -1,11 +1,10 @@
 package me.plugin.serene.model;
 
-import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
-
 import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 
 public record MaterialItemStack(Material material, Queue<ItemStack> itemStacks) {
     @Override

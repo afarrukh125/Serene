@@ -1,5 +1,8 @@
 package me.plugin.serene.actions;
 
+import static java.util.Objects.requireNonNull;
+
+import java.util.concurrent.atomic.AtomicReference;
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
 import org.bukkit.World;
@@ -7,10 +10,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.atomic.AtomicReference;
-
-import static java.util.Objects.requireNonNull;
 
 public class SleepHandler {
     private static final Logger LOG = LoggerFactory.getLogger(SleepHandler.class);

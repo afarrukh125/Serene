@@ -1,20 +1,5 @@
 package me.plugin.serene.actions;
 
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.meta.Damageable;
-
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
-import java.util.Set;
-
 import static java.util.Objects.requireNonNull;
 import static me.plugin.serene.util.Utils.isToolBrokenAfterApplyingDamage;
 import static me.plugin.serene.util.Utils.shouldTakeDamage;
@@ -46,6 +31,20 @@ import static org.bukkit.Material.SPRUCE_LEAVES;
 import static org.bukkit.Material.SPRUCE_LOG;
 import static org.bukkit.Material.STONE_AXE;
 import static org.bukkit.Material.WOODEN_AXE;
+
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.Set;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.Damageable;
 
 public class TreeBreaker {
     private static final Set<Material> LOG_MATERIALS =

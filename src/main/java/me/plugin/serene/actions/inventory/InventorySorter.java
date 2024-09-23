@@ -1,6 +1,11 @@
 package me.plugin.serene.actions.inventory;
 
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.joining;
+
 import com.google.common.annotations.VisibleForTesting;
+import java.util.*;
 import me.plugin.serene.model.MaterialItemStack;
 import me.plugin.serene.util.Utils;
 import org.bukkit.Location;
@@ -15,12 +20,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
-
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.joining;
 
 public class InventorySorter {
 
@@ -70,7 +69,8 @@ public class InventorySorter {
     private String generateFaultyInventoryString(Inventory originalInventory) {
         return Arrays.stream(originalInventory.getContents())
                 .filter(Objects::nonNull)
-                .map(itemStack -> "ItemStack.of(Material." + itemStack.getType().name() + ", " + itemStack.getAmount() + ")")
+                .map(itemStack ->
+                        "ItemStack.of(Material." + itemStack.getType().name() + ", " + itemStack.getAmount() + ")")
                 .collect(joining(",\n"));
     }
 

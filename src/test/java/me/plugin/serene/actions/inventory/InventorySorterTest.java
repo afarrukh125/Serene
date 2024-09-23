@@ -1,5 +1,13 @@
 package me.plugin.serene.actions.inventory;
 
+import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
+import java.util.*;
+import java.util.function.Supplier;
 import me.plugin.serene.actions.PlayerTest;
 import me.plugin.serene.model.MaterialItemStack;
 import org.bukkit.Material;
@@ -8,15 +16,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.junit.jupiter.api.Test;
 import org.mockito.stubbing.Answer;
-
-import java.util.*;
-import java.util.function.Supplier;
-
-import static java.util.stream.Collectors.toList;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 class InventorySorterTest extends PlayerTest {
 
@@ -84,7 +83,6 @@ class InventorySorterTest extends PlayerTest {
         assertThat(itemStacks.get(8)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 64));
         assertThat(itemStacks.get(7)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 5));
 
-
         // when
         var verticallySortedItemStacks = getItemStacks(inventorySorter, groupSupplier.get());
 
@@ -142,43 +140,45 @@ class InventorySorterTest extends PlayerTest {
         // given
         var inventorySorter = new InventorySorter();
         // when
-        var items = new ItemStack[]{ItemStack.of(Material.CRIMSON_ROOTS, 8),
-                ItemStack.of(Material.LANTERN, 2),
-                ItemStack.of(Material.NETHERRACK, 33),
-                ItemStack.of(Material.NETHERRACK, 64),
-                ItemStack.of(Material.NETHERRACK, 64),
-                ItemStack.of(Material.NETHERRACK, 64),
-                ItemStack.of(Material.NETHERRACK, 64),
-                ItemStack.of(Material.NETHERRACK, 64),
-                ItemStack.of(Material.NETHERRACK, 64),
-                ItemStack.of(Material.CRIMSON_STEM, 45),
-                ItemStack.of(Material.MAGMA_BLOCK, 10),
-                ItemStack.of(Material.NETHER_GOLD_ORE, 7),
-                ItemStack.of(Material.SHROOMLIGHT, 7),
-                ItemStack.of(Material.CRIMSON_NYLIUM, 8),
-                ItemStack.of(Material.CRIMSON_NYLIUM, 64),
-                ItemStack.of(Material.CRIMSON_NYLIUM, 64),
-                ItemStack.of(Material.CRYING_OBSIDIAN, 10),
-                ItemStack.of(Material.MOSS_CARPET, 12),
-                ItemStack.of(Material.NETHER_QUARTZ_ORE, 12),
-                ItemStack.of(Material.SOUL_SOIL, 3),
-                ItemStack.of(Material.SOUL_SAND, 49),
-                ItemStack.of(Material.SOUL_SAND, 64),
-                ItemStack.of(Material.GHAST_TEAR, 2),
-                ItemStack.of(Material.NETHER_BRICK, 11),
-                ItemStack.of(Material.NETHER_WART_BLOCK, 38),
-                ItemStack.of(Material.WARPED_ROOTS, 1),
-                ItemStack.of(Material.BLACKSTONE, 1),
-                ItemStack.of(Material.GILDED_BLACKSTONE, 9),
-                ItemStack.of(Material.NETHER_BRICK_FENCE, 1),
-                ItemStack.of(Material.OAK_PLANKS, 2),
-                ItemStack.of(Material.WARPED_STEM, 11),
-                ItemStack.of(Material.CRACKED_POLISHED_BLACKSTONE_BRICKS, 8),
-                ItemStack.of(Material.GLOW_INK_SAC, 8),
-                ItemStack.of(Material.NETHER_BRICK_STAIRS, 34),
-                ItemStack.of(Material.POLISHED_BLACKSTONE_BRICKS, 62),
-                ItemStack.of(Material.WEEPING_VINES, 3),
-                ItemStack.of(Material.CRIMSON_FUNGUS, 13)};
+        var items = new ItemStack[] {
+            ItemStack.of(Material.CRIMSON_ROOTS, 8),
+            ItemStack.of(Material.LANTERN, 2),
+            ItemStack.of(Material.NETHERRACK, 33),
+            ItemStack.of(Material.NETHERRACK, 64),
+            ItemStack.of(Material.NETHERRACK, 64),
+            ItemStack.of(Material.NETHERRACK, 64),
+            ItemStack.of(Material.NETHERRACK, 64),
+            ItemStack.of(Material.NETHERRACK, 64),
+            ItemStack.of(Material.NETHERRACK, 64),
+            ItemStack.of(Material.CRIMSON_STEM, 45),
+            ItemStack.of(Material.MAGMA_BLOCK, 10),
+            ItemStack.of(Material.NETHER_GOLD_ORE, 7),
+            ItemStack.of(Material.SHROOMLIGHT, 7),
+            ItemStack.of(Material.CRIMSON_NYLIUM, 8),
+            ItemStack.of(Material.CRIMSON_NYLIUM, 64),
+            ItemStack.of(Material.CRIMSON_NYLIUM, 64),
+            ItemStack.of(Material.CRYING_OBSIDIAN, 10),
+            ItemStack.of(Material.MOSS_CARPET, 12),
+            ItemStack.of(Material.NETHER_QUARTZ_ORE, 12),
+            ItemStack.of(Material.SOUL_SOIL, 3),
+            ItemStack.of(Material.SOUL_SAND, 49),
+            ItemStack.of(Material.SOUL_SAND, 64),
+            ItemStack.of(Material.GHAST_TEAR, 2),
+            ItemStack.of(Material.NETHER_BRICK, 11),
+            ItemStack.of(Material.NETHER_WART_BLOCK, 38),
+            ItemStack.of(Material.WARPED_ROOTS, 1),
+            ItemStack.of(Material.BLACKSTONE, 1),
+            ItemStack.of(Material.GILDED_BLACKSTONE, 9),
+            ItemStack.of(Material.NETHER_BRICK_FENCE, 1),
+            ItemStack.of(Material.OAK_PLANKS, 2),
+            ItemStack.of(Material.WARPED_STEM, 11),
+            ItemStack.of(Material.CRACKED_POLISHED_BLACKSTONE_BRICKS, 8),
+            ItemStack.of(Material.GLOW_INK_SAC, 8),
+            ItemStack.of(Material.NETHER_BRICK_STAIRS, 34),
+            ItemStack.of(Material.POLISHED_BLACKSTONE_BRICKS, 62),
+            ItemStack.of(Material.WEEPING_VINES, 3),
+            ItemStack.of(Material.CRIMSON_FUNGUS, 13)
+        };
 
         var inventoryToSortHorizontally = spy(Inventory.class);
         var itemStacksHorizontal = setupFinalOrganisedInventory(inventorySorter, inventoryToSortHorizontally, items);
@@ -194,41 +194,41 @@ class InventorySorterTest extends PlayerTest {
         // given
         var inventorySorter = new InventorySorter();
         // when
-        var items = new ItemStack[]{
-                ItemStack.of(Material.STONE_SLAB, 64),
-                ItemStack.of(Material.CHISELED_STONE_BRICKS, 64),
-                ItemStack.of(Material.SMOOTH_STONE, 34),
-                ItemStack.of(Material.SMOOTH_STONE, 64),
-                ItemStack.of(Material.SMOOTH_STONE, 64),
-                ItemStack.of(Material.SMOOTH_STONE, 64),
-                ItemStack.of(Material.SMOOTH_STONE, 64),
-                ItemStack.of(Material.STONE_SLAB, 64),
-                ItemStack.of(Material.CHISELED_STONE_BRICKS, 24),
-                ItemStack.of(Material.STONE_BRICKS, 64),
-                ItemStack.of(Material.STONE_BRICKS, 64),
-                ItemStack.of(Material.STONE_SLAB, 64),
-                ItemStack.of(Material.MOSSY_COBBLESTONE, 8),
-                ItemStack.of(Material.MOSSY_STONE_BRICKS, 4),
-                ItemStack.of(Material.STONE_SLAB, 64),
-                ItemStack.of(Material.STONE_BRICK_SLAB, 64),
-                ItemStack.of(Material.STONE_BRICK_WALL, 5),
-                ItemStack.of(Material.STONE_SLAB, 64),
-                ItemStack.of(Material.STONE_STAIRS, 9),
-                ItemStack.of(Material.STONE, 44),
-                ItemStack.of(Material.STONE, 64),
-                ItemStack.of(Material.STONE, 64),
-                ItemStack.of(Material.STONE, 64),
-                ItemStack.of(Material.STONE, 64),
-                ItemStack.of(Material.STONE, 64),
-                ItemStack.of(Material.STONE_SLAB, 16),
-                ItemStack.of(Material.STONE, 64),
-                ItemStack.of(Material.STONE, 64),
-                ItemStack.of(Material.STONE, 64),
-                ItemStack.of(Material.STONE, 64),
-                ItemStack.of(Material.STONE, 64),
-                ItemStack.of(Material.STONE, 64),
-                ItemStack.of(Material.STONE, 64),
-                ItemStack.of(Material.STONE, 64)
+        var items = new ItemStack[] {
+            ItemStack.of(Material.STONE_SLAB, 64),
+            ItemStack.of(Material.CHISELED_STONE_BRICKS, 64),
+            ItemStack.of(Material.SMOOTH_STONE, 34),
+            ItemStack.of(Material.SMOOTH_STONE, 64),
+            ItemStack.of(Material.SMOOTH_STONE, 64),
+            ItemStack.of(Material.SMOOTH_STONE, 64),
+            ItemStack.of(Material.SMOOTH_STONE, 64),
+            ItemStack.of(Material.STONE_SLAB, 64),
+            ItemStack.of(Material.CHISELED_STONE_BRICKS, 24),
+            ItemStack.of(Material.STONE_BRICKS, 64),
+            ItemStack.of(Material.STONE_BRICKS, 64),
+            ItemStack.of(Material.STONE_SLAB, 64),
+            ItemStack.of(Material.MOSSY_COBBLESTONE, 8),
+            ItemStack.of(Material.MOSSY_STONE_BRICKS, 4),
+            ItemStack.of(Material.STONE_SLAB, 64),
+            ItemStack.of(Material.STONE_BRICK_SLAB, 64),
+            ItemStack.of(Material.STONE_BRICK_WALL, 5),
+            ItemStack.of(Material.STONE_SLAB, 64),
+            ItemStack.of(Material.STONE_STAIRS, 9),
+            ItemStack.of(Material.STONE, 44),
+            ItemStack.of(Material.STONE, 64),
+            ItemStack.of(Material.STONE, 64),
+            ItemStack.of(Material.STONE, 64),
+            ItemStack.of(Material.STONE, 64),
+            ItemStack.of(Material.STONE, 64),
+            ItemStack.of(Material.STONE_SLAB, 16),
+            ItemStack.of(Material.STONE, 64),
+            ItemStack.of(Material.STONE, 64),
+            ItemStack.of(Material.STONE, 64),
+            ItemStack.of(Material.STONE, 64),
+            ItemStack.of(Material.STONE, 64),
+            ItemStack.of(Material.STONE, 64),
+            ItemStack.of(Material.STONE, 64),
+            ItemStack.of(Material.STONE, 64)
         };
 
         var inventoryToSortHorizontally = spy(Inventory.class);
@@ -245,58 +245,58 @@ class InventorySorterTest extends PlayerTest {
         // given
         var inventorySorter = new InventorySorter();
         // when
-        var items = new ItemStack[]{
-                ItemStack.of(Material.DIAMOND_BOOTS, 1),
-                ItemStack.of(Material.DIAMOND_BOOTS, 1),
-                ItemStack.of(Material.DIAMOND_BOOTS, 1),
-                ItemStack.of(Material.DIAMOND_BOOTS, 1),
-                ItemStack.of(Material.DIAMOND_BOOTS, 1),
-                ItemStack.of(Material.DIAMOND_BOOTS, 1),
-                ItemStack.of(Material.DIAMOND_BOOTS, 1),
-                ItemStack.of(Material.DIAMOND_BOOTS, 1),
-                ItemStack.of(Material.DIAMOND_BOOTS, 1),
-                ItemStack.of(Material.IRON_HELMET, 1),
-                ItemStack.of(Material.IRON_HELMET, 1),
-                ItemStack.of(Material.IRON_HELMET, 1),
-                ItemStack.of(Material.IRON_HELMET, 1),
-                ItemStack.of(Material.IRON_HELMET, 1),
-                ItemStack.of(Material.IRON_HELMET, 1),
-                ItemStack.of(Material.IRON_HELMET, 1),
-                ItemStack.of(Material.IRON_HELMET, 1),
-                ItemStack.of(Material.IRON_HELMET, 1),
-                ItemStack.of(Material.BOW, 1),
-                ItemStack.of(Material.IRON_AXE, 1),
-                ItemStack.of(Material.SHIELD, 1),
-                ItemStack.of(Material.SHIELD, 1),
-                ItemStack.of(Material.SHIELD, 1),
-                ItemStack.of(Material.SHIELD, 1),
-                ItemStack.of(Material.SHIELD, 1),
-                ItemStack.of(Material.SHIELD, 1),
-                ItemStack.of(Material.BOW, 1),
-                ItemStack.of(Material.IRON_AXE, 1),
-                ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
-                ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
-                ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
-                ItemStack.of(Material.DIAMOND_HELMET, 1),
-                ItemStack.of(Material.DIAMOND_HELMET, 1),
-                ItemStack.of(Material.DIAMOND_HELMET, 1),
-                ItemStack.of(Material.DIAMOND_HELMET, 1),
-                ItemStack.of(Material.BOW, 1),
-                ItemStack.of(Material.IRON_AXE, 1),
-                ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
-                ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
-                ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
-                ItemStack.of(Material.DIAMOND_LEGGINGS, 1),
-                ItemStack.of(Material.DIAMOND_LEGGINGS, 1),
-                ItemStack.of(Material.BOW, 1),
-                ItemStack.of(Material.DIAMOND_LEGGINGS, 1),
-                ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
-                ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
-                ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
-                ItemStack.of(Material.DIAMOND_LEGGINGS, 1),
-                ItemStack.of(Material.DIAMOND_LEGGINGS, 1),
-                ItemStack.of(Material.DIAMOND_LEGGINGS, 1),
-                ItemStack.of(Material.DIAMOND_LEGGINGS, 1)
+        var items = new ItemStack[] {
+            ItemStack.of(Material.DIAMOND_BOOTS, 1),
+            ItemStack.of(Material.DIAMOND_BOOTS, 1),
+            ItemStack.of(Material.DIAMOND_BOOTS, 1),
+            ItemStack.of(Material.DIAMOND_BOOTS, 1),
+            ItemStack.of(Material.DIAMOND_BOOTS, 1),
+            ItemStack.of(Material.DIAMOND_BOOTS, 1),
+            ItemStack.of(Material.DIAMOND_BOOTS, 1),
+            ItemStack.of(Material.DIAMOND_BOOTS, 1),
+            ItemStack.of(Material.DIAMOND_BOOTS, 1),
+            ItemStack.of(Material.IRON_HELMET, 1),
+            ItemStack.of(Material.IRON_HELMET, 1),
+            ItemStack.of(Material.IRON_HELMET, 1),
+            ItemStack.of(Material.IRON_HELMET, 1),
+            ItemStack.of(Material.IRON_HELMET, 1),
+            ItemStack.of(Material.IRON_HELMET, 1),
+            ItemStack.of(Material.IRON_HELMET, 1),
+            ItemStack.of(Material.IRON_HELMET, 1),
+            ItemStack.of(Material.IRON_HELMET, 1),
+            ItemStack.of(Material.BOW, 1),
+            ItemStack.of(Material.IRON_AXE, 1),
+            ItemStack.of(Material.SHIELD, 1),
+            ItemStack.of(Material.SHIELD, 1),
+            ItemStack.of(Material.SHIELD, 1),
+            ItemStack.of(Material.SHIELD, 1),
+            ItemStack.of(Material.SHIELD, 1),
+            ItemStack.of(Material.SHIELD, 1),
+            ItemStack.of(Material.BOW, 1),
+            ItemStack.of(Material.IRON_AXE, 1),
+            ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
+            ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
+            ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
+            ItemStack.of(Material.DIAMOND_HELMET, 1),
+            ItemStack.of(Material.DIAMOND_HELMET, 1),
+            ItemStack.of(Material.DIAMOND_HELMET, 1),
+            ItemStack.of(Material.DIAMOND_HELMET, 1),
+            ItemStack.of(Material.BOW, 1),
+            ItemStack.of(Material.IRON_AXE, 1),
+            ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
+            ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
+            ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
+            ItemStack.of(Material.DIAMOND_LEGGINGS, 1),
+            ItemStack.of(Material.DIAMOND_LEGGINGS, 1),
+            ItemStack.of(Material.BOW, 1),
+            ItemStack.of(Material.DIAMOND_LEGGINGS, 1),
+            ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
+            ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
+            ItemStack.of(Material.DIAMOND_CHESTPLATE, 1),
+            ItemStack.of(Material.DIAMOND_LEGGINGS, 1),
+            ItemStack.of(Material.DIAMOND_LEGGINGS, 1),
+            ItemStack.of(Material.DIAMOND_LEGGINGS, 1),
+            ItemStack.of(Material.DIAMOND_LEGGINGS, 1)
         };
 
         var inventoryToSortHorizontally = spy(Inventory.class);
@@ -308,11 +308,11 @@ class InventorySorterTest extends PlayerTest {
         assertSameContents(itemStacksVertical, inventorySorter, inventoryToSortVertically);
     }
 
-    private static void assertSameContents(List<ItemStack> stacks, InventorySorter inventorySorter, Inventory inventory) {
-        assertThat(stacks.stream()
-                .filter(Objects::nonNull))
-                .containsExactlyInAnyOrder(inventorySorter.getOrganisedGroups(inventory)
-                        .stream().map(MaterialItemStack::itemStacks)
+    private static void assertSameContents(
+            List<ItemStack> stacks, InventorySorter inventorySorter, Inventory inventory) {
+        assertThat(stacks.stream().filter(Objects::nonNull))
+                .containsExactlyInAnyOrder(inventorySorter.getOrganisedGroups(inventory).stream()
+                        .map(MaterialItemStack::itemStacks)
                         .flatMap(Collection::stream)
                         .toArray(ItemStack[]::new));
     }
@@ -325,7 +325,8 @@ class InventorySorterTest extends PlayerTest {
         return setupFinalOrganisedInventory(inventorySorter, spy(Inventory.class), itemStacks);
     }
 
-    private List<ItemStack> setupFinalOrganisedInventory(InventorySorter inventorySorter, Inventory inventory, ItemStack... itemStacks) {
+    private List<ItemStack> setupFinalOrganisedInventory(
+            InventorySorter inventorySorter, Inventory inventory, ItemStack... itemStacks) {
 
         var chest = spy(Chest.class);
 
@@ -342,7 +343,8 @@ class InventorySorterTest extends PlayerTest {
 
         when(inventory.getContents()).thenReturn(backingList.toArray(new ItemStack[54]));
 
-        Supplier<List<MaterialItemStack>> groupSupplier = () -> inventorySorter.getOrganisedGroups(chest.getInventory());
+        Supplier<List<MaterialItemStack>> groupSupplier =
+                () -> inventorySorter.getOrganisedGroups(chest.getInventory());
 
         return getItemStacks(inventorySorter, groupSupplier.get(), InventorySorter.LARGE_CHEST_NUM_ROWS);
     }

@@ -1,10 +1,9 @@
 package me.plugin.serene.actions.inventory;
 
-import me.plugin.serene.model.MaterialItemStack;
-import org.bukkit.inventory.ItemStack;
-
 import java.util.List;
 import java.util.function.Predicate;
+import me.plugin.serene.model.MaterialItemStack;
+import org.bukkit.inventory.ItemStack;
 
 public abstract class BidirectionalSortingStrategy implements SortingStrategy {
 

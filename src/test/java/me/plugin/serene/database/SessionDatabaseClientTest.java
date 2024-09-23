@@ -1,12 +1,12 @@
 package me.plugin.serene.database;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 import org.bukkit.entity.Player;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class SessionDatabaseClientTest {
 

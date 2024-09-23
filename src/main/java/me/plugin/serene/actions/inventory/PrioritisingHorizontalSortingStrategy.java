@@ -1,19 +1,19 @@
 package me.plugin.serene.actions.inventory;
 
+import static java.util.Collections.emptyList;
+import static me.plugin.serene.actions.inventory.SortingStrategy.dumpNormally;
+
+import java.util.ArrayList;
+import java.util.List;
 import me.plugin.serene.model.Coordinate;
 import me.plugin.serene.model.MaterialItemStack;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static java.util.Collections.emptyList;
-import static me.plugin.serene.actions.inventory.SortingStrategy.dumpNormally;
-
 public class PrioritisingHorizontalSortingStrategy extends BidirectionalSortingStrategy {
 
     @Override
-    public ItemStack[][] sort(List<MaterialItemStack> materialItemStacks, ItemStack[][] newStacks, List<MaterialItemStack> notPlaced) {
+    public ItemStack[][] sort(
+            List<MaterialItemStack> materialItemStacks, ItemStack[][] newStacks, List<MaterialItemStack> notPlaced) {
         alternatePrioritisingHorizontal(materialItemStacks, newStacks, notPlaced);
         alternatePrioritisingVertical(materialItemStacks, newStacks, notPlaced);
         if (!notPlaced.isEmpty()) {
@@ -62,11 +62,11 @@ public class PrioritisingHorizontalSortingStrategy extends BidirectionalSortingS
                     var coordinates = new ArrayList<Coordinate>();
                     var canPlace = true;
                     for (int heightPointer = y;
-                         heightPointer < newStacks.length && heightPointer < y + numRows;
-                         heightPointer++) {
+                            heightPointer < newStacks.length && heightPointer < y + numRows;
+                            heightPointer++) {
                         for (int widthPointer = x;
-                             widthPointer < newStacks[y].length && widthPointer < x + targetLineSize;
-                             widthPointer++) {
+                                widthPointer < newStacks[y].length && widthPointer < x + targetLineSize;
+                                widthPointer++) {
                             coordinates.add(new Coordinate(widthPointer, heightPointer));
                             if (newStacks[heightPointer][widthPointer] != null) {
                                 canPlace = false;
@@ -77,7 +77,7 @@ public class PrioritisingHorizontalSortingStrategy extends BidirectionalSortingS
                             break;
                         }
                     }
-                    if (canPlace && coordinates.size() == (targetLineSize*numRows)) {
+                    if (canPlace && coordinates.size() == (targetLineSize * numRows)) {
                         return coordinates;
                     }
                 }

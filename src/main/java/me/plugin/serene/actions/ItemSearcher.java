@@ -1,12 +1,7 @@
 package me.plugin.serene.actions;
 
-import org.bukkit.Effect;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.World;
-import org.bukkit.block.Chest;
-import org.bukkit.entity.Player;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.joining;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -15,10 +10,13 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.stream.Collectors;
-
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.joining;
+import org.bukkit.Effect;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.World;
+import org.bukkit.block.Chest;
+import org.bukkit.entity.Player;
 
 public class ItemSearcher {
 
@@ -76,12 +74,10 @@ public class ItemSearcher {
             if (foundChestLocations.stream()
                     .anyMatch(l -> (l.getY() > player.getLocation().getY())
                             || (l.getY() < player.getLocation().getY()))) {
-                player.sendMessage(
-                        "Found chests with item %s (Marked with particle effects, may be above/below you)"
-                                .formatted(sanitisedName));
+                player.sendMessage("Found chests with item %s (Marked with particle effects, may be above/below you)"
+                        .formatted(sanitisedName));
             } else {
-                player.sendMessage(
-                        "Found chests with item %s (Marked with particle effects)".formatted(sanitisedName));
+                player.sendMessage("Found chests with item %s (Marked with particle effects)".formatted(sanitisedName));
             }
             for (var chestLocation : foundChestLocations) {
                 playEffectsAtLocation(player, chestLocation);

@@ -1,14 +1,13 @@
 package me.plugin.serene.actions.inventory;
 
-import me.plugin.serene.model.Coordinate;
-import me.plugin.serene.model.MaterialItemStack;
-import org.bukkit.inventory.ItemStack;
+import static java.util.Collections.emptyList;
+import static me.plugin.serene.actions.inventory.SortingStrategy.dumpNormally;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static java.util.Collections.emptyList;
-import static me.plugin.serene.actions.inventory.SortingStrategy.dumpNormally;
+import me.plugin.serene.model.Coordinate;
+import me.plugin.serene.model.MaterialItemStack;
+import org.bukkit.inventory.ItemStack;
 
 public class PrioritisingVerticalSortingStrategy extends BidirectionalSortingStrategy {
 
@@ -46,7 +45,7 @@ public class PrioritisingVerticalSortingStrategy extends BidirectionalSortingStr
                             break;
                         }
                     }
-                    if (canPlace && coordinates.size() == (targetLineSize*numRows)) {
+                    if (canPlace && coordinates.size() == (targetLineSize * numRows)) {
                         return coordinates;
                     }
                 }

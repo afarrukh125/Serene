@@ -1,6 +1,14 @@
 package me.plugin.serene.util;
 
+import static java.util.stream.Collectors.joining;
+
 import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.IntFunction;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -8,15 +16,6 @@ import org.bukkit.World;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.Damageable;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.IntFunction;
-
-import static java.util.stream.Collectors.joining;
 
 public class Utils {
     public static boolean shouldTakeDamage(int unbreakingLevel) {

@@ -1,8 +1,8 @@
 package me.plugin.serene.model;
 
-import org.bukkit.configuration.file.FileConfiguration;
-
 import static java.util.Objects.requireNonNull;
+
+import org.bukkit.configuration.file.FileConfiguration;
 
 public record SereneConfiguration(FileConfiguration fileConfig) {
     public boolean shouldShowExperienceMessage() {

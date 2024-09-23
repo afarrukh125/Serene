@@ -1,28 +1,5 @@
 package me.plugin.serene.actions;
 
-import com.google.common.collect.ImmutableMap;
-import jakarta.inject.Inject;
-import me.plugin.serene.database.SereneDatabaseClient;
-import me.plugin.serene.util.ExperienceData;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Player;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.player.PlayerExpChangeEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.Damageable;
-
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-
 import static java.util.Objects.requireNonNull;
 import static me.plugin.serene.util.Utils.isToolBrokenAfterApplyingDamage;
 import static me.plugin.serene.util.Utils.shouldTakeDamage;
@@ -50,6 +27,28 @@ import static org.bukkit.Material.NETHER_QUARTZ_ORE;
 import static org.bukkit.Material.REDSTONE_ORE;
 import static org.bukkit.Material.STONE_PICKAXE;
 import static org.bukkit.Material.WOODEN_PICKAXE;
+
+import com.google.common.collect.ImmutableMap;
+import jakarta.inject.Inject;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import me.plugin.serene.database.SereneDatabaseClient;
+import me.plugin.serene.util.ExperienceData;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.player.PlayerExpChangeEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
 
 public class VeinBreaker {
 

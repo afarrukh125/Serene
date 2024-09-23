@@ -1,13 +1,12 @@
 package me.plugin.serene.actions.inventory;
 
-import me.plugin.serene.model.Coordinate;
-import me.plugin.serene.model.MaterialItemStack;
-import org.bukkit.inventory.ItemStack;
+import static java.util.Collections.emptyList;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static java.util.Collections.emptyList;
+import me.plugin.serene.model.Coordinate;
+import me.plugin.serene.model.MaterialItemStack;
+import org.bukkit.inventory.ItemStack;
 
 public class HorizontalSortingStrategy implements UnidirectionalSortingStrategy {
     @Override

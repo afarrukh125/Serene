@@ -1,4 +1,4 @@
-package me.plugin.serene.util;
+package me.plugin.serene.actions.inventory.util;
 
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
@@ -89,7 +89,7 @@ public class InventoryRenderer {
                     // g.setRenderingHints(RENDERING_HINTS_MAP);
                     g.setColor(Color.darkGray);
                     g.fillRect(0, 0, display.width(), display.height());
-                    var partition = Lists.partition(items, 9);
+                    var partition = Lists.partition(items, ROW_SIZE);
                     int row = 0;
                     for (var itemList : partition) {
                         for (int i = 0; i < itemList.size(); i++) {

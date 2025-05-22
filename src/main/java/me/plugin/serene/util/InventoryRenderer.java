@@ -87,7 +87,7 @@ public class InventoryRenderer {
             if (delta >= 1) {
                 renderFrame(g -> {
                     // g.setRenderingHints(RENDERING_HINTS_MAP);
-                    g.setColor(Color.GRAY);
+                    g.setColor(Color.darkGray);
                     g.fillRect(0, 0, display.width(), display.height());
                     var partition = Lists.partition(items, 9);
                     int row = 0;

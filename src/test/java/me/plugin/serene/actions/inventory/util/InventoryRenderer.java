@@ -1,11 +1,15 @@
 package me.plugin.serene.actions.inventory.util;
 
 import com.google.common.collect.Lists;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontFormatException;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
@@ -24,8 +28,18 @@ public class InventoryRenderer {
     private static final Logger LOG = LoggerFactory.getLogger(InventoryRenderer.class);
     public static final int GAP = 64;
     public static final int ROW_SIZE = 9;
+    public static final int BASE_X_OFFSET = 10;
+    public static final int BASE_Y_OFFSET = 10;
     private final Display display;
     private final Map<String, BufferedImage> cache;
+    private static final Font MINECRAFT_FONT;
+    static {
+        try {
+            MINECRAFT_FONT = Font.createFont(Font.PLAIN, InventoryRenderer.class.getResourceAsStream("/minecraft_font.ttf")).deriveFont(14f);
+        } catch (FontFormatException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     private InventoryRenderer() {
         this.display = new Display("Inventory Renderer", 1024, 500);
@@ -47,32 +61,32 @@ public class InventoryRenderer {
     public static void main(String[] args) {
         var inventoryRenderer = new InventoryRenderer();
         inventoryRenderer.render(List.of(
-                "ACACIA_LEAVES",
-                "ACACIA_LEAVES",
-                "ACACIA_LEAVES",
-                "BLUE_ICE",
-                "BLUE_ICE",
-                "BLUE_ICE",
-                "BLUE_ICE",
-                "BLUE_ICE",
-                "BLUE_ICE",
-                "BLUE_ICE",
-                "BLUE_ICE",
-                "BLUE_ICE",
-                "BLUE_ICE",
-                "BLAZE_ROD",
-                "BLAZE_ROD",
-                "BLAZE_ROD",
-                "BLAZE_ROD",
-                "BLAZE_ROD",
-                "BLAZE_ROD",
-                "BLAZE_ROD",
-                "EGG",
-                "EGG",
-                "COBBLESTONE"));
+                ItemStack.of(Material.ACACIA_LEAVES, 64),
+                ItemStack.of(Material.ACACIA_LEAVES, 64),
+                ItemStack.of(Material.ACACIA_LEAVES, 64),
+                ItemStack.of(Material.BLUE_ICE, 64),
+                ItemStack.of(Material.BLUE_ICE, 64),
+                ItemStack.of(Material.BLUE_ICE, 64),
+                ItemStack.of(Material.BLUE_ICE, 64),
+                ItemStack.of(Material.BLUE_ICE, 64),
+                ItemStack.of(Material.BLUE_ICE, 64),
+                ItemStack.of(Material.BLUE_ICE, 64),
+                ItemStack.of(Material.BLUE_ICE, 64),
+                ItemStack.of(Material.BLUE_ICE, 64),
+                ItemStack.of(Material.BLUE_ICE, 64),
+                ItemStack.of(Material.BLAZE_ROD, 64),
+                ItemStack.of(Material.BLAZE_ROD, 64),
+                ItemStack.of(Material.BLAZE_ROD, 64),
+                ItemStack.of(Material.BLAZE_ROD, 64),
+                ItemStack.of(Material.BLAZE_ROD, 64),
+                ItemStack.of(Material.BLAZE_ROD, 64),
+                ItemStack.of(Material.BLAZE_ROD, 64),
+                ItemStack.of(Material.EGG, 16),
+                ItemStack.of(Material.EGG, 16),
+                ItemStack.of(Material.COBBLESTONE, 64)));
     }
 
-    private void render(List<String> items) {
+    private void render(List<ItemStack> items) {
         int fps = 1;
         double timePerTick = (double) 1000000000 / fps;
         double delta = 0;
@@ -93,13 +107,19 @@ public class InventoryRenderer {
                     int row = 0;
                     for (var itemList : partition) {
                         for (int i = 0; i < itemList.size(); i++) {
+                            var currentItem = itemList.get(i);
                             BufferedImage image;
                             try {
-                                image = imageFromItem(itemList.get(i));
+                                image = imageFromItem(currentItem.getType().name());
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
                             }
-                            g.drawImage(image, 10 + (GAP*i), 10 + (GAP*row), null);
+                            var x = BASE_X_OFFSET + (GAP * i);
+                            var y = BASE_Y_OFFSET + (GAP * row);
+                            g.drawImage(image, x, y, null);
+                            g.setColor(Color.WHITE);
+                            g.setFont(MINECRAFT_FONT);
+                            g.drawString("" + currentItem.getAmount(), x + image.getWidth() - 20,y + image.getHeight());
                         }
                         row++;
                     }

@@ -8,7 +8,9 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class InventoryRenderer {
@@ -17,17 +19,23 @@ public class InventoryRenderer {
     public static final int GAP = 64;
     public static final int ROW_SIZE = 9;
     private final Display display;
+    private final Map<String, BufferedImage> cache;
 
     private InventoryRenderer() {
         this.display = new Display("Inventory Renderer", 1024, 500);
-        ;
+        cache = new HashMap<>();
     }
 
-    public static BufferedImage imageFromItem(String material) throws IOException {
+    public BufferedImage imageFromItem(String material) throws IOException {
+        if(cache.containsKey(material)) {
+            return cache.get(material);
+        }
         var fileName = "minecraft_" + material.toLowerCase() + ".png";
         var path = "/items_1.21.5/%s".formatted(fileName);
         System.out.printf("Resolving path %s for material %s%n", path, material);
-        return ImageIO.read(InventoryRenderer.class.getResourceAsStream(path));
+        var image = ImageIO.read(InventoryRenderer.class.getResourceAsStream(path));
+        cache.put(material, image);
+        return image;
     }
 
     public static void main(String[] args) {
@@ -70,7 +78,7 @@ public class InventoryRenderer {
             delta += (currentTime - prevTime) / timePerTick;
             prevTime = currentTime;
 
-            if (delta >= 1) { // This checks if the game is running at our frames
+            if (delta >= 1) {
                 renderFrame(g -> {
                     g.setColor(Color.GRAY);
                     g.fillRect(0, 0, display.width(), display.height());

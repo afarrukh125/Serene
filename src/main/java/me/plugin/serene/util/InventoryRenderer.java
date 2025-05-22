@@ -1,5 +1,6 @@
 package me.plugin.serene.util;
 
+import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,7 @@ public class InventoryRenderer {
     }
 
     public BufferedImage imageFromItem(String material) throws IOException {
-        if(cache.containsKey(material)) {
+        if (cache.containsKey(material)) {
             return cache.get(material);
         }
         var fileName = "minecraft_" + material.toLowerCase() + ".png";
@@ -88,18 +89,19 @@ public class InventoryRenderer {
                     // g.setRenderingHints(RENDERING_HINTS_MAP);
                     g.setColor(Color.GRAY);
                     g.fillRect(0, 0, display.width(), display.height());
-                    var row = 0;
-                    for (int i = 0; i < items.size(); i++) {
-                        BufferedImage image;
-                        try {
-                            image = imageFromItem(items.get(i));
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
+                    var partition = Lists.partition(items, 9);
+                    int row = 0;
+                    for (var itemList : partition) {
+                        for (int i = 0; i < itemList.size(); i++) {
+                            BufferedImage image;
+                            try {
+                                image = imageFromItem(itemList.get(i));
+                            } catch (IOException e) {
+                                throw new RuntimeException(e);
+                            }
+                            g.drawImage(image, 10 + (GAP*i), 10 + (GAP*row), null);
                         }
-                        g.drawImage(image, 10 + (GAP * (i % ROW_SIZE)), 10 + (GAP * row), null);
-                        if (i > 0 && i % ROW_SIZE == 0) {
-                            row++;
-                        }
+                        row++;
                     }
 
                 });

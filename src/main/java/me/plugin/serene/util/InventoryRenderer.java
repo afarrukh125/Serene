@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.HashMap;
@@ -15,6 +16,10 @@ import java.util.function.Consumer;
 
 public class InventoryRenderer {
 
+    public static final Map<RenderingHints.Key, Object> RENDERING_HINTS_MAP = Map.of(
+            RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON,
+            RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY,
+            RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     private static final Logger LOG = LoggerFactory.getLogger(InventoryRenderer.class);
     public static final int GAP = 64;
     public static final int ROW_SIZE = 9;
@@ -44,23 +49,23 @@ public class InventoryRenderer {
                 "ACACIA_LEAVES",
                 "ACACIA_LEAVES",
                 "ACACIA_LEAVES",
-                "GRAVEL",
-                "GRAVEL",
-                "GRAVEL",
-                "GRAVEL",
-                "GRAVEL",
-                "GRAVEL",
-                "GRAVEL",
-                "GRAVEL",
-                "GRAVEL",
-                "GRAVEL",
-                "EGG",
-                "EGG",
-                "EGG",
-                "EGG",
-                "EGG",
-                "EGG",
-                "EGG",
+                "BLUE_ICE",
+                "BLUE_ICE",
+                "BLUE_ICE",
+                "BLUE_ICE",
+                "BLUE_ICE",
+                "BLUE_ICE",
+                "BLUE_ICE",
+                "BLUE_ICE",
+                "BLUE_ICE",
+                "BLUE_ICE",
+                "BLAZE_ROD",
+                "BLAZE_ROD",
+                "BLAZE_ROD",
+                "BLAZE_ROD",
+                "BLAZE_ROD",
+                "BLAZE_ROD",
+                "BLAZE_ROD",
                 "EGG",
                 "EGG",
                 "COBBLESTONE"));
@@ -80,6 +85,7 @@ public class InventoryRenderer {
 
             if (delta >= 1) {
                 renderFrame(g -> {
+                    // g.setRenderingHints(RENDERING_HINTS_MAP);
                     g.setColor(Color.GRAY);
                     g.fillRect(0, 0, display.width(), display.height());
                     var row = 0;

@@ -1,4 +1,4 @@
-package me.plugin.serene.util;
+package me.plugin.serene.actions.inventory.util;
 
 import java.awt.Canvas;
 import java.awt.Dimension;

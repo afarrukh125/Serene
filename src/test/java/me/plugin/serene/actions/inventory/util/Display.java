@@ -12,15 +12,19 @@ public class Display {
     private final int width;
     private final int height;
 
-    public Display(String title, int width, int height) {
+    private Display(String title, int width, int height) {
         this.title = title;
         this.width = width;
         this.height = height;
-
-        createDisplay();
     }
 
-    private void createDisplay() {
+    public static Display create(String title, int width, int height) {
+        var display = new Display(title, width, height);
+        display.prepare();
+        return display;
+    }
+
+    private void prepare() {
         frame = new JFrame(title);
 
         frame.setSize(width, height);

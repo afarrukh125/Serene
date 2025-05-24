@@ -1,7 +1,13 @@
 package me.plugin.serene.actions.inventory.util;
 
+import com.google.common.io.Resources;
+
 import java.awt.Canvas;
 import java.awt.Dimension;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
 public class Display {
@@ -43,6 +49,12 @@ public class Display {
 
         frame.add(canvas);
         frame.pack();
+
+        try {
+            frame.setIconImage(ImageIO.read(Resources.getResource("icon.png")));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     public Canvas getCanvas() { // Standard getter method to return our canvas

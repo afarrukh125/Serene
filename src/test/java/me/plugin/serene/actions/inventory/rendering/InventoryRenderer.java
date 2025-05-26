@@ -1,4 +1,4 @@
-package me.plugin.serene.actions.inventory.util;
+package me.plugin.serene.actions.inventory.rendering;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Guice;
@@ -9,8 +9,15 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import javax.imageio.ImageIO;
+import me.plugin.serene.actions.inventory.InventorySorter;
+import me.plugin.serene.actions.inventory.util.InventoryUtils;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.slf4j.Logger;
@@ -39,7 +46,7 @@ public class InventoryRenderer {
     public static void main(String[] args) {
         var injector = Guice.createInjector(new InventoryRendererModule());
         var inventoryRenderer = injector.getInstance(InventoryRenderer.class);
-        inventoryRenderer.render(List.of(
+        var unsortedInventory = List.of(
                 ItemStack.of(Material.STONE_SLAB, 64),
                 ItemStack.of(Material.CHISELED_STONE_BRICKS, 64),
                 ItemStack.of(Material.SMOOTH_STONE, 34),
@@ -73,7 +80,31 @@ public class InventoryRenderer {
                 ItemStack.of(Material.STONE, 64),
                 ItemStack.of(Material.STONE, 64),
                 ItemStack.of(Material.STONE, 64),
-                ItemStack.of(Material.STONE, 64)));
+                ItemStack.of(Material.STONE, 64));
+        inventoryRenderer.render(unsortedInventory);
+        CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS).execute(() -> {});
+
+        var timer = new Timer();
+        var atomicInteger = new AtomicInteger();
+        var inventorySorter = new InventorySorter();
+        timer.scheduleAtFixedRate(
+                new TimerTask() {
+                    @Override
+                    public void run() {
+                        List<ItemStack> items;
+                        if (atomicInteger.getAndIncrement() % 2 == 0) {
+                            LOG.info("Re-rendering organised inventory");
+                            items = InventoryUtils.setupFinalOrganisedInventory(
+                                    inventorySorter, unsortedInventory.toArray(ItemStack[]::new));
+                        } else {
+                            LOG.info("Re-rendering original inventory");
+                            items = unsortedInventory;
+                        }
+                        inventoryRenderer.render(items);
+                    }
+                },
+                3000,
+                2500);
     }
 
     private void render(List<ItemStack> items) {
@@ -92,16 +123,18 @@ public class InventoryRenderer {
                 for (var itemList : partition) {
                     for (int i = 0; i < itemList.size(); i++) {
                         var currentItem = itemList.get(i);
-                        var image = itemImageProvider.getImage(currentItem.getType());
-                        var x = BASE_X_OFFSET + (X_GAP * i);
-                        var y = BASE_Y_OFFSET + (Y_GAP * row);
-                        g.drawImage(image, x, y, null);
-                        g.setColor(Color.WHITE);
-                        g.setFont(font);
-                        g.drawString(
-                                String.valueOf(currentItem.getAmount()),
-                                x + image.getWidth() - 20,
-                                y + image.getHeight());
+                        if (currentItem != null) {
+                            var image = itemImageProvider.getImage(currentItem.getType());
+                            var x = BASE_X_OFFSET + (X_GAP * i);
+                            var y = BASE_Y_OFFSET + (Y_GAP * row);
+                            g.drawImage(image, x, y, null);
+                            g.setColor(Color.WHITE);
+                            g.setFont(font);
+                            g.drawString(
+                                    String.valueOf(currentItem.getAmount()),
+                                    x + image.getWidth() - 20,
+                                    y + image.getHeight());
+                        }
                     }
                     row++;
                 }
@@ -140,8 +173,6 @@ public class InventoryRenderer {
         var g = buffStrat.getDrawGraphics();
 
         g.clearRect(0, 0, display.width(), display.height());
-
-        LOG.info("Drawing now");
 
         renderAction.accept((Graphics2D) g);
 

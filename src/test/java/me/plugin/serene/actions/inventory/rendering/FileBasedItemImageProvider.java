@@ -1,14 +1,13 @@
-package me.plugin.serene.actions.inventory.util;
+package me.plugin.serene.actions.inventory.rendering;
 
-import org.bukkit.Material;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.imageio.ImageIO;
+import org.bukkit.Material;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FileBasedItemImageProvider implements ItemImageProvider {
     private static final Logger LOG = LoggerFactory.getLogger(FileBasedItemImageProvider.class);
@@ -17,7 +16,6 @@ public class FileBasedItemImageProvider implements ItemImageProvider {
     public FileBasedItemImageProvider() {
         this.cache = new HashMap<>();
     }
-
 
     @Override
     public BufferedImage getImage(Material material) {

@@ -3,12 +3,6 @@ package me.plugin.serene.actions.inventory.util;
 import com.google.common.collect.Lists;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
-import org.bukkit.Material;
-import org.bukkit.inventory.ItemStack;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.imageio.ImageIO;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
@@ -16,14 +10,20 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.List;
 import java.util.function.Consumer;
+import javax.imageio.ImageIO;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InventoryRenderer {
     private static final Logger LOG = LoggerFactory.getLogger(InventoryRenderer.class);
 
-    public static final int GAP = 64;
+    public static final int X_GAP = 108;
+    public static final int Y_GAP = 71;
     public static final int ROW_SIZE = 9;
-    public static final int BASE_X_OFFSET = 10;
-    public static final int BASE_Y_OFFSET = 10;
+    public static final int BASE_X_OFFSET = 60;
+    public static final int BASE_Y_OFFSET = 62;
 
     private final Font font;
     private final Display display;
@@ -85,7 +85,7 @@ public class InventoryRenderer {
             if (renderFrame(g -> {
                 g.setColor(Color.darkGray);
                 g.fillRect(0, 0, display.width(), display.height());
-                g.drawImage(chest(items.size()), BASE_X_OFFSET, BASE_Y_OFFSET, display.width(), display.height(), null);
+                g.drawImage(chest(items.size()), 0, 0, display.width(), display.height(), null);
 
                 var partition = Lists.partition(items, ROW_SIZE);
                 int row = 0;
@@ -93,8 +93,8 @@ public class InventoryRenderer {
                     for (int i = 0; i < itemList.size(); i++) {
                         var currentItem = itemList.get(i);
                         var image = itemImageProvider.getImage(currentItem.getType());
-                        var x = BASE_X_OFFSET + (GAP * i);
-                        var y = BASE_Y_OFFSET + (GAP * row);
+                        var x = BASE_X_OFFSET + (X_GAP * i);
+                        var y = BASE_Y_OFFSET + (Y_GAP * row);
                         g.drawImage(image, x, y, null);
                         g.setColor(Color.WHITE);
                         g.setFont(font);

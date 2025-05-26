@@ -1,25 +1,25 @@
-package me.plugin.serene.actions.inventory.util;
+package me.plugin.serene.actions.inventory.rendering;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.InetAddress;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class InventoryRendererModule extends AbstractModule {
     private static final Logger LOG = LoggerFactory.getLogger(InventoryRendererModule.class);
+
     @Singleton
     @Provides
     public ItemImageProvider itemImageProvider() {
         try {
             boolean online = InetAddress.getByName("8.8.8.8").isReachable(3000);
-            if(online) {
+            if (online) {
                 LOG.info("Connected to the internet successfully, using live images from online");
                 return new OnlineItemImageProvider();
             } else {

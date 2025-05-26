@@ -1,10 +1,8 @@
-package me.plugin.serene.actions.inventory.util;
+package me.plugin.serene.actions.inventory.rendering;
 
 import com.google.common.io.Resources;
-
 import java.awt.Canvas;
 import java.awt.Dimension;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import javax.imageio.ImageIO;

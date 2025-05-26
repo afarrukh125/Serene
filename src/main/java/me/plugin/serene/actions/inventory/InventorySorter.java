@@ -101,8 +101,7 @@ public class InventorySorter {
     }
 
     // Collates all unorganised items into groups
-    @VisibleForTesting
-    List<MaterialItemStack> getOrganisedGroups(Inventory inventory) {
+    public List<MaterialItemStack> getOrganisedGroups(Inventory inventory) {
         var itemsToStacks =
                 Arrays.stream(inventory.getContents()).filter(Objects::nonNull).collect(groupingBy(ItemStack::getType));
 
@@ -143,7 +142,7 @@ public class InventorySorter {
     }
 
     @VisibleForTesting
-    ItemStack[] generateFinalSortedItemStacks(
+    public ItemStack[] generateFinalSortedItemStacks(
             List<MaterialItemStack> materialItemStacks, int numRows, Location location) {
         List<MaterialItemStack> notPlaced = new ArrayList<>();
 

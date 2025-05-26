@@ -2,22 +2,19 @@ package me.plugin.serene.actions.inventory;
 
 import static java.util.stream.Collectors.toList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 import java.util.*;
 import java.util.function.Supplier;
 import me.plugin.serene.actions.PlayerTest;
+import me.plugin.serene.actions.inventory.util.InventoryUtils;
 import me.plugin.serene.model.MaterialItemStack;
 import org.bukkit.Material;
-import org.bukkit.block.Chest;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.junit.jupiter.api.Test;
-import org.mockito.stubbing.Answer;
 
-class InventorySorterTest extends PlayerTest {
+public class InventorySorterTest extends PlayerTest {
 
     @Test
     void testSimpleOrganisedGroupGeneration() {
@@ -75,7 +72,7 @@ class InventorySorterTest extends PlayerTest {
                         materialItemStacks(Material.COBBLESTONE, 42));
 
         // when
-        var itemStacks = getItemStacks(inventorySorter, groupSupplier.get());
+        var itemStacks = InventoryUtils.getItemStacks(inventorySorter, groupSupplier.get(), player.getLocation());
 
         // then
         assertThat(itemStacks.get(0)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
@@ -84,7 +81,8 @@ class InventorySorterTest extends PlayerTest {
         assertThat(itemStacks.get(7)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 5));
 
         // when
-        var verticallySortedItemStacks = getItemStacks(inventorySorter, groupSupplier.get());
+        var verticallySortedItemStacks =
+                InventoryUtils.getItemStacks(inventorySorter, groupSupplier.get(), player.getLocation());
 
         // then
         assertThat(verticallySortedItemStacks.get(0)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 64));
@@ -98,7 +96,7 @@ class InventorySorterTest extends PlayerTest {
     @Test
     public void testComplexScenarioInLargeInventory() {
         // when
-        var itemStacks = setupFinalOrganisedInventory(
+        var itemStacks = InventoryUtils.setupFinalOrganisedInventory(
                 ItemStack.of(Material.ACACIA_LEAVES, 23),
                 ItemStack.of(Material.ACACIA_LEAVES, 23),
                 ItemStack.of(Material.ACACIA_LEAVES, 23),
@@ -181,11 +179,13 @@ class InventorySorterTest extends PlayerTest {
         };
 
         var inventoryToSortHorizontally = spy(Inventory.class);
-        var itemStacksHorizontal = setupFinalOrganisedInventory(inventorySorter, inventoryToSortHorizontally, items);
+        var itemStacksHorizontal =
+                InventoryUtils.setupFinalOrganisedInventory(inventorySorter, inventoryToSortHorizontally, items);
         assertSameContents(itemStacksHorizontal, inventorySorter, inventoryToSortHorizontally);
 
         var inventoryToSortVertically = spy(Inventory.class);
-        var itemStacksVertical = setupFinalOrganisedInventory(inventorySorter, inventoryToSortVertically, items);
+        var itemStacksVertical =
+                InventoryUtils.setupFinalOrganisedInventory(inventorySorter, inventoryToSortVertically, items);
         assertSameContents(itemStacksVertical, inventorySorter, inventoryToSortVertically);
     }
 
@@ -232,11 +232,13 @@ class InventorySorterTest extends PlayerTest {
         };
 
         var inventoryToSortHorizontally = spy(Inventory.class);
-        var itemStacksHorizontal = setupFinalOrganisedInventory(inventorySorter, inventoryToSortHorizontally, items);
+        var itemStacksHorizontal =
+                InventoryUtils.setupFinalOrganisedInventory(inventorySorter, inventoryToSortHorizontally, items);
         assertSameContents(itemStacksHorizontal, inventorySorter, inventoryToSortHorizontally);
 
         var inventoryToSortVertically = spy(Inventory.class);
-        var itemStacksVertical = setupFinalOrganisedInventory(inventorySorter, inventoryToSortVertically, items);
+        var itemStacksVertical =
+                InventoryUtils.setupFinalOrganisedInventory(inventorySorter, inventoryToSortVertically, items);
         assertSameContents(itemStacksVertical, inventorySorter, inventoryToSortVertically);
     }
 
@@ -300,11 +302,13 @@ class InventorySorterTest extends PlayerTest {
         };
 
         var inventoryToSortHorizontally = spy(Inventory.class);
-        var itemStacksHorizontal = setupFinalOrganisedInventory(inventorySorter, inventoryToSortHorizontally, items);
+        var itemStacksHorizontal =
+                InventoryUtils.setupFinalOrganisedInventory(inventorySorter, inventoryToSortHorizontally, items);
         assertSameContents(itemStacksHorizontal, inventorySorter, inventoryToSortHorizontally);
 
         var inventoryToSortVertically = spy(Inventory.class);
-        var itemStacksVertical = setupFinalOrganisedInventory(inventorySorter, inventoryToSortVertically, items);
+        var itemStacksVertical =
+                InventoryUtils.setupFinalOrganisedInventory(inventorySorter, inventoryToSortVertically, items);
         assertSameContents(itemStacksVertical, inventorySorter, inventoryToSortVertically);
     }
 
@@ -315,47 +319,6 @@ class InventorySorterTest extends PlayerTest {
                         .map(MaterialItemStack::itemStacks)
                         .flatMap(Collection::stream)
                         .toArray(ItemStack[]::new));
-    }
-
-    private List<ItemStack> setupFinalOrganisedInventory(ItemStack... itemStacks) {
-        return setupFinalOrganisedInventory(new InventorySorter(), itemStacks);
-    }
-
-    private List<ItemStack> setupFinalOrganisedInventory(InventorySorter inventorySorter, ItemStack... itemStacks) {
-        return setupFinalOrganisedInventory(inventorySorter, spy(Inventory.class), itemStacks);
-    }
-
-    private List<ItemStack> setupFinalOrganisedInventory(
-            InventorySorter inventorySorter, Inventory inventory, ItemStack... itemStacks) {
-
-        var chest = spy(Chest.class);
-
-        var backingList = new ArrayList<ItemStack>();
-        when(chest.getInventory()).thenReturn(inventory);
-        when(inventory.addItem(any(ItemStack.class))).thenAnswer((Answer<Void>) invocation -> {
-            backingList.addAll(Arrays.stream(invocation.getArguments())
-                    .map(object -> ((ItemStack) object))
-                    .toList());
-            return null;
-        });
-
-        chest.getInventory().addItem(itemStacks);
-
-        when(inventory.getContents()).thenReturn(backingList.toArray(new ItemStack[54]));
-
-        Supplier<List<MaterialItemStack>> groupSupplier =
-                () -> inventorySorter.getOrganisedGroups(chest.getInventory());
-
-        return getItemStacks(inventorySorter, groupSupplier.get(), InventorySorter.LARGE_CHEST_NUM_ROWS);
-    }
-
-    private List<ItemStack> getItemStacks(InventorySorter inventorySorter, List<MaterialItemStack> groups) {
-        return getItemStacks(inventorySorter, groups, 3);
-    }
-
-    private List<ItemStack> getItemStacks(
-            InventorySorter inventorySorter, List<MaterialItemStack> groups, int numRows) {
-        return Arrays.asList(inventorySorter.generateFinalSortedItemStacks(groups, numRows, player.getLocation()));
     }
 
     private static MaterialItemStack materialItemStacks(Material material, int... amounts) {

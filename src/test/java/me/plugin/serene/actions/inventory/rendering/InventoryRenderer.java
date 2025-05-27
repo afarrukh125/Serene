@@ -5,14 +5,12 @@ import com.google.inject.Guice;
 import com.google.inject.Inject;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Graphics2D;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import javax.imageio.ImageIO;
@@ -26,11 +24,17 @@ import org.slf4j.LoggerFactory;
 public class InventoryRenderer {
     private static final Logger LOG = LoggerFactory.getLogger(InventoryRenderer.class);
 
-    public static final int X_GAP = 108;
-    public static final int Y_GAP = 71;
     public static final int ROW_SIZE = 9;
-    public static final int BASE_X_OFFSET = 60;
-    public static final int BASE_Y_OFFSET = 62;
+
+    public static final int BASE_X_OFFSET = 22;
+    public static final int BASE_Y_OFFSET = 50;
+
+    public static final int X_GAP = 54;
+    public static final int Y_GAP = 54;
+
+    public static final int BLOCK_IMAGE_WIDTH = 42;
+    public static final int BLOCK_IMAGE_HEIGHT = 42;
+    public static final Color SORT_COLOR = new Color(1, 100, 32);
 
     private final Font font;
     private final Display display;
@@ -64,6 +68,7 @@ public class InventoryRenderer {
                 ItemStack.of(Material.STONE_SLAB, 64),
                 ItemStack.of(Material.STONE_BRICK_SLAB, 64),
                 ItemStack.of(Material.STONE_BRICK_WALL, 5),
+                ItemStack.of(Material.STONE_BRICK_WALL, 5),
                 ItemStack.of(Material.STONE_SLAB, 64),
                 ItemStack.of(Material.STONE_STAIRS, 9),
                 ItemStack.of(Material.STONE, 44),
@@ -81,8 +86,6 @@ public class InventoryRenderer {
                 ItemStack.of(Material.STONE, 64),
                 ItemStack.of(Material.STONE, 64),
                 ItemStack.of(Material.STONE, 64));
-        inventoryRenderer.render(unsortedInventory);
-        CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS).execute(() -> {});
 
         var timer = new Timer();
         var atomicInteger = new AtomicInteger();
@@ -92,22 +95,34 @@ public class InventoryRenderer {
                     @Override
                     public void run() {
                         List<ItemStack> items;
-                        if (atomicInteger.getAndIncrement() % 2 == 0) {
+                        Consumer<Graphics> postRenderAction;
+                        var iteration = atomicInteger.getAndIncrement();
+                        if (iteration % 3 == 0) {
+                            LOG.info("Re-rendering original inventory");
+                            items = unsortedInventory;
+                            postRenderAction = drawInfoText(Color.RED, "Original inventory");
+
+                        } else {
                             LOG.info("Re-rendering organised inventory");
                             items = InventoryUtils.setupFinalOrganisedInventory(
                                     inventorySorter, unsortedInventory.toArray(ItemStack[]::new));
-                        } else {
-                            LOG.info("Re-rendering original inventory");
-                            items = unsortedInventory;
+                            postRenderAction = drawInfoText(SORT_COLOR, "Sort %s".formatted(iteration % 3));
                         }
-                        inventoryRenderer.render(items);
+                        inventoryRenderer.render(items, postRenderAction);
                     }
                 },
-                3000,
+                0,
                 2500);
     }
 
-    private void render(List<ItemStack> items) {
+    private static Consumer<Graphics> drawInfoText(Color col, String message) {
+        return g -> {
+            g.setColor(col);
+            g.drawString(message, 220, 30);
+        };
+    }
+
+    private void render(List<ItemStack> items, Consumer<Graphics> postRenderAction) {
         if (display.getCanvas().getBufferStrategy() == null) {
             display.getCanvas().createBufferStrategy(3);
         }
@@ -127,13 +142,14 @@ public class InventoryRenderer {
                             var image = itemImageProvider.getImage(currentItem.getType());
                             var x = BASE_X_OFFSET + (X_GAP * i);
                             var y = BASE_Y_OFFSET + (Y_GAP * row);
-                            g.drawImage(image, x, y, null);
+                            g.drawImage(image, x, y, BLOCK_IMAGE_WIDTH, BLOCK_IMAGE_HEIGHT, null);
                             g.setColor(Color.WHITE);
                             g.setFont(font);
                             g.drawString(
                                     String.valueOf(currentItem.getAmount()),
-                                    x + image.getWidth() - 20,
-                                    y + image.getHeight());
+                                    x + BLOCK_IMAGE_WIDTH - 11,
+                                    y + BLOCK_IMAGE_HEIGHT);
+                            postRenderAction.accept(g);
                         }
                     }
                     row++;
@@ -163,7 +179,7 @@ public class InventoryRenderer {
         }
     }
 
-    private boolean renderFrame(Consumer<Graphics2D> renderAction) {
+    private boolean renderFrame(Consumer<Graphics> renderAction) {
         var buffStrat = display.getCanvas().getBufferStrategy();
         if (buffStrat == null) {
             display.getCanvas().createBufferStrategy(3);
@@ -174,7 +190,7 @@ public class InventoryRenderer {
 
         g.clearRect(0, 0, display.width(), display.height());
 
-        renderAction.accept((Graphics2D) g);
+        renderAction.accept(g);
 
         buffStrat.show();
         g.dispose();

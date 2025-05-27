@@ -42,8 +42,7 @@ public class Display {
         canvas.setMaximumSize(new Dimension(width, height));
         canvas.setMinimumSize(new Dimension(width, height));
 
-        canvas.setFocusable(
-                false); // Allows application to only focus on JFrame in order to allow keyboard inputs to work
+        canvas.setFocusable(false);
 
         frame.add(canvas);
         frame.pack();

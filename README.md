@@ -16,3 +16,12 @@ Place into your plugins folder in your bukkit/spigot/paper server and you're goo
 This project currently uses Java 22
 
 Import the pom.xml into IntelliJ, and it should do everything for you
+
+# Rendering inventory
+
+There is a feature to render any inventory you like using Java's own UI rendering functionality to test out
+the algorithms visually without logging into the game. 
+
+Get started by running
+[InventoryRendererRunner](src/test/java/me/plugin/serene/actions/inventory/util/InventoryRendererRunner.java)
+and plug in your own items to play around with it. This is still in early stages and further refinement will be needed.

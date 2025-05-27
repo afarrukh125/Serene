@@ -19,6 +19,9 @@ import org.bukkit.inventory.ItemStack;
 import org.mockito.stubbing.Answer;
 
 public class InventoryUtils {
+
+    public static final WorldMock WORLD_MOCK = new WorldMock(Material.GRAVEL, 0);
+
     public static List<ItemStack> setupFinalOrganisedInventory(ItemStack... itemStacks) {
         return setupFinalOrganisedInventory(new InventorySorter(), itemStacks);
     }
@@ -32,7 +35,7 @@ public class InventoryUtils {
             InventorySorter inventorySorter, Inventory inventory, ItemStack... itemStacks) {
 
         var chest = spy(Chest.class);
-        var location = new WorldMock(Material.GRAVEL, 0).getSpawnLocation();
+        var location = WORLD_MOCK.getSpawnLocation();
 
         var backingList = new ArrayList<ItemStack>();
         when(chest.getInventory()).thenReturn(inventory);

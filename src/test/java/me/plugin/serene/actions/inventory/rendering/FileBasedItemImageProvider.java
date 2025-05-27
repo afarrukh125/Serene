@@ -24,7 +24,7 @@ public class FileBasedItemImageProvider implements ItemImageProvider {
         }
         var fileName = "minecraft_" + material.name().toLowerCase() + ".png";
         var path = "/items_1.21.5/%s".formatted(fileName);
-        LOG.info("Resolving path %s for material %s%n", path, material);
+        LOG.info("Resolving path {} for material {}", path, material);
         BufferedImage image = null;
         try {
             image = ImageIO.read(InventoryRenderer.class.getResourceAsStream(path));

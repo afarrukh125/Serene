@@ -35,11 +35,11 @@ public class InventoryRendererModule extends AbstractModule {
     @Provides
     public Font font() throws IOException, FontFormatException {
         return Font.createFont(Font.PLAIN, InventoryRenderer.class.getResourceAsStream("/minecraft_font.ttf"))
-                .deriveFont(14f);
+                .deriveFont(10f);
     }
 
     @Provides
     public Display display() {
-        return Display.create("Inventory Renderer", 1024, 500);
+        return Display.create("Inventory Renderer", 513, 380);
     }
 }

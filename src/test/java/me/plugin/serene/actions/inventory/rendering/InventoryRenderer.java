@@ -2,12 +2,11 @@ package me.plugin.serene.actions.inventory.rendering;
 
 import com.google.common.collect.Lists;
 import com.google.inject.Inject;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Graphics;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import javax.imageio.ImageIO;
 import org.bukkit.inventory.ItemStack;
@@ -24,6 +23,8 @@ public class InventoryRenderer {
 
     public static final int BLOCK_IMAGE_WIDTH = 42;
     public static final int BLOCK_IMAGE_HEIGHT = 42;
+    public static final Map<RenderingHints.Key, Object> RENDERING_HINTS =
+            Map.of(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
     private final Font font;
     private final Display display;
@@ -101,6 +102,8 @@ public class InventoryRenderer {
         }
 
         var g = buffStrat.getDrawGraphics();
+        var g2d = (Graphics2D) g;
+        g2d.addRenderingHints(RENDERING_HINTS);
 
         g.clearRect(0, 0, display.width(), display.height());
 

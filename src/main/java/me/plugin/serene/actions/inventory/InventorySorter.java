@@ -95,8 +95,9 @@ public class InventorySorter {
         return switch (type) {
             case CHEST -> ((Chest) block.getState()).getInventory();
             case ENDER_CHEST -> player.getEnderChest();
-            default -> throw new IllegalArgumentException(
-                    "Unknown block type to translate to inventory %s".formatted(block.getType()));
+            default ->
+                throw new IllegalArgumentException(
+                        "Unknown block type to translate to inventory %s".formatted(block.getType()));
         };
     }
 

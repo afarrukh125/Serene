@@ -24,7 +24,7 @@ public class OnlineItemImageProvider implements ItemImageProvider {
             return cache.get(material);
         }
         try {
-            var image = ImageIO.read(URI.create("https://mc.nerothe.com/img/1.21.5/minecraft_%s.png"
+            var image = ImageIO.read(URI.create("https://mc.nerothe.com/img/1.21.11/minecraft_%s.png"
                             .formatted(material.name().toLowerCase()))
                     .toURL());
             LOG.info("Caching material {}", material);

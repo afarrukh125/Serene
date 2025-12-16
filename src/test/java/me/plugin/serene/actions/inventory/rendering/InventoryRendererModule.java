@@ -6,28 +6,36 @@ import com.google.inject.Singleton;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.net.InetAddress;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class InventoryRendererModule extends AbstractModule {
     private static final Logger LOG = LoggerFactory.getLogger(InventoryRendererModule.class);
+    public static final URI BASE_URI = URI.create("https://mc.nerothe.com/");
 
     @Singleton
     @Provides
     public ItemImageProvider itemImageProvider() {
-        try {
-            boolean online = InetAddress.getByName("8.8.8.8").isReachable(3000);
-            if (online) {
-                LOG.info("Connected to the internet successfully, using live images from online");
-                return new OnlineItemImageProvider();
-            } else {
-                LOG.info("Could not connect to the internet, using local file-based provider");
-                return new FileBasedItemImageProvider();
-            }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+        HttpResponse<String> response;
+        try (var httpClient =
+                HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build()) {
+            var req = HttpRequest.newBuilder().GET().uri(BASE_URI).build();
+            response = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        var online = response.statusCode() == 200;
+        if (online) {
+            LOG.info("Connected to the internet successfully, using live images from online");
+            return new OnlineItemImageProvider();
+        } else {
+            LOG.info("Could not connect to the internet, using local file-based provider");
+            return new FileBasedItemImageProvider();
         }
     }
 

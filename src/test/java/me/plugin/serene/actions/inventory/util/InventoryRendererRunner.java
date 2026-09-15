@@ -11,7 +11,6 @@ import java.util.function.Consumer;
 import me.plugin.serene.actions.inventory.InventorySorter;
 import me.plugin.serene.actions.inventory.rendering.InventoryRenderer;
 import me.plugin.serene.actions.inventory.rendering.InventoryRendererModule;
-import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,42 +22,7 @@ public class InventoryRendererRunner {
     public static void main(String... args) {
         var injector = Guice.createInjector(new InventoryRendererModule());
         var inventoryRenderer = injector.getInstance(InventoryRenderer.class);
-        var unsortedInventory = List.of(
-                ItemStack.of(Material.STONE_SLAB, 64),
-                ItemStack.of(Material.CHISELED_STONE_BRICKS, 64),
-                ItemStack.of(Material.SMOOTH_STONE, 34),
-                ItemStack.of(Material.SMOOTH_STONE, 64),
-                ItemStack.of(Material.SMOOTH_STONE, 64),
-                ItemStack.of(Material.SMOOTH_STONE, 64),
-                ItemStack.of(Material.SMOOTH_STONE, 64),
-                ItemStack.of(Material.STONE_SLAB, 64),
-                ItemStack.of(Material.CHISELED_STONE_BRICKS, 24),
-                ItemStack.of(Material.STONE_BRICKS, 64),
-                ItemStack.of(Material.STONE_BRICKS, 64),
-                ItemStack.of(Material.STONE_SLAB, 64),
-                ItemStack.of(Material.MOSSY_COBBLESTONE, 8),
-                ItemStack.of(Material.MOSSY_STONE_BRICKS, 4),
-                ItemStack.of(Material.STONE_SLAB, 64),
-                ItemStack.of(Material.STONE_BRICK_SLAB, 64),
-                ItemStack.of(Material.STONE_BRICK_WALL, 5),
-                ItemStack.of(Material.STONE_BRICK_WALL, 5),
-                ItemStack.of(Material.STONE_SLAB, 64),
-                ItemStack.of(Material.STONE_STAIRS, 9),
-                ItemStack.of(Material.STONE, 44),
-                ItemStack.of(Material.STONE, 64),
-                ItemStack.of(Material.STONE, 64),
-                ItemStack.of(Material.STONE, 64),
-                ItemStack.of(Material.STONE, 64),
-                ItemStack.of(Material.STONE, 64),
-                ItemStack.of(Material.STONE_SLAB, 16),
-                ItemStack.of(Material.STONE, 64),
-                ItemStack.of(Material.STONE, 64),
-                ItemStack.of(Material.STONE, 64),
-                ItemStack.of(Material.STONE, 64),
-                ItemStack.of(Material.STONE, 64),
-                ItemStack.of(Material.STONE, 64),
-                ItemStack.of(Material.STONE, 64),
-                ItemStack.of(Material.STONE, 64));
+        var unsortedInventory = SampleInventories.STONE_HAUL;
 
         var timer = new Timer();
         var atomicInteger = new AtomicInteger();

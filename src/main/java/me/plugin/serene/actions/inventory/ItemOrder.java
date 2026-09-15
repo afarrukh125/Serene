@@ -8,9 +8,9 @@ import org.bukkit.inventory.meta.Damageable;
 
 public final class ItemOrder {
 
-    // Material.values() follows Minecraft's own registry order, which is what the creative menu
-    // shows. It is the closest thing the API gives us to the item tree InventoryTweaks shipped.
-    private static final Comparator<Material> REGISTRY = Comparator.comparingInt(Material::ordinal);
+    private static final Comparator<Material> REGISTRY = Comparator.comparingInt(ItemFamilies::anchor)
+            .thenComparingInt(ItemFamilies::formRank)
+            .thenComparingInt(Material::ordinal);
 
     public static final Comparator<MaterialItemStack> GROUPS =
             Comparator.comparing(MaterialItemStack::material, REGISTRY);

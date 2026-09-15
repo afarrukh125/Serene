@@ -103,35 +103,26 @@ public class InventorySorter {
 
     // Collates all unorganised items into groups
     public List<MaterialItemStack> getOrganisedGroups(Inventory inventory) {
-        var itemsToStacks =
-                Arrays.stream(inventory.getContents()).filter(Objects::nonNull).collect(groupingBy(ItemStack::getType));
+        var itemsToStacks = Arrays.stream(inventory.getContents())
+                .filter(Objects::nonNull)
+                .filter(itemStack -> itemStack.getType() != Material.AIR)
+                .collect(groupingBy(ItemStack::getType));
 
         var reorganisedStacks = new ArrayList<MaterialItemStack>();
         for (var material : itemsToStacks.keySet()) {
             var allStacks = new LinkedList<ItemStack>();
+            var maxSize = Math.max(1, material.getMaxStackSize());
             var groupedByMeta = itemsToStacks.get(material).stream().collect(groupingBy(ItemStack::getItemMeta));
             for (var itemMeta : groupedByMeta.keySet()) {
-                var currentCount = 0;
-                var maxSize = material.getMaxStackSize();
-                var itemStacks = new LinkedList<>(groupedByMeta.get(itemMeta));
-                ItemStack next = null;
-                while (!itemStacks.isEmpty()) {
-                    next = itemStacks.poll();
-                    if (next.getAmount() == maxSize) {
-                        allStacks.add(next);
-                    } else {
-                        currentCount += next.getAmount();
-                        if (currentCount >= maxSize) {
-                            next.setAmount(maxSize);
-                            allStacks.add(next);
-                            currentCount = currentCount - maxSize;
-                        }
-                    }
-                }
-                if (currentCount > 0) {
-                    var finalStack = next.clone();
-                    finalStack.setAmount(currentCount);
-                    allStacks.add(finalStack);
+                var itemStacks = groupedByMeta.get(itemMeta);
+                var remaining =
+                        itemStacks.stream().mapToInt(ItemStack::getAmount).sum();
+                while (remaining > 0) {
+                    // Never mutate the stacks we were handed: they write through to the live inventory.
+                    var merged = itemStacks.get(0).clone();
+                    merged.setAmount(Math.min(remaining, maxSize));
+                    allStacks.add(merged);
+                    remaining -= merged.getAmount();
                 }
             }
             reorganisedStacks.add(new MaterialItemStack(material, allStacks));

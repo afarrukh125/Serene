@@ -79,7 +79,7 @@ public class InventorySorterTest extends PlayerTest {
         assertThat(GridRenderer.renderWithAmounts(itemStacks).lines().findFirst())
                 .hasValue("COBBLESTONE:42 ACACIA_LEAVES:64 ACACIA_LEAVES:5 - - - - - -");
 
-        // when sorting the same chest again, the layout flips to columns
+        // when
         var verticallySortedItemStacks =
                 InventoryUtils.getItemStacks(inventorySorter, groupSupplier.get(), player.getLocation());
 
@@ -123,15 +123,15 @@ public class InventorySorterTest extends PlayerTest {
 
         // then
         assertThat(GridRenderer.render(itemStacks)).isEqualTo("""
-                        A B B B B B B B B
-                        B B C C D D D D D
+                        A B B C C C C C C
+                        C C C C D D D D D
                         D D D D . . . . .
                         . . . . . . . . .
                         . . . . . . . . .
                         . . . . . . . . .
                         A = COBBLESTONE
-                        B = GRAVEL
-                        C = ACACIA_LEAVES
+                        B = ACACIA_LEAVES
+                        C = GRAVEL
                         D = EGG
                         """);
     }

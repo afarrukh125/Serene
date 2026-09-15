@@ -35,21 +35,21 @@ public class CompactingSortingStrategyTest extends PlayerTest {
 
         assertThat(GridRenderer.render(slots)).isEqualTo("""
                         A A A A A A A A A
-                        A A A A A B B B B
-                        B B C D D D D D E
-                        F F G H H I J . .
+                        A A A A A B C C C
+                        C C C D D D D D E
+                        E F G H I J J . .
                         . . . . . . . . .
                         . . . . . . . . .
                         A = STONE
-                        B = STONE_SLAB
-                        C = STONE_BRICK_SLAB
+                        B = STONE_STAIRS
+                        C = STONE_SLAB
                         D = SMOOTH_STONE
-                        E = MOSSY_COBBLESTONE
-                        F = STONE_BRICKS
-                        G = MOSSY_STONE_BRICKS
-                        H = CHISELED_STONE_BRICKS
-                        I = STONE_BRICK_WALL
-                        J = STONE_STAIRS
+                        E = STONE_BRICKS
+                        F = STONE_BRICK_SLAB
+                        G = STONE_BRICK_WALL
+                        H = MOSSY_COBBLESTONE
+                        I = MOSSY_STONE_BRICKS
+                        J = CHISELED_STONE_BRICKS
                         """);
     }
 
@@ -59,21 +59,21 @@ public class CompactingSortingStrategyTest extends PlayerTest {
 
         assertThat(GridRenderer.render(slots)).isEqualTo("""
                         A A A B C D . . .
-                        A A A B C D . . .
-                        A A B E F G . . .
-                        A A B C H I . . .
-                        A A B C H . . . .
+                        A A A B C E . . .
+                        A A F B G H . . .
+                        A A B C G H . . .
+                        A A B C I . . . .
                         A A B C J . . . .
                         A = STONE
                         B = STONE_SLAB
                         C = SMOOTH_STONE
-                        D = CHISELED_STONE_BRICKS
-                        E = STONE_BRICK_SLAB
-                        F = MOSSY_COBBLESTONE
-                        G = STONE_BRICK_WALL
-                        H = STONE_BRICKS
-                        I = STONE_STAIRS
-                        J = MOSSY_STONE_BRICKS
+                        D = MOSSY_COBBLESTONE
+                        E = MOSSY_STONE_BRICKS
+                        F = STONE_STAIRS
+                        G = STONE_BRICKS
+                        H = CHISELED_STONE_BRICKS
+                        I = STONE_BRICK_SLAB
+                        J = STONE_BRICK_WALL
                         """);
     }
 
@@ -243,6 +243,77 @@ public class CompactingSortingStrategyTest extends PlayerTest {
         return java.util.stream.IntStream.range(0, count)
                 .mapToObj(index -> damaged(Material.DIAMOND_PICKAXE, index + 1))
                 .toArray(ItemStack[]::new);
+    }
+
+    @Test
+    void oneMaterialsVariantsAreGroupedTogetherRatherThanByForm() {
+        var slots = layOut(
+                ROW_MAJOR,
+                3,
+                ItemStack.of(Material.BIRCH_PLANKS, 64),
+                ItemStack.of(Material.OAK_STAIRS, 64),
+                ItemStack.of(Material.BIRCH_LOG, 64),
+                ItemStack.of(Material.OAK_PLANKS, 64),
+                ItemStack.of(Material.OAK_LOG, 64),
+                ItemStack.of(Material.BIRCH_SLAB, 64),
+                ItemStack.of(Material.OAK_SLAB, 64),
+                ItemStack.of(Material.BIRCH_STAIRS, 64));
+
+        assertThat(slots.stream().filter(Objects::nonNull).map(ItemStack::getType))
+                .containsExactly(
+                        Material.OAK_LOG,
+                        Material.OAK_PLANKS,
+                        Material.OAK_STAIRS,
+                        Material.OAK_SLAB,
+                        Material.BIRCH_LOG,
+                        Material.BIRCH_PLANKS,
+                        Material.BIRCH_STAIRS,
+                        Material.BIRCH_SLAB);
+    }
+
+    @Test
+    void aStoneFamilyLeadsWithItsBaseBlock() {
+        var slots = layOut(
+                ROW_MAJOR,
+                3,
+                ItemStack.of(Material.STONE_BRICK_WALL, 64),
+                ItemStack.of(Material.COBBLESTONE_STAIRS, 64),
+                ItemStack.of(Material.STONE_BRICKS, 64),
+                ItemStack.of(Material.STONE_SLAB, 64),
+                ItemStack.of(Material.COBBLESTONE, 64),
+                ItemStack.of(Material.STONE, 64),
+                ItemStack.of(Material.STONE_BRICK_STAIRS, 64));
+
+        assertThat(slots.stream().filter(Objects::nonNull).map(ItemStack::getType))
+                .containsExactly(
+                        Material.STONE,
+                        Material.STONE_SLAB,
+                        Material.COBBLESTONE,
+                        Material.COBBLESTONE_STAIRS,
+                        Material.STONE_BRICKS,
+                        Material.STONE_BRICK_STAIRS,
+                        Material.STONE_BRICK_WALL);
+    }
+
+    @Test
+    void colourVariantsStayGroupedByFormInDyeOrder() {
+        var slots = layOut(
+                ROW_MAJOR,
+                3,
+                ItemStack.of(Material.RED_CARPET, 64),
+                ItemStack.of(Material.RED_WOOL, 64),
+                ItemStack.of(Material.WHITE_CARPET, 64),
+                ItemStack.of(Material.WHITE_WOOL, 64));
+
+        assertThat(slots.stream().filter(Objects::nonNull).map(ItemStack::getType))
+                .containsExactly(Material.WHITE_WOOL, Material.RED_WOOL, Material.WHITE_CARPET, Material.RED_CARPET);
+    }
+
+    @Test
+    void familiesAreActuallyResolvedFromTags() {
+        assertThat(ItemFamilies.anchor(Material.OAK_STAIRS)).isEqualTo(ItemFamilies.anchor(Material.OAK_PLANKS));
+        assertThat(ItemFamilies.anchor(Material.OAK_STAIRS)).isNotEqualTo(ItemFamilies.anchor(Material.BIRCH_PLANKS));
+        assertThat(ItemFamilies.anchor(Material.WHITE_WOOL)).isEqualTo(Material.WHITE_WOOL.ordinal());
     }
 
     private static long totalItems(List<MaterialItemStack> groups) {

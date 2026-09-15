@@ -20,10 +20,6 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.junit.jupiter.api.Test;
 
-/**
- * Exercises the renderer's drawing path against an offscreen image so it runs in a headless build, where the
- * {@link Display}-backed {@link InventoryRenderer#render} cannot.
- */
 public class InventoryRendererTest extends PlayerTest {
 
     private static final int WIDTH = 513;
@@ -79,7 +75,6 @@ public class InventoryRendererTest extends PlayerTest {
     void drawsAnItemIntoEveryOccupiedSlotAndNothingIntoEmptyOnes() {
         var image = drawSorted(SampleInventories.STONE_HAUL);
 
-        // The stone haul merges down to 34 stacks, so rows 0 to 2 are full and row 3 is partly filled.
         assertThat(hasRedNear(image, slotX(0), slotY(0))).isTrue();
         assertThat(hasRedNear(image, slotX(8), slotY(0))).isTrue();
         assertThat(hasRedNear(image, slotX(6), slotY(3))).isTrue();

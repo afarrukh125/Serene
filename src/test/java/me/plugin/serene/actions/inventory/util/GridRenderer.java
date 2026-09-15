@@ -7,10 +7,6 @@ import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-/**
- * Renders a sorted inventory as a symbol grid plus a legend, so layout tests read as a picture of the chest
- * and a regression shows up as a visual diff rather than a shifted slot index.
- */
 public final class GridRenderer {
 
     private static final String SYMBOLS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

@@ -9,17 +9,10 @@ import me.plugin.serene.model.Coordinate;
 import me.plugin.serene.model.MaterialItemStack;
 import org.bukkit.inventory.ItemStack;
 
-/**
- * Lays the whole inventory out as one uninterrupted run of items starting at the first slot, ordered by
- * {@link ItemOrder}. This is the InventoryTweaks layout: no gaps, related items adjacent, partial stacks
- * trailing the full ones.
- */
 public class CompactingSortingStrategy implements SortingStrategy {
 
     public enum FillDirection {
-        /** Reading order: left to right, then down a row. */
         ROW_MAJOR,
-        /** Column order: top to bottom, then across a column. */
         COLUMN_MAJOR
     }
 

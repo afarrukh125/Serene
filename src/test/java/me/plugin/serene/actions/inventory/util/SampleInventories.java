@@ -4,7 +4,6 @@ import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-/** Realistic unsorted inventories shared by the layout tests and the renderer. */
 public final class SampleInventories {
 
     public static final List<ItemStack> STONE_HAUL = List.of(

@@ -79,10 +79,6 @@ public class InventorySorter {
                 : SortTarget.ofBlock(block.getLocation());
     }
 
-    /**
-     * Guards against the sort losing, duplicating or resizing anything. Stack counts alone would miss a change in
-     * amounts, so the total number of items is checked too.
-     */
     private static boolean isEverythingAccountedFor(List<MaterialItemStack> groups, ItemStack[] newItemStacks) {
         var placed = Arrays.stream(newItemStacks).filter(Objects::nonNull).toList();
         var expected =
@@ -129,14 +125,12 @@ public class InventorySorter {
         itemsToStacks.forEach((material, stacksOfMaterial) -> {
             var allStacks = new ArrayList<ItemStack>();
             var maxSize = Math.max(1, material.getMaxStackSize());
-            // Grouped into a LinkedHashMap so stacks differing only by NBT keep a stable, repeatable order.
             var groupedByMeta =
                     stacksOfMaterial.stream().collect(groupingBy(ItemStack::getItemMeta, LinkedHashMap::new, toList()));
             groupedByMeta.forEach((itemMeta, itemStacks) -> {
                 var remaining =
                         itemStacks.stream().mapToInt(ItemStack::getAmount).sum();
                 while (remaining > 0) {
-                    // Never mutate the stacks we were handed: they write through to the live inventory.
                     var merged = itemStacks.get(0).clone();
                     merged.setAmount(Math.min(remaining, maxSize));
                     allStacks.add(merged);

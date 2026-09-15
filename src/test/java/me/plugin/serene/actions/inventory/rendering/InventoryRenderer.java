@@ -56,10 +56,6 @@ public class InventoryRenderer {
         }
     }
 
-    /**
-     * Draws a whole inventory onto any {@link Graphics}, so this can be exercised against an offscreen image in a
-     * headless build rather than only against a live window.
-     */
     public void draw(Graphics g, List<ItemStack> items, int width, int height, Consumer<Graphics> postRenderAction) {
         g.setColor(Color.darkGray);
         g.fillRect(0, 0, width, height);

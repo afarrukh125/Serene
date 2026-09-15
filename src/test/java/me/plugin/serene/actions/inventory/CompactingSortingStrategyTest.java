@@ -6,54 +6,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import me.plugin.serene.actions.PlayerTest;
 import me.plugin.serene.actions.inventory.util.GridRenderer;
 import me.plugin.serene.actions.inventory.util.InventoryUtils;
+import me.plugin.serene.actions.inventory.util.SampleInventories;
 import me.plugin.serene.model.MaterialItemStack;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.junit.jupiter.api.Test;
 
 public class CompactingSortingStrategyTest extends PlayerTest {
-
-    private static final ItemStack[] STONE_HAUL = {
-        ItemStack.of(Material.STONE_SLAB, 64),
-        ItemStack.of(Material.CHISELED_STONE_BRICKS, 64),
-        ItemStack.of(Material.SMOOTH_STONE, 34),
-        ItemStack.of(Material.SMOOTH_STONE, 64),
-        ItemStack.of(Material.SMOOTH_STONE, 64),
-        ItemStack.of(Material.SMOOTH_STONE, 64),
-        ItemStack.of(Material.SMOOTH_STONE, 64),
-        ItemStack.of(Material.STONE_SLAB, 64),
-        ItemStack.of(Material.CHISELED_STONE_BRICKS, 24),
-        ItemStack.of(Material.STONE_BRICKS, 64),
-        ItemStack.of(Material.STONE_BRICKS, 64),
-        ItemStack.of(Material.STONE_SLAB, 64),
-        ItemStack.of(Material.MOSSY_COBBLESTONE, 8),
-        ItemStack.of(Material.MOSSY_STONE_BRICKS, 4),
-        ItemStack.of(Material.STONE_SLAB, 64),
-        ItemStack.of(Material.STONE_BRICK_SLAB, 64),
-        ItemStack.of(Material.STONE_BRICK_WALL, 5),
-        ItemStack.of(Material.STONE_SLAB, 64),
-        ItemStack.of(Material.STONE_STAIRS, 9),
-        ItemStack.of(Material.STONE, 44),
-        ItemStack.of(Material.STONE, 64),
-        ItemStack.of(Material.STONE, 64),
-        ItemStack.of(Material.STONE, 64),
-        ItemStack.of(Material.STONE, 64),
-        ItemStack.of(Material.STONE, 64),
-        ItemStack.of(Material.STONE_SLAB, 16),
-        ItemStack.of(Material.STONE, 64),
-        ItemStack.of(Material.STONE, 64),
-        ItemStack.of(Material.STONE, 64),
-        ItemStack.of(Material.STONE, 64),
-        ItemStack.of(Material.STONE, 64),
-        ItemStack.of(Material.STONE, 64),
-        ItemStack.of(Material.STONE, 64),
-        ItemStack.of(Material.STONE, 64)
-    };
 
     private static List<ItemStack> layOut(
             CompactingSortingStrategy.FillDirection direction, int numRows, ItemStack... items) {
@@ -66,7 +31,7 @@ public class CompactingSortingStrategyTest extends PlayerTest {
 
     @Test
     void rowMajorFillsInReadingOrderWithNoGaps() {
-        var slots = layOut(ROW_MAJOR, 6, STONE_HAUL);
+        var slots = layOut(ROW_MAJOR, 6, SampleInventories.stoneHaul());
 
         assertThat(GridRenderer.render(slots)).isEqualTo("""
                         A A A A A A A A A
@@ -90,7 +55,7 @@ public class CompactingSortingStrategyTest extends PlayerTest {
 
     @Test
     void columnMajorFillsDownColumnsWithNoGaps() {
-        var slots = layOut(COLUMN_MAJOR, 6, STONE_HAUL);
+        var slots = layOut(COLUMN_MAJOR, 6, SampleInventories.stoneHaul());
 
         assertThat(GridRenderer.render(slots)).isEqualTo("""
                         A A A B C D . . .
@@ -159,7 +124,7 @@ public class CompactingSortingStrategyTest extends PlayerTest {
     void everyLayoutIsGapFreeAlongItsOwnFillOrder() {
         var numRows = 6;
         for (var direction : CompactingSortingStrategy.FillDirection.values()) {
-            var slots = layOut(direction, numRows, STONE_HAUL);
+            var slots = layOut(direction, numRows, SampleInventories.stoneHaul());
             var filled = slots.stream().filter(Objects::nonNull).count();
 
             for (var position = 0; position < slots.size(); position++) {
@@ -204,6 +169,80 @@ public class CompactingSortingStrategyTest extends PlayerTest {
         assertThat(groups).hasSize(1);
         assertThat(groups.get(0).itemStacks().stream().map(ItemStack::getAmount))
                 .containsExactly(64, 64, 64, 8);
+    }
+
+    @Test
+    void anEmptyInventoryProducesAnEmptyGrid() {
+        var slots = layOut(ROW_MAJOR, 6);
+
+        assertThat(slots).hasSize(54).containsOnlyNulls();
+    }
+
+    @Test
+    void anExactlyFullChestUsesEverySlot() {
+        var items = new ItemStack[54];
+        Arrays.fill(items, ItemStack.of(Material.STONE, 64));
+
+        var slots = layOut(ROW_MAJOR, 6, items);
+
+        assertThat(slots).hasSize(54).doesNotContainNull();
+        assertThat(slots.stream().mapToInt(ItemStack::getAmount).sum()).isEqualTo(54 * 64);
+    }
+
+    @Test
+    void itemsThatCannotFitAreReportedRatherThanDropped() {
+        var groups = new InventorySorter().getOrganisedGroups(InventoryUtils.inventoryOf(distinctUnstackables(40)));
+        var notPlaced = new ArrayList<MaterialItemStack>();
+
+        new CompactingSortingStrategy(ROW_MAJOR).sort(groups, new ItemStack[3][InventorySorter.ROW_SIZE], notPlaced);
+
+        assertThat(notPlaced.stream()
+                        .mapToInt(group -> group.itemStacks().size())
+                        .sum())
+                .isEqualTo(40 - 27);
+    }
+
+    @Test
+    void repeatedSortsOfAnAlreadySortedInventoryAreStable() {
+        var first = layOut(ROW_MAJOR, 6, SampleInventories.stoneHaul());
+        var second =
+                layOut(ROW_MAJOR, 6, first.stream().filter(Objects::nonNull).toArray(ItemStack[]::new));
+
+        assertThat(GridRenderer.renderWithAmounts(second)).isEqualTo(GridRenderer.renderWithAmounts(first));
+    }
+
+    @Test
+    void stacksDifferingOnlyByMetadataKeepAStableOrderAcrossRuns() {
+        var renders = new HashSet<String>();
+        for (var run = 0; run < 20; run++) {
+            renders.add(GridRenderer.renderWithAmounts(layOut(ROW_MAJOR, 3, damagedPickaxes())));
+        }
+
+        assertThat(renders).hasSize(1);
+    }
+
+    private static ItemStack[] damagedPickaxes() {
+        return new ItemStack[] {
+            damaged(Material.DIAMOND_PICKAXE, 5),
+            damaged(Material.DIAMOND_PICKAXE, 200),
+            damaged(Material.DIAMOND_PICKAXE, 0),
+            damaged(Material.DIAMOND_PICKAXE, 97),
+            damaged(Material.DIAMOND_PICKAXE, 1531)
+        };
+    }
+
+    private static ItemStack damaged(Material material, int damage) {
+        var itemStack = ItemStack.of(material, 1);
+        var meta = itemStack.getItemMeta();
+        ((org.bukkit.inventory.meta.Damageable) meta).setDamage(damage);
+        itemStack.setItemMeta(meta);
+        return itemStack;
+    }
+
+    private static ItemStack[] distinctUnstackables(int count) {
+        return java.util.stream.IntStream.range(0, count)
+                .mapToObj(index -> damaged(Material.DIAMOND_PICKAXE, index + 1))
+                .toArray(ItemStack[]::new);
     }
 
     private static long totalItems(List<MaterialItemStack> groups) {

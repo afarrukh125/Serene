@@ -327,9 +327,9 @@ public class InventorySorterTest extends PlayerTest {
     private static MaterialItemStack materialItemStacks(Material material, int... amounts) {
         return new MaterialItemStack(
                 material,
-                new LinkedList<>(Arrays.stream(amounts)
+                new ArrayList<>(Arrays.stream(amounts)
                         .boxed()
-                        .map(amount -> new ItemStack(material, amount))
+                        .map(amount -> ItemStack.of(material, amount))
                         .collect(toList())));
     }
 }

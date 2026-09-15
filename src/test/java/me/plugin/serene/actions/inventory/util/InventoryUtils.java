@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import me.plugin.serene.actions.inventory.InventorySorter;
 import me.plugin.serene.model.MaterialItemStack;
+import me.plugin.serene.model.SortTarget;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Chest;
@@ -77,6 +78,7 @@ public class InventoryUtils {
 
     private static List<ItemStack> getItemStacks(
             InventorySorter inventorySorter, List<MaterialItemStack> groups, int numRows, Location location) {
-        return Arrays.asList(inventorySorter.generateFinalSortedItemStacks(groups, numRows, location));
+        return Arrays.asList(
+                inventorySorter.generateFinalSortedItemStacks(groups, numRows, SortTarget.ofBlock(location)));
     }
 }

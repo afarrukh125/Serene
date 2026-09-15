@@ -7,6 +7,7 @@ import static org.mockito.Mockito.spy;
 import java.util.*;
 import java.util.function.Supplier;
 import me.plugin.serene.actions.PlayerTest;
+import me.plugin.serene.actions.inventory.util.GridRenderer;
 import me.plugin.serene.actions.inventory.util.InventoryUtils;
 import me.plugin.serene.model.MaterialItemStack;
 import org.bukkit.Material;
@@ -75,20 +76,19 @@ public class InventorySorterTest extends PlayerTest {
         var itemStacks = InventoryUtils.getItemStacks(inventorySorter, groupSupplier.get(), player.getLocation());
 
         // then
-        assertThat(itemStacks.get(0)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
+        assertThat(GridRenderer.renderWithAmounts(itemStacks).lines().findFirst())
+                .hasValue("COBBLESTONE:42 ACACIA_LEAVES:64 ACACIA_LEAVES:5 - - - - - -");
 
-        assertThat(itemStacks.get(8)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 64));
-        assertThat(itemStacks.get(7)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 5));
-
-        // when
+        // when sorting the same chest again, the layout flips to columns
         var verticallySortedItemStacks =
                 InventoryUtils.getItemStacks(inventorySorter, groupSupplier.get(), player.getLocation());
 
         // then
-        assertThat(verticallySortedItemStacks.get(0)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 64));
-        assertThat(verticallySortedItemStacks.get(9)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 5));
-
-        assertThat(verticallySortedItemStacks.get(8)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
+        assertThat(GridRenderer.renderWithAmounts(verticallySortedItemStacks)).isEqualTo("""
+                        COBBLESTONE:42 - - - - - - - -
+                        ACACIA_LEAVES:64 - - - - - - - -
+                        ACACIA_LEAVES:5 - - - - - - - -
+                        """);
 
         assertThat(verticallySortedItemStacks).filteredOn(Objects::isNull).hasSize(24);
     }
@@ -122,15 +122,18 @@ public class InventorySorterTest extends PlayerTest {
                 ItemStack.of(Material.COBBLESTONE, 42));
 
         // then
-        assertThat(itemStacks.subList(0, 9)).containsOnly(ItemStack.of(Material.EGG, 16));
-
-        assertThat(itemStacks.get(9)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 64));
-        assertThat(itemStacks.get(18)).isEqualTo(ItemStack.of(Material.ACACIA_LEAVES, 5));
-
-        assertThat(itemStacks.get(17)).isEqualTo(ItemStack.of(Material.COBBLESTONE, 42));
-
-        assertThat(itemStacks.subList(10, 15)).containsOnly(ItemStack.of(Material.GRAVEL, 64));
-        assertThat(itemStacks.subList(19, 24)).containsOnly(ItemStack.of(Material.GRAVEL, 64));
+        assertThat(GridRenderer.render(itemStacks)).isEqualTo("""
+                        A B B B B B B B B
+                        B B C C D D D D D
+                        D D D D . . . . .
+                        . . . . . . . . .
+                        . . . . . . . . .
+                        . . . . . . . . .
+                        A = COBBLESTONE
+                        B = GRAVEL
+                        C = ACACIA_LEAVES
+                        D = EGG
+                        """);
     }
 
     @Test

@@ -3,6 +3,8 @@ package me.plugin.serene.actions.inventory;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
+import static me.plugin.serene.actions.inventory.CompactingSortingStrategy.FillDirection.COLUMN_MAJOR;
+import static me.plugin.serene.actions.inventory.CompactingSortingStrategy.FillDirection.ROW_MAJOR;
 
 import com.google.common.annotations.VisibleForTesting;
 import java.util.*;
@@ -128,8 +130,7 @@ public class InventorySorter {
             reorganisedStacks.add(new MaterialItemStack(material, allStacks));
         }
 
-        // Place the biggest stacks first
-        sortBySizeThenName(reorganisedStacks);
+        reorganisedStacks.sort(ItemOrder.GROUPS);
         return reorganisedStacks;
     }
 
@@ -140,10 +141,10 @@ public class InventorySorter {
 
         SortingStrategy sortingStrategy;
         if (seenLocations.contains(location)) {
-            sortingStrategy = new PrioritisingVerticalSortingStrategy();
+            sortingStrategy = new CompactingSortingStrategy(COLUMN_MAJOR);
             seenLocations.remove(location);
         } else {
-            sortingStrategy = new PrioritisingHorizontalSortingStrategy();
+            sortingStrategy = new CompactingSortingStrategy(ROW_MAJOR);
             seenLocations.add(location);
         }
         return flatten(sortingStrategy.sort(materialItemStacks, new ItemStack[numRows][ROW_SIZE], notPlaced));
@@ -151,12 +152,5 @@ public class InventorySorter {
 
     private ItemStack[] flatten(ItemStack[][] itemStacks) {
         return Utils.flatten(itemStacks, ItemStack[]::new);
-    }
-
-    private static void sortBySizeThenName(List<MaterialItemStack> reorganisedStacks) {
-        reorganisedStacks.sort(Comparator.<MaterialItemStack, Integer>comparing(
-                        materialItemStack -> materialItemStack.itemStacks().size())
-                .reversed()
-                .thenComparing(materialItemStack -> materialItemStack.material().name()));
     }
 }

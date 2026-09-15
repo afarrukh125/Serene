@@ -22,6 +22,20 @@ public class InventoryUtils {
 
     public static final WorldMock WORLD_MOCK = new WorldMock(Material.GRAVEL, 0);
 
+    public static Inventory inventoryOf(ItemStack... itemStacks) {
+        var inventory = spy(Inventory.class);
+        var backingList = new ArrayList<ItemStack>();
+        when(inventory.addItem(any(ItemStack.class))).thenAnswer((Answer<Void>) invocation -> {
+            backingList.addAll(Arrays.stream(invocation.getArguments())
+                    .map(object -> ((ItemStack) object))
+                    .toList());
+            return null;
+        });
+        inventory.addItem(itemStacks);
+        when(inventory.getContents()).thenReturn(backingList.toArray(new ItemStack[54]));
+        return inventory;
+    }
+
     public static List<ItemStack> setupFinalOrganisedInventory(ItemStack... itemStacks) {
         return setupFinalOrganisedInventory(new InventorySorter(), itemStacks);
     }

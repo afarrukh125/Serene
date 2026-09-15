@@ -1,8 +1,9 @@
 package me.plugin.serene.actions.inventory;
 
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import me.plugin.serene.model.Coordinate;
 import me.plugin.serene.model.MaterialItemStack;
@@ -63,8 +64,11 @@ public class CompactingSortingStrategy implements SortingStrategy {
     }
 
     private static List<MaterialItemStack> regroup(List<ItemStack> overflow) {
-        return overflow.stream().collect(groupingBy(ItemStack::getType)).entrySet().stream()
-                .map(entry -> new MaterialItemStack(entry.getKey(), new LinkedList<>(entry.getValue())))
+        return overflow.stream()
+                .collect(groupingBy(ItemStack::getType, LinkedHashMap::new, toList()))
+                .entrySet()
+                .stream()
+                .map(entry -> new MaterialItemStack(entry.getKey(), entry.getValue()))
                 .toList();
     }
 }

@@ -43,33 +43,7 @@ public class InventoryRenderer {
         }
 
         for (int attempts = 0; attempts < 3; attempts++) {
-            if (renderFrame(g -> {
-                g.setColor(Color.darkGray);
-                g.fillRect(0, 0, display.width(), display.height());
-                g.drawImage(chest(items.size()), 0, 0, display.width(), display.height(), null);
-
-                var partition = Lists.partition(items, ROW_SIZE);
-                int row = 0;
-                for (var itemList : partition) {
-                    for (int i = 0; i < itemList.size(); i++) {
-                        var currentItem = itemList.get(i);
-                        if (currentItem != null) {
-                            var image = itemImageProvider.getImage(currentItem.getType());
-                            var x = BASE_X_OFFSET + (X_GAP * i);
-                            var y = BASE_Y_OFFSET + (Y_GAP * row);
-                            g.drawImage(image, x, y, BLOCK_IMAGE_WIDTH, BLOCK_IMAGE_HEIGHT, null);
-                            g.setColor(Color.WHITE);
-                            g.setFont(font);
-                            g.drawString(
-                                    String.valueOf(currentItem.getAmount()),
-                                    x + BLOCK_IMAGE_WIDTH - 11,
-                                    y + BLOCK_IMAGE_HEIGHT);
-                            postRenderAction.accept(g);
-                        }
-                    }
-                    row++;
-                }
-            })) {
+            if (renderFrame(g -> draw(g, items, display.width(), display.height(), postRenderAction))) {
                 break;
             }
 
@@ -79,6 +53,38 @@ public class InventoryRenderer {
                 Thread.currentThread().interrupt();
                 break;
             }
+        }
+    }
+
+    /**
+     * Draws a whole inventory onto any {@link Graphics}, so this can be exercised against an offscreen image in a
+     * headless build rather than only against a live window.
+     */
+    public void draw(Graphics g, List<ItemStack> items, int width, int height, Consumer<Graphics> postRenderAction) {
+        g.setColor(Color.darkGray);
+        g.fillRect(0, 0, width, height);
+        g.drawImage(chest(items.size()), 0, 0, width, height, null);
+
+        var partition = Lists.partition(items, ROW_SIZE);
+        int row = 0;
+        for (var itemList : partition) {
+            for (int i = 0; i < itemList.size(); i++) {
+                var currentItem = itemList.get(i);
+                if (currentItem != null) {
+                    var image = itemImageProvider.getImage(currentItem.getType());
+                    var x = BASE_X_OFFSET + (X_GAP * i);
+                    var y = BASE_Y_OFFSET + (Y_GAP * row);
+                    g.drawImage(image, x, y, BLOCK_IMAGE_WIDTH, BLOCK_IMAGE_HEIGHT, null);
+                    g.setColor(Color.WHITE);
+                    g.setFont(font);
+                    g.drawString(
+                            String.valueOf(currentItem.getAmount()),
+                            x + BLOCK_IMAGE_WIDTH - 11,
+                            y + BLOCK_IMAGE_HEIGHT);
+                    postRenderAction.accept(g);
+                }
+            }
+            row++;
         }
     }
 

@@ -17,10 +17,6 @@ public record SereneConfiguration(FileConfiguration fileConfig) {
         return isFeatureEnabled("inventorysort");
     }
 
-    public boolean is1pSleepEnabled() {
-        return isFeatureEnabled("1psleep");
-    }
-
     public boolean isVeinBreakerEnabled() {
         return isFeatureEnabled("veinbreaker");
     }

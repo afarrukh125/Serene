@@ -1,6 +1,5 @@
 # Serene
 
-* One-player sleep
 * Chest sorting (sneak + right click with feather)
 * Item search for nearby chests
 * Tree breaking (Break only the bottom log while sneaking with an axe)
@@ -10,6 +9,8 @@
 # Using Serene
 
 Place into your plugins folder in your bukkit/spigot/paper server and you're good to go
+
+For one-player sleep, use the vanilla game rule instead: `/gamerule playersSleepingPercentage 0`
 
 # Developing
 
